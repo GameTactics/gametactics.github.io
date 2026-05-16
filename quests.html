@@ -1,0 +1,144 @@
+05.16 23:12
+quests.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>NTE Quests Guide | Main Story & Anomaly Commissions | Neverness to Everness</title>
+    <meta name="description" content="Complete walkthrough for Neverness to Everness main story, side quests, and anomaly commissions. Includes boss strategies, puzzle solutions, and hidden collectibles.">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#f0f2f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:#1e2a3e;min-width:1100px;}
+        body.dark{background:#0b1120;color:#e2e8f0;}
+        .container{width:1200px;margin:0 auto;padding:0 20px;}
+        header{background:#fff;border-bottom:1px solid #e2e8f0;position:sticky;top:0;z-index:100;}
+        body.dark header{background:#1e293b;border-bottom-color:#334155;}
+        .header-inner{display:flex;justify-content:space-between;align-items:center;padding:16px 0;}
+        .logo h1{font-size:1.8rem;background:linear-gradient(135deg,#ff7b2c,#ffb347);-webkit-background-clip:text;background-clip:text;color:transparent;}
+        .logo p{font-size:0.75rem;color:#5b6e8c;}
+        .nav{display:flex;gap:12px;}
+        .nav a{background:#f1f5f9;padding:8px 20px;border-radius:40px;text-decoration:none;font-size:0.9rem;font-weight:600;color:#1e2a3e;transition:0.2s;}
+        .nav a:hover,.nav a.active{background:#ff7b2c;color:white;}
+        .theme-toggle{background:#eef2ff;border:none;border-radius:40px;padding:8px 20px;cursor:pointer;}
+        .hero{background:linear-gradient(135deg,#fff8f0,#fff);padding:40px 0;text-align:center;border-bottom:1px solid #e2e8f0;}
+        .hero h2{font-size:2.2rem;color:#ff7b2c;}
+        .version-badge{background:#ff7b2c;display:inline-block;padding:6px 16px;border-radius:60px;font-size:0.8rem;color:white;margin-top:12px;}
+        .main-grid{display:grid;grid-template-columns:2fr 1fr;gap:40px;padding:48px 0 64px;}
+        .card{background:#fff;border-radius:24px;padding:28px;margin-bottom:32px;border:1px solid #e9edf2;box-shadow:0 4px 12px rgba(0,0,0,0.03);}
+        body.dark .card{background:#1e293b;border-color:#334155;}
+        .card h3{font-size:1.6rem;margin-bottom:20px;color:#ff7b2c;border-left:5px solid #ff7b2c;padding-left:18px;}
+        .list-styled{padding-left:1.6rem;margin:16px 0;}
+        .list-styled li{margin-bottom:10px;}
+        .tip-box{background:#fff7e5;border-left:5px solid #ff7b2c;padding:16px 20px;border-radius:20px;margin:20px 0;}
+        body.dark .tip-box{background:#2a2f3f;}
+        .table-wrapper{overflow-x:auto;margin:16px 0;}
+        table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+        th,td{border:1px solid #e2e8f0;padding:10px 12px;text-align:left;}
+        th{background:#f8fafc;}
+        .sidebar-card{background:#fff;border-radius:24px;padding:24px;margin-bottom:28px;border:1px solid #e9edf2;}
+        body.dark .sidebar-card{background:#1e293b;border-color:#334155;}
+        .sidebar-card h4{font-size:1.3rem;margin-bottom:16px;color:#ff7b2c;border-left:4px solid #ff7b2c;padding-left:14px;}
+        .tag-group{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;}
+        .tag{background:#eef2ff;padding:6px 16px;border-radius:40px;font-size:0.75rem;}
+        .ad-place{background:#f8fafc;border-radius:20px;padding:18px;text-align:center;margin:24px 0 8px;border:1px dashed #cbd5e1;font-size:0.75rem;}
+        .back-top{position:fixed;bottom:30px;right:30px;background:#ff7b2c;color:white;border:none;width:50px;height:50px;border-radius:50%;font-size:1.5rem;cursor:pointer;opacity:0;transition:0.2s;z-index:200;}
+        .back-top.show{opacity:1;}
+        footer{background:#fff;border-top:1px solid #e2e8f0;padding:36px 0;text-align:center;}
+        .disclaimer{font-size:0.7rem;color:#5b6e8c;max-width:1000px;margin:0 auto;}
+        a{text-decoration:none;color:#ff7b2c;}
+        @media (max-width:1100px){body{min-width:auto;}.container{width:100%;max-width:1200px;}}
+    </style>
+</head>
+<body>
+<header>
+    <div class="container header-inner">
+        <div class="logo"><h1>异环 · NTE Guide</h1><p>Neverness to Everness Fan Hub</p></div>
+        <div class="nav">
+            <a href="index.html">Home</a>
+            <a href="characters.html">Characters</a>
+            <a href="citytycoon.html">City Tycoon</a>
+            <a href="espercycle.html">Esper Cycle</a>
+            <a href="quests.html" class="active">Quests</a>
+            <a href="beginner.html">Beginner</a>
+            <a href="updates.html">Updates</a>
+        </div>
+        <button class="theme-toggle" id="themeToggle"> Dark Mode</button>
+    </div>
+</header>
+<section class="hero">
+    <div class="container">
+        <h2>Quest Walkthrough & Guide</h2>
+        <p>Main Story · Anomaly Commissions · Hidden Side Quests</p>
+        <div class="version-badge">✅ Updated for May 2026 · All Chapters</div>
+    </div>
+</section>
+<div class="container main-grid">
+    <div class="content-left">
+        <div class="card">
+            <h3> Main Story Overview</h3>
+            <p>The main story is divided into chapters. Completing them unlocks new areas, City Tycoon features, and character recruitment. Below is a chapter-by-chapter guide.</p>
+            <div class="ad-place"> Google AdSense - Top</div>
+        </div>
+        <div class="card">
+            <h3>Chapter 1: "Unforeseen Yet Foretold" (Prologue)</h3>
+            <ul class="list-styled">
+                <li><strong>Objective:</strong> Complete tutorial, meet Mint, and clear the first anomaly.</li>
+                <li><strong>Key steps:</strong> Exit garage → talk to Nelly → meet Mint at director's office → enter anomaly dimension → find Mint → fight two small monsters → learn Esper Cycle → critical dodge tutorial → defeat Picture Frame Anomaly boss.</li>
+                <li><strong>Boss tip:</strong> The Picture Frame attacks with projectiles and area slams. Dodge red indicators, use critical dodges to trigger slow-mo counterattacks. Build Break meter with Chaos element.</li>
+                <li><strong>Rewards:</strong> 200 Annulith, Character EXP materials, unlock City Tycoon.</li>
+            </ul>
+            <div class="tip-box"> <strong>Pro tip:</strong> After the boss, you'll receive a free 10-pull ticket. Use it on starter banner.</div>
+        </div>
+        <div class="card">
+            <h3>Chapter 2: "Welcome to Hethereau"</h3>
+            <ul class="list-styled">
+                <li><strong>Unlock:</strong> After reaching City Tycoon level 2.</li>
+                <li><strong>Objectives:</strong> Explore the city, complete three anomaly commissions, and meet key NPCs (coffee shop owner, car dealer).</li>
+                <li><strong>Hidden side quest:</strong> Talk to the street musician near the fountain – play along with his rhythm mini-game for 50 Annulith.</li>
+                <li><strong>Rewards:</strong> 300 Annulith, 20k Fons, unlock ride-hailing.</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Chapter 3: "Chaos Under the Neon"</h3>
+            <ul class="list-styled">
+                <li><strong>Requirements:</strong> City Tycoon level 4, character level 20+.</li>
+                <li><strong>Main boss:</strong> Neon Corruptor (Incantation element).</li>
+                <li><strong>Strategy:</strong> Use Chaos element (Sakiri) to trigger Scorch reaction. Boss summons electric fields – move away from glowing floor tiles. After 50% HP, boss gains shield; break it with 2 Discord rotations.</li>
+                <li><strong>Rewards:</strong> 500 Annulith, S-rank arcana box (choose "Rogue" or "Scorching").</li>
+            </ul>
+            <div class="ad-place"> Google AdSense - In-Content</div>
+        </div>
+        <div class="card">
+            <h3> Anomaly Commissions (Daily / Weekly)</h3>
+            <p>After chapter 2, you unlock anomaly commissions – repeatable missions that reward Hunter EXP, upgrade materials, and Annulith.</p>
+            <ul class="list-styled">
+                <li><strong>Green (Easy):</strong> Defeat 10 basic enemies. Reward: 10 Annulith, 1 blue mat.</li>
+                <li><strong>Blue (Medium):</strong> Clear anomaly zone with 2 mini-bosses. Reward: 30 Annulith, 2 purple mats.</li>
+                <li><strong>Purple (Hard):</strong> Complete within time limit (5 min). Reward: 60 Annulith, 1 gold mat, chance of arcana drop.</li>
+                <li><strong>Gold (Weekly):</strong> Defeat a named boss. Reward: 150 Annulith, 3 gold mats, exclusive title.</li>
+            </ul>
+            <div class="tip-box"> <strong>Efficiency tip:</strong> Always pick purple/gold commissions. They give the best rewards for stamina spent.</div>
+        </div>
+        <div class="card">
+            <h3> Hidden Side Quests & Collectibles</h3>
+            <ul class="list-styled">
+                <li><strong>Lost Cat in Bluebeard Road:</strong> Find the cat near the dumpster, follow it to owner – reward: 20k Fons.</li>
+                <li><strong>Graffiti Artist:</strong> Spray 5 hidden graffiti spots around the city – reward: exclusive car decal.</li>
+                <li><strong>Time Capsule:</strong> Behind the coffee shop, dig with shovel (buy from general store) – reward: 100 Annulith.</li>
+                <li><strong>Memory Orbs:</strong> 50 orbs scattered across the map. Collect 10/20/30/40/50 for Annulith and ascension materials.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="sidebar">
+        <div class="sidebar-card"><h4> About</h4><p>Fan-made walkthrough based on global version 1.0. Not official.</p><div class="ad-place"> AdSense Sidebar</div></div>
+        <div class="sidebar-card"><h4> Boss Weakness Cheatsheet</h4><ul class="list-styled"><li>Picture Frame → Chaos</li><li>Neon Corruptor → Chaos+Incantation</li><li>Void Walker → Psyche</li></ul></div>
+        <div class="sidebar-card"><h4>️ Tags</h4><div class="tag-group"><span class="tag">Main Story</span><span class="tag">Boss</span><span class="tag">Anomaly</span><span class="tag">Side Quest</span></div></div>
+    </div>
+</div>
+<footer>...</footer>
+<button class="back-top" id="backToTop">↑</button>
+<script>/* 同前深色模式 */</script>
+</body>
+</html>
+

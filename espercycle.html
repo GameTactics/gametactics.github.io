@@ -1,0 +1,199 @@
+05.16 23:12
+espercycle.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>NTE Esper Cycle Guide | Combat Mechanics | Neverness to Everness</title>
+    <meta name="description" content="Complete Esper Cycle guide for Neverness to Everness: six-element reaction order, triple cycle, break damage, team building tips, and advanced combat strategies.">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#f0f2f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:#1e2a3e;min-width:1100px;}
+        body.dark{background:#0b1120;color:#e2e8f0;}
+        .container{width:1200px;margin:0 auto;padding:0 20px;}
+        header{background:#fff;border-bottom:1px solid #e2e8f0;position:sticky;top:0;z-index:100;}
+        body.dark header{background:#1e293b;border-bottom-color:#334155;}
+        .header-inner{display:flex;justify-content:space-between;align-items:center;padding:16px 0;}
+        .logo h1{font-size:1.8rem;background:linear-gradient(135deg,#ff7b2c,#ffb347);-webkit-background-clip:text;background-clip:text;color:transparent;}
+        .logo p{font-size:0.75rem;color:#5b6e8c;}
+        .nav{display:flex;gap:12px;}
+        .nav a{background:#f1f5f9;padding:8px 20px;border-radius:40px;text-decoration:none;font-size:0.9rem;font-weight:600;color:#1e2a3e;transition:0.2s;}
+        .nav a:hover,.nav a.active{background:#ff7b2c;color:white;}
+        .theme-toggle{background:#eef2ff;border:none;border-radius:40px;padding:8px 20px;cursor:pointer;}
+        .hero{background:linear-gradient(135deg,#fff8f0,#fff);padding:40px 0;text-align:center;border-bottom:1px solid #e2e8f0;}
+        .hero h2{font-size:2.2rem;color:#ff7b2c;}
+        .version-badge{background:#ff7b2c;display:inline-block;padding:6px 16px;border-radius:60px;font-size:0.8rem;color:white;margin-top:12px;}
+        .main-grid{display:grid;grid-template-columns:2fr 1fr;gap:40px;padding:48px 0 64px;}
+        .card{background:#fff;border-radius:24px;padding:28px;margin-bottom:32px;border:1px solid #e9edf2;box-shadow:0 4px 12px rgba(0,0,0,0.03);}
+        body.dark .card{background:#1e293b;border-color:#334155;}
+        .card h3{font-size:1.6rem;margin-bottom:20px;color:#ff7b2c;border-left:5px solid #ff7b2c;padding-left:18px;}
+        .card h4{font-size:1.2rem;margin:16px 0 8px;color:#ff7b2c;}
+        .list-styled{padding-left:1.6rem;margin:16px 0;}
+        .list-styled li{margin-bottom:10px;}
+        .tip-box{background:#fff7e5;border-left:5px solid #ff7b2c;padding:16px 20px;border-radius:20px;margin:20px 0;}
+        body.dark .tip-box{background:#2a2f3f;}
+        .table-wrapper{overflow-x:auto;margin:16px 0;}
+        table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+        th,td{border:1px solid #e2e8f0;padding:10px 12px;text-align:left;}
+        th{background:#f8fafc;font-weight:600;}
+        body.dark th,body.dark td{border-color:#334155;}
+        .sidebar-card{background:#fff;border-radius:24px;padding:24px;margin-bottom:28px;border:1px solid #e9edf2;}
+        body.dark .sidebar-card{background:#1e293b;border-color:#334155;}
+        .sidebar-card h4{font-size:1.3rem;margin-bottom:16px;color:#ff7b2c;border-left:4px solid #ff7b2c;padding-left:14px;}
+        .tag-group{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;}
+        .tag{background:#eef2ff;padding:6px 16px;border-radius:40px;font-size:0.75rem;font-weight:500;}
+        body.dark .tag{background:#2d3a4f;color:#cbd5e1;}
+        .ad-place{background:#f8fafc;border-radius:20px;padding:18px;text-align:center;margin:24px 0 8px;border:1px dashed #cbd5e1;font-size:0.75rem;color:#5b6e8c;}
+        body.dark .ad-place{background:#0f172a;border-color:#334155;}
+        .back-top{position:fixed;bottom:30px;right:30px;background:#ff7b2c;color:white;border:none;width:50px;height:50px;border-radius:50%;font-size:1.5rem;cursor:pointer;opacity:0;transition:0.2s;z-index:200;}
+        .back-top.show{opacity:1;}
+        footer{background:#fff;border-top:1px solid #e2e8f0;padding:36px 0;text-align:center;}
+        body.dark footer{background:#0f172a;}
+        .disclaimer{font-size:0.7rem;color:#5b6e8c;max-width:1000px;margin:0 auto;line-height:1.5;}
+        a{text-decoration:none;color:#ff7b2c;}
+        a:hover{text-decoration:underline;}
+        @media (max-width:1100px){body{min-width:auto;}.container{width:100%;max-width:1200px;}}
+    </style>
+</head>
+<body>
+<header>
+    <div class="container header-inner">
+        <div class="logo"><h1>异环 · NTE Guide</h1><p>Neverness to Everness Fan Hub</p></div>
+        <div class="nav">
+            <a href="index.html">Home</a>
+            <a href="characters.html">Characters</a>
+            <a href="citytycoon.html">City Tycoon</a>
+            <a href="espercycle.html" class="active">Esper Cycle</a>
+            <a href="quests.html">Quests</a>
+            <a href="beginner.html">Beginner</a>
+            <a href="updates.html">Updates</a>
+        </div>
+        <button class="theme-toggle" id="themeToggle"> Dark Mode</button>
+    </div>
+</header>
+<section class="hero">
+    <div class="container">
+        <h2>Esper Cycle System – Combat Deep Dive</h2>
+        <p>Master the 6-element reaction chain for massive damage</p>
+        <div class="version-badge">✅ Updated May 2026 · Version 1.0</div>
+    </div>
+</section>
+<div class="container main-grid">
+    <div class="content-left">
+        <div class="card">
+            <h3> What is the Esper Cycle?</h3>
+            <p>The Esper Cycle is Neverness to Everness's core combat mechanic. Six elements (Lakshana → Cosmos → Anima → Incantation → Chaos → Psyche → back to Lakshana) form a fixed reaction order. Triggering adjacent elements creates powerful reactions; triple combos unlock <strong>Charged</strong> or <strong>Discord</strong> states.</p>
+            <div class="ad-place"> Google AdSense - Top</div>
+        </div>
+        <div class="card">
+            <h3>⚡ Element Reaction Table</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Reaction</th><th>Elements</th><th>Effect</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Remora</strong></td><td>Lakshana → Cosmos</td><td>Slows enemies by 40%, reduces attack speed for 6s.</td></tr>
+                        <tr><td><strong>Blossom</strong></td><td>Cosmos → Anima</td><td>Summons a flower turret that deals continuous AoE damage for 8s.</td></tr>
+                        <tr><td><strong>Hexed</strong></td><td>Anima → Incantation</td><td>Follow-up damage based on number of hits dealt in the last 3s (scales with ATK).</td></tr>
+                        <tr><td><strong>Scorch</strong></td><td>Incantation → Chaos</td><td>Long-lasting DoT (15s) that also reduces enemy DEF by 15%.</td></tr>
+                        <tr><td><strong>Nova</strong></td><td>Chaos → Psyche</td><td>Delayed burst explosion after 3s. Deals bonus damage based on missing HP.</td></tr>
+                        <tr><td><strong>Stain</strong></td><td>Psyche → Lakshana</td><td>Increases damage taken from Psyche and Lakshana attacks by 25% for 10s.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="tip-box"> <strong>Important:</strong> Reactions only trigger if you apply elements in the correct cyclic order. Reverse order (e.g., Chaos → Incantation) does nothing.</div>
+        </div>
+        <div class="card">
+            <h3> Triple Cycle: Charged & Discord</h3>
+            <p>When you trigger <strong>three consecutive reactions</strong> in order, you enter a special state:</p>
+            <ul class="list-styled">
+                <li><strong>Charged (Top Trio):</strong> Lakshana → Cosmos → Anima. All party members gain 20% Ultimate energy and 30% ATK for 12s.</li>
+                <li><strong>Discord (Bottom Trio):</strong> Incantation → Chaos → Psyche. Deals massive Break damage (stagger) to all enemies, ignoring 50% of their Break resistance.</li>
+            </ul>
+            <div class="tip-box">⚔️ <strong>Combo Tip:</strong> In boss fights, aim for Discord to break boss quickly, then use Charged to burst down during stagger.</div>
+        </div>
+        <div class="card">
+            <h3> Team Building Strategies</h3>
+            <p>Build your team around the element chain. Two common archetypes:</p>
+            <ul class="list-styled">
+                <li><strong>Top Trio Team:</strong> Lakshana (Haniel) + Cosmos (Zero/Chiz) + Anima (Nanally). Excellent for sustained damage and ultimate spam.</li>
+                <li><strong>Bottom Trio Team:</strong> Incantation (Baicang) + Chaos (Sakiri) + Psyche (Jiuyuan). Best for burst damage and breaking tough enemies.</li>
+                <li><strong>Hybrid Team:</strong> Use four elements to trigger both Charged and Discord in one rotation, but requires precise swapping.</li>
+            </ul>
+            <p>Recommended starter team: <strong>Sakiri (Chaos) + Nanally (Anima) + Zero (Cosmos)</strong> — covers three elements, easy to execute.</p>
+            <div class="ad-place"> Google AdSense - In-Content</div>
+        </div>
+        <div class="card">
+            <h3>⏱️ Combat Rotation Example (Bottom Trio)</h3>
+            <ul class="list-styled">
+                <li><strong>Step 1:</strong> Open with Incantation character (Baicang) – apply Incantation with skill.</li>
+                <li><strong>Step 2:</strong> Swap to Chaos character (Sakiri) – use skill to trigger Scorch (Incantation → Chaos).</li>
+                <li><strong>Step 3:</strong> Immediately swap to Psyche character (Jiuyuan) – use ultimate or enhanced attack to trigger Nova (Chaos → Psyche).</li>
+                <li><strong>Result:</strong> Discord activates, dealing massive Break damage and stunning the boss.</li>
+                <li><strong>Step 4:</strong> While boss is staggered, unload all ultimates and heavy attacks.</li>
+            </ul>
+            <div class="tip-box">️ <strong>Practice:</strong> The training room in the garage allows you to set enemy dummy to test rotations. Use it to perfect your timing.</div>
+        </div>
+        <div class="card">
+            <h3> Break & Ultimate Energy Mechanics</h3>
+            <ul class="list-styled">
+                <li><strong>Break Bar:</strong> Appears under boss HP. Fills when you use reactions (especially Discord). Once full, boss is stunned for 8s and takes +50% damage.</li>
+                <li><strong>Ultimate Energy:</strong> Generated by normal attacks, skills, and Charged state. Save ultimates for break windows.</li>
+                <li><strong>Swap Cooldown:</strong> 2 seconds between swaps. Plan your rotation to avoid downtime.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="sidebar">
+        <div class="sidebar-card">
+            <h4> About This Guide</h4>
+            <p>Fan-made mechanics analysis based on global version 1.0. Not official. All numbers are from player testing.</p>
+            <div class="ad-place" style="margin-top:12px;"> Google AdSense - Sidebar</div>
+        </div>
+        <div class="sidebar-card">
+            <h4> Quick Reference</h4>
+            <ul class="list-styled">
+                <li><strong>Top Trio:</strong> Charged → +20% ult, +30% ATK</li>
+                <li><strong>Bottom Trio:</strong> Discord → Break damage</li>
+                <li><strong>Reaction order:</strong> L → C → A → I → Ch → P → L</li>
+            </ul>
+        </div>
+        <div class="sidebar-card">
+            <h4>️ Tags</h4>
+            <div class="tag-group">
+                <span class="tag">Esper Cycle</span><span class="tag">Reactions</span><span class="tag">Charged</span>
+                <span class="tag">Discord</span><span class="tag">Break</span><span class="tag">Team Comp</span>
+            </div>
+        </div>
+        <div class="sidebar-card">
+            <h4> Related Links</h4>
+            <ul class="list-styled">
+                <li><a href="characters.html">Character Tier List</a></li>
+                <li><a href="beginner.html">Beginner Combat Tips</a></li>
+                <li><a href="quests.html">Boss Walkthroughs</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<footer>
+    <div class="container">
+        <div class="disclaimer">This website is a fan-made guide and is not affiliated with, endorsed, or sponsored by Hotta Studio, Perfect World, or any official Neverness to Everness publishers. All game assets belong to their respective owners. Guides are based on player testing. For official information, visit the official NTE website.</div>
+        <div class="disclaimer" style="margin-top:12px;">© 2026 NTE Guide Hub · All original content · <a href="privacy.html">Privacy Policy</a></div>
+    </div>
+</footer>
+<button class="back-top" id="backToTop">↑</button>
+<script>
+    const toggle = document.getElementById('themeToggle');
+    const body = document.body;
+    const isDark = localStorage.getItem('nte-theme') === 'dark';
+    if(isDark){ body.classList.add('dark'); toggle.textContent='☀️ Light Mode'; }
+    toggle.addEventListener('click',()=>{
+        if(body.classList.contains('dark')){ body.classList.remove('dark'); localStorage.setItem('nte-theme','light'); toggle.textContent=' Dark Mode'; }
+        else{ body.classList.add('dark'); localStorage.setItem('nte-theme','dark'); toggle.textContent='☀️ Light Mode'; }
+    });
+    const backBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll',()=>{ if(window.scrollY>400) backBtn.classList.add('show'); else backBtn.classList.remove('show'); });
+    backBtn.addEventListener('click',()=>{ window.scrollTo({top:0,behavior:'smooth'}); });
+</script>
+</body>
+</html>
+
