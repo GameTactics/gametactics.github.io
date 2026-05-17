@@ -2,163 +2,60 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>热门AI工具大全</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>国内AI工具 · 全AI导航</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
-        }
-        body {
-            background-color: #f0f2f5;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1 {
-            text-align: center;
-            color: #1a73e8;
-            margin-bottom: 30px;
-        }
-        .ai-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .ai-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        .ai-card:hover {
-            transform: translateY(-5px);
-        }
-        .ai-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-        }
-        .ai-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .ai-desc {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 15px;
-        }
-        .ai-link {
-            display: inline-block;
-            padding: 8px 20px;
-            background-color: #1a73e8;
-            color: white;
-            text-decoration: none;
-            border-radius: 20px;
-            font-size: 14px;
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#f0f2f8;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding:20px;}
+        .container{max-width:1400px;margin:0 auto;background:white;border-radius:32px;padding:30px 24px;box-shadow:0 4px 20px rgba(0,0,0,0.03);border:1px solid #eef2f8;}
+        .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+        .back{color:#ff7b2c;text-decoration:none;font-weight:500;}
+        .btn-foreign{background:#ff7b2c;color:white;padding:8px 20px;border-radius:40px;text-decoration:none;font-weight:500;transition:0.2s;}
+        .btn-foreign:hover{background:#e66b1f;}
+        h1{color:#ff7b2c;font-size:1.8rem;margin-bottom:8px;}
+        .ad{background:#f8fafc;border-radius:24px;padding:14px;text-align:center;margin:20px 0;border:1px dashed #cbd5e1;font-size:0.75rem;color:#6c7f8f;}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:24px 16px;margin:30px 0;}
+        .tool-card{background:#f8fafc;border-radius:24px;padding:20px 12px;text-align:center;cursor:pointer;transition:all 0.2s ease;border:1px solid #eef2f8;}
+        .tool-card:hover{background:#fff7e5;transform:translateY(-3px);border-color:#ffd7b5;}
+        .tool-icon{width:64px;height:64px;margin:0 auto 12px;}
+        .tool-icon img{width:100%;height:100%;object-fit:contain;}
+        .tool-name{font-size:0.95rem;font-weight:600;color:#1e2a3e;}
+        .footer{text-align:center;margin-top:30px;font-size:0.7rem;color:#8ba0bc;}
+        @media (max-width:550px){
+            .grid{grid-template-columns:repeat(2,1fr);gap:16px;}
+            .tool-icon{width:48px;height:48px;}
+            .tool-name{font-size:0.85rem;}
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>热门AI工具大全</h1>
-        <div class="ai-grid">
-            <!-- 豆包 -->
-            <div class="ai-card">
-                <img src="doubao.jpg" alt="豆包" class="ai-icon">
-                <div class="ai-name">豆包</div>
-                <div class="ai-desc">字节跳动推出的智能对话AI</div>
-                <a href="https://www.doubao.com" target="_blank" class="ai-link">立即使用</a>
-            </div>
-            <!-- 百川 -->
-            <div class="ai-card">
-                <img src="baichuan.jpg" alt="百川" class="ai-icon">
-                <div class="ai-name">百川智能</div>
-                <div class="ai-desc">大模型对话与内容生成平台</div>
-                <a href="https://www.baichuan-ai.com" target="_blank" class="ai-link">立即使用</a>
-            </div>
-            <!-- 讯飞星火 -->
-            <div class="ai-card">
-                <img src="xunfei.jpg" alt="讯飞星火" class="ai-icon">
-                <div class="ai-name">讯飞星火</div>
-                <div class="ai-desc">科大讯飞的认知大模型</div>
-                <a href="https://xinghuo.xfyun.cn" target="_blank" class="ai-link">立即使用</a>
-            </div>
-            <!-- 海螺AI -->
-            <div class="ai-card">
-                <img src="hailuo.jpg" alt="海螺AI" class="ai-icon">
-                <div class="ai-name">海螺AI</div>
-                <div class="ai-desc">多模态智能助手</div>
-                <a href="https://hailuoai.com" target="_blank" class="ai-link">立即使用</a>
-            </div>
-            <!-- 阶跃星辰 -->
-            <div class="ai-card">
-                <img src="jieyue.jpg" alt="阶跃星辰" class="ai-icon">
-                <div class="ai-name">阶跃星辰</div>
-                <div class="ai-desc">企业级AI对话平台</div>
-                <a href="https://www.stepfun.com" target="_blank" class="ai-link">立即使用</a>
-            </div>
-            <!-- 夸克AI -->
-            <div class="ai-card">
-                <img src="kuake.jpg" alt="夸克AI" class="ai-icon">
-                <div class="ai-name">夸克AI</div>
-                <div class="ai-desc">阿里旗下的智能搜索助手</div>
-                <a href="https://quark.sm.cn" target="_blank" class="ai-link">立即使用</a>
-            </div>
-            <!-- Kimi -->
-            <div class="ai-card">
-                <img src="kimi.jpg" alt="Kimi" class="ai-icon">
-                <div class="ai-name">Kimi智能助手</div>
-                <div class="ai-desc">支持超长文本处理的AI</div>
-                <a href="https://kimi.moonshot.cn" target="_blank" class="ai-link">立即使用</a>
-            </div>
-            <!-- 天工AI -->
-            <div class="ai-card">
-                <img src="tiangong.jpg" alt="天工AI" class="ai-icon">
-                <div class="ai-name">天工AI</div>
-                <div class="ai-desc">昆仑万维的大模型平台</div>
-                <a href="https://www.tiangong.cn" target="_blank" class="ai-link">立即使用</a>
-            </div>
-            <!-- 小企鹅AI -->
-            <div class="ai-card">
-                <img src="xiaoque.jpg" alt="小企鹅AI" class="ai-icon">
-                <div class="ai-name">小企鹅AI</div>
-                <div class="ai-desc">腾讯旗下的智能对话工具</div>
-                <a href="https://ai.qq.com" target="_blank" class="ai-link">立即使用</a>
-            </div>
-            <!-- DeepSeek -->
-            <div class="ai-card">
-                <img src="deepseek.jpg" alt="DeepSeek" class="ai-icon">
-                <div class="ai-name">DeepSeek</div>
-                <div class="ai-desc">深度求索的开源大模型</div>
-                <a href="https://www.deepseek.com" target="_blank" class="ai-link">立即使用</a>
-            </div>
-            <!-- 阿芙AI -->
-            <div class="ai-card">
-                <img src="afu.jpg" alt="阿芙AI" class="ai-icon">
-                <div class="ai-name">阿芙AI</div>
-                <div class="ai-desc">专注于创意内容生成</div>
-                <a href="https://afuai.com" target="_blank" class="ai-link">立即使用</a>
-            </div>
-            <!-- 纳米AI -->
-            <div class="ai-card">
-                <img src="nami.jpg" alt="纳米AI" class="ai-icon">
-                <div class="ai-name">纳米AI</div>
-                <div class="ai-desc">多场景智能对话助手</div>
-                <a href="https://namiai.com" target="_blank" class="ai-link">立即使用</a>
-            </div>
-        </div>
+<div class="container">
+    <div class="top-bar">
+        <a href="index.html" class="back">← 返回首页</a>
+        <a href="list-en.html" class="btn-foreign">🌍 国外AI</a>
     </div>
+    <h1>🇨🇳 国内AI工具</h1>
+    <div class="ad">📢 Google AdSense 广告位（顶部）</div>
+    <div class="grid">
+        <div class="tool-card" onclick="location.href='ai-doubao.html'"><div class="tool-icon"><img src="doubao.jpg" alt="豆包"></div><div class="tool-name">豆包</div></div>
+        <div class="tool-card" onclick="location.href='ai-deepseek.html'"><div class="tool-icon"><img src="deepseek.jpg" alt="DeepSeek"></div><div class="tool-name">DeepSeek</div></div>
+        <div class="tool-card" onclick="location.href='ai-kimi.html'"><div class="tool-icon"><img src="kimi.jpg" alt="Kimi"></div><div class="tool-name">Kimi</div></div>
+        <div class="tool-card" onclick="location.href='ai-tongyi.html'"><div class="tool-icon"><img src="tongyi.jpg" alt="通义千问"></div><div class="tool-name">通义千问</div></div>
+        <div class="tool-card" onclick="location.href='ai-wenxin.html'"><div class="tool-icon"><img src="wenxin.jpg" alt="文心一言"></div><div class="tool-name">文心一言</div></div>
+        <div class="tool-card" onclick="location.href='ai-xunfei.html'"><div class="tool-icon"><img src="xunfei.jpg" alt="讯飞星火"></div><div class="tool-name">讯飞星火</div></div>
+        <div class="tool-card" onclick="location.href='ai-tencent.html'"><div class="tool-icon"><img src="tencent.jpg" alt="腾讯元宝"></div><div class="tool-name">腾讯元宝</div></div>
+        <div class="tool-card" onclick="location.href='ai-zhipu.html'"><div class="tool-icon"><img src="zhipu.jpg" alt="智谱清言"></div><div class="tool-name">智谱清言</div></div>
+        <div class="tool-card" onclick="location.href='ai-hailuo.html'"><div class="tool-icon"><img src="hailuo.jpg" alt="海螺AI"></div><div class="tool-name">海螺AI</div></div>
+        <div class="tool-card" onclick="location.href='ai-tiangong.html'"><div class="tool-icon"><img src="tiangong.jpg" alt="天工AI"></div><div class="tool-name">天工AI</div></div>
+        <div class="tool-card" onclick="location.href='ai-jieyue.html'"><div class="tool-icon"><img src="jieyue.jpg" alt="阶跃AI"></div><div class="tool-name">阶跃AI</div></div>
+        <div class="tool-card" onclick="location.href='ai-夸克.html'"><div class="tool-icon"><img src="kuake.jpg" alt="夸克"></div><div class="tool-name">夸克</div></div>
+        <div class="tool-card" onclick="location.href='ai-baichuan.html'"><div class="tool-icon"><img src="baichuan.jpg" alt="百川AI"></div><div class="tool-name">百川AI</div></div>
+        <div class="tool-card" onclick="location.href='ai-nami.html'"><div class="tool-icon"><img src="nami.jpg" alt="纳米AI"></div><div class="tool-name">纳米AI</div></div>
+        <div class="tool-card" onclick="location.href='ai-afu.html'"><div class="tool-icon"><img src="afu.jpg" alt="蚂蚁阿福"></div><div class="tool-name">蚂蚁阿福</div></div>
+        <div class="tool-card" onclick="location.href='ai-xiaoque.html'"><div class="tool-icon"><img src="xiaoque.jpg" alt="小云雀"></div><div class="tool-name">小云雀</div></div>
+    </div>
+    <div class="ad">📢 Google AdSense 广告位（底部）</div>
+    <div class="footer">✅ 点击卡片查看详细价格与购买链接</div>
+</div>
 </body>
 </html>
-
