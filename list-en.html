@@ -1,5 +1,3 @@
-05.19 01:16
-list-en
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -29,6 +27,9 @@ list-en
         .tool-name{font-size:0.95rem;font-weight:600;color:#1e2a3e;margin-bottom:4px;}
         .tool-desc{font-size:0.7rem;color:#6c7f8f;line-height:1.3;}
         .footer{text-align:center;margin-top:30px;font-size:0.7rem;color:#8ba0bc;line-height:1.5;}
+        .divider{height:2px;background:linear-gradient(90deg,#ff7b2c,#ffb347);margin:40px 0 20px;border-radius:2px;}
+        .info-box{background:#f8fafc;border-radius:24px;padding:16px;margin:20px 0;border:1px solid #eef2f8;text-align:center;}
+        .info-box p{color:#5b6e8c;font-size:0.8rem;}
         .arena{background:#f2f0fc;border-radius:24px;padding:20px;margin:30px 0 20px;border:1px solid #e0d6f5;}
         .arena h3{color:#6c47b4;margin-bottom:12px;font-size:1.2rem;}
         .arena-question{background:#fff;border-radius:20px;padding:16px;margin:16px 0;border-left:4px solid #ff7b2c;}
@@ -57,75 +58,73 @@ list-en
 <div class="container">
     <div class="top-bar">
         <a href="index.html" class="back">← 返回首页</a>
-        <a href="list-cn.html" class="btn-domestic"> 国内AI</a>
-        <button class="share-btn" id="shareButton"> 分享给朋友，一起用免费AI</button>
-        <button class="feedback-btn" id="feedbackButton"> 意见反馈</button>
+        <a href="list-cn.html" class="btn-domestic">🇨🇳 国内AI</a>
+        <button class="share-btn" id="shareButton">📤 分享给朋友，一起用免费AI</button>
+        <button class="feedback-btn" id="feedbackButton">📝 意见反馈</button>
     </div>
-    <h1> 国外AI工具</h1>
+    <h1>🌍 国外AI工具</h1>
+
     <div class="recommend">
-         编辑推荐：ChatGPT 全能助手；Claude 长文本王者；Midjourney 顶级AI绘画。
+        🔥 编辑推荐：Claude 长文本王者；Midjourney 顶级AI绘画；Runway 视频生成。
     </div>
-    <div class="ad"> Google AdSense 广告位（顶部）</div>
+
+    <div class="ad">📢 Google AdSense 广告位（顶部）</div>
+
+    <!-- 上方：6个可用国外AI -->
     <div class="grid">
-        <!-- 聊天对话 / 通用模型 -->
-        <div class="tool-card" onclick="window.open('https://chat.openai.com','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="chatgpt.jpg" alt="ChatGPT"></div><div class="tool-name">ChatGPT</div><div class="tool-desc">OpenAI · 全能对话 → 聊天、编程、翻译、创作</div></div>
-        <div class="tool-card" onclick="window.open('https://gemini.google.com','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="gemini.jpg" alt="Google Gemini"></div><div class="tool-name">Google Gemini</div><div class="tool-desc">Google · 多模态大模型 → 图文理解、超长上下文</div></div>
         <div class="tool-card" onclick="window.open('https://claude.ai','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="claude.jpg" alt="Claude"></div><div class="tool-name">Claude</div><div class="tool-desc">Anthropic · 安全长文本 → 分析文档、代码生成</div></div>
-        <div class="tool-card" onclick="window.open('https://copilot.microsoft.com','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="copilot.jpg" alt="Microsoft Copilot"></div><div class="tool-name">Microsoft Copilot</div><div class="tool-desc">微软 · 办公助手 → 集成Office、提高效率</div></div>
-        <div class="tool-card" onclick="window.open('https://www.perplexity.ai','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="perplexity.jpg" alt="Perplexity AI"></div><div class="tool-name">Perplexity AI</div><div class="tool-desc">答案引擎 → 提供来源引用、适合研究</div></div>
-        <div class="tool-card" onclick="window.open('https://grok.com','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="grok.jpg" alt="Grok"></div><div class="tool-name">Grok</div><div class="tool-desc">xAI · 实时信息 → 接入社交平台数据</div></div>
-        <!-- AI绘画/设计 -->
         <div class="tool-card" onclick="window.open('https://www.midjourney.com','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="midjourney.jpg" alt="Midjourney"></div><div class="tool-name">Midjourney</div><div class="tool-desc">顶级AI绘画 → 高质量艺术图像</div></div>
-        <div class="tool-card" onclick="window.open('https://leonardo.ai','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="leonardo.jpg" alt="Leonardo.ai"></div><div class="tool-name">Leonardo.ai</div><div class="tool-desc">游戏资产生成 → 风格多样</div></div>
         <div class="tool-card" onclick="window.open('https://stability.ai','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="stablediffusion.jpg" alt="Stable Diffusion"></div><div class="tool-name">Stable Diffusion</div><div class="tool-desc">开源图像生成 → 可本地部署</div></div>
-        <!-- 编程与办公 -->
         <div class="tool-card" onclick="window.open('https://www.cursor.com','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="cursor.jpg" alt="Cursor"></div><div class="tool-name">Cursor</div><div class="tool-desc">AI编程 → 代码编辑器、智能补全</div></div>
         <div class="tool-card" onclick="window.open('https://www.notion.so','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="notion.jpg" alt="Notion AI"></div><div class="tool-name">Notion AI</div><div class="tool-desc">笔记AI写作辅助</div></div>
-        <div class="tool-card" onclick="window.open('https://gamma.app','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="gamma.jpg" alt="Gamma"></div><div class="tool-name">Gamma</div><div class="tool-desc">AI生成演示文稿</div></div>
         <div class="tool-card" onclick="window.open('https://runwayml.com','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="runway.jpg" alt="Runway"></div><div class="tool-name">Runway</div><div class="tool-desc">视频编辑与生成 → AI特效</div></div>
-        <div class="tool-card" onclick="window.open('https://lumalabs.ai','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="luma.jpg" alt="Luma Dream Machine"></div><div class="tool-name">Luma Dream Machine</div><div class="tool-desc">AI视频生成 → 高质量3D场景</div></div>
-        <div class="tool-card" onclick="window.open('https://www.krea.ai','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="krea.jpg" alt="Krea AI"></div><div class="tool-name">Krea AI</div><div class="tool-desc">实时AI设计工具 → 创意生成</div></div>
-        <!-- 浏览器与AI搜索 -->
-        <div class="tool-card" onclick="window.open('https://arc.net','_blank','noopener,noreferrer')"><div class="tool-icon"><img src="arcsearch.jpg" alt="Arc Search"></div><div class="tool-name">Arc Search</div><div class="tool-desc">AI增强浏览器 → 整合搜索摘要</div></div>
     </div>
-    <!-- AI对比测试示例板块 -->
-    <div class="arena">
-        <h3> AI擂台赛：同一个问题，谁答得更好？</h3>
-        <div class="arena-question">
-             <strong>问题：</strong>“用一句话解释什么是AI幻觉”
-        </div>
-        <div class="arena-answers">
-            <div class="arena-item"><strong>ChatGPT</strong> AI生成看似合理但实际错误或虚假的信息。</div>
-            <div class="arena-item"><strong>Claude</strong> 模型编造了不存在的事实，源于训练数据不足或推理偏差。</div>
-            <div class="arena-item"><strong>Google Gemini</strong> 当AI非常自信地给出错误答案时，就产生了“幻觉”。</div>
-        </div>
-        <div class="arena-note">
-             觉得哪个回答最清楚？点击上方卡片去亲自体验！<br>
-            （每周更换新问题，欢迎通过「意见反馈」推荐题目）
-        </div>
+
+    <!-- 分割线及说明 -->
+    <div class="divider"></div>
+    <div class="info-box">
+        <p>📌 以下国外AI因网络限制无法直接访问，请自行了解使用方式。</p>
     </div>
-    <div class="ad"> Google AdSense 广告位（底部）</div>
+
+    <!-- 下方：其余10个国外AI（仅作展示，点击无效或提示） -->
+    <div class="grid">
+        <div class="tool-card" onclick="alert('抱歉，该网站在中国大陆无法直接访问，请自行了解使用方式。')"><div class="tool-icon"><img src="chatgpt.jpg" alt="ChatGPT"></div><div class="tool-name">ChatGPT</div><div class="tool-desc">OpenAI · 全能对话 → 无法直接访问</div></div>
+        <div class="tool-card" onclick="alert('抱歉，该网站在中国大陆无法直接访问，请自行了解使用方式。')"><div class="tool-icon"><img src="gemini.jpg" alt="Google Gemini"></div><div class="tool-name">Google Gemini</div><div class="tool-desc">Google · 多模态 → 无法直接访问</div></div>
+        <div class="tool-card" onclick="alert('抱歉，该网站在中国大陆无法直接访问，请自行了解使用方式。')"><div class="tool-icon"><img src="copilot.jpg" alt="Microsoft Copilot"></div><div class="tool-name">Microsoft Copilot</div><div class="tool-desc">微软 · 办公助手 → 无法直接访问</div></div>
+        <div class="tool-card" onclick="alert('抱歉，该网站在中国大陆无法直接访问，请自行了解使用方式。')"><div class="tool-icon"><img src="perplexity.jpg" alt="Perplexity AI"></div><div class="tool-name">Perplexity AI</div><div class="tool-desc">答案引擎 → 无法直接访问</div></div>
+        <div class="tool-card" onclick="alert('抱歉，该网站在中国大陆无法直接访问，请自行了解使用方式。')"><div class="tool-icon"><img src="grok.jpg" alt="Grok"></div><div class="tool-name">Grok</div><div class="tool-desc">xAI · 实时信息 → 无法直接访问</div></div>
+        <div class="tool-card" onclick="alert('抱歉，该网站在中国大陆无法直接访问，请自行了解使用方式。')"><div class="tool-icon"><img src="leonardo.jpg" alt="Leonardo.ai"></div><div class="tool-name">Leonardo.ai</div><div class="tool-desc">游戏资产生成 → 无法直接访问</div></div>
+        <div class="tool-card" onclick="alert('抱歉，该网站在中国大陆无法直接访问，请自行了解使用方式。')"><div class="tool-icon"><img src="gamma.jpg" alt="Gamma"></div><div class="tool-name">Gamma</div><div class="tool-desc">AI生成演示文稿 → 无法直接访问</div></div>
+        <div class="tool-card" onclick="alert('抱歉，该网站在中国大陆无法直接访问，请自行了解使用方式。')"><div class="tool-icon"><img src="luma.jpg" alt="Luma Dream Machine"></div><div class="tool-name">Luma Dream Machine</div><div class="tool-desc">AI视频生成 → 无法直接访问</div></div>
+        <div class="tool-card" onclick="alert('抱歉，该网站在中国大陆无法直接访问，请自行了解使用方式。')"><div class="tool-icon"><img src="krea.jpg" alt="Krea AI"></div><div class="tool-name">Krea AI</div><div class="tool-desc">实时AI设计 → 无法直接访问</div></div>
+        <div class="tool-card" onclick="alert('抱歉，该网站在中国大陆无法直接访问，请自行了解使用方式。')"><div class="tool-icon"><img src="arcsearch.jpg" alt="Arc Search"></div><div class="tool-name">Arc Search</div><div class="tool-desc">AI增强浏览器 → 无法直接访问</div></div>
+    </div>
+
+    <div class="ad">📢 Google AdSense 广告位（底部）</div>
     <div class="footer">
-        ✅ 点击卡片直接使用工具 | 发现问题或想添加新AI？点「意见反馈」告诉我<br>
-         使用技巧：点击任意卡片直接跳转官网，无需注册。如果链接失效，请点「意见反馈」告知。
+        ✅ 点击卡片直接使用工具（绿色为可用） | 发现问题或想添加新AI？点「意见反馈」告诉我<br>
+        💡 使用技巧：下方工具因网络限制无法直接访问，建议使用上方可用工具。
     </div>
 </div>
+
+<!-- 反馈模态框等脚本（与之前相同，略） -->
 <div id="feedbackModal" class="modal">
     <div class="modal-content">
-        <h3> 意见反馈</h3>
+        <h3>📢 意见反馈</h3>
         <p>请描述你遇到的问题（如链接失效、AI错误），或你想添加的AI工具。</p>
-        <textarea id="feedbackText" rows="5" placeholder="例如：ChatGPT官网打不开；建议添加xxxAI..."></textarea>
+        <textarea id="feedbackText" rows="5" placeholder="例如：Stable Diffusion 官网打不开；建议添加xxxAI..."></textarea>
         <div class="modal-buttons">
             <button class="cancel-btn" id="cancelFeedback">取消</button>
             <button class="send-btn" id="sendFeedback">发送</button>
         </div>
     </div>
 </div>
+
 <script>
     document.getElementById('shareButton')?.addEventListener('click',function(){
         const url='https://gametactics.github.io/list-en.html';
         const title='全AI导航 · 国外AI工具大全';
-        const text='最全国外AI工具集合：ChatGPT、Claude、Midjourney等，点击即用！';
+        const text='国外AI工具精选：Claude、Midjourney等6款可用，点击即用！';
         if(navigator.share) navigator.share({title,text,url}).catch(()=>{});
         else{
             const ta=document.createElement('textarea');
@@ -158,4 +157,3 @@ list-en
 </script>
 </body>
 </html>
-
