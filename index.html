@@ -8,12 +8,12 @@
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#f2f4f8;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:16px;color:#1e293b;}
         .container{max-width:600px;margin:0 auto;}
+        .ad-top{background:#f8fafc;border-radius:20px;padding:12px;text-align:center;margin-bottom:20px;border:1px dashed #cbd5e1;font-size:0.75rem;color:#6c7f8f;}
         .header{text-align:center;margin-bottom:24px;}
         .header h1{font-size:2rem;color:#ff7b2c;letter-spacing:-0.5px;}
         .header p{color:#5b6e8c;font-size:0.85rem;margin-top:4px;}
         .card{background:white;border-radius:28px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.02);border:1px solid #eef2f8;}
         .card-title{font-size:1.3rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px;border-left:4px solid #ff7b2c;padding-left:12px;}
-        .badge{background:#ff7b2c10;color:#ff7b2c;padding:4px 10px;border-radius:30px;font-size:0.7rem;font-weight:500;}
         .grid{display:flex;flex-direction:column;gap:12px;}
         .link-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f2f5;text-decoration:none;color:#1e293b;}
         .link-item:last-child{border-bottom:none;}
@@ -22,36 +22,54 @@
         .link-name{font-weight:500;}
         .link-desc{font-size:0.75rem;color:#6c7f8f;margin-top:2px;}
         .arrow{color:#94a3b8;font-size:1.2rem;}
-        .install-guide{background:#ff7b2c15;border-radius:24px;padding:14px;text-align:center;margin-top:8px;font-size:0.8rem;border:1px dashed #ff7b2c;color:#ff7b2c;}
         .footer{text-align:center;font-size:0.7rem;color:#8ba0bc;margin-top:32px;padding-bottom:20px;}
-        .soon{opacity:0.7;filter:grayscale(0.1);}
     </style>
 </head>
 <body>
 <div class="container">
+    <!-- 顶部广告位 -->
+    <div class="ad-top">📢 Google AdSense 广告位</div>
+
+    <!-- 头部 -->
     <div class="header">
         <h1>🎮 GameTactics</h1>
-        <p>功能型网页 · 添加到桌面即APP</p>
+        <p>功能型网页 · 每个都是独立工具</p>
     </div>
 
+    <!-- 卡片一：自动工具 -->
     <div class="card">
-        <div class="card-title">🚀 赚钱项目 <span class="badge">进行中</span></div>
+        <div class="card-title">🛠️ 自动工具</div>
         <div class="grid">
-            <a href="/shenghuobang/" class="link-item">
-                <div class="link-left"><span class="link-icon">🏥</span><div><div class="link-name">生活帮AI</div><div class="link-desc">健康 / 天气 / 攻略 / 家务 · 一键问AI</div></div></div><span class="arrow">→</span>
-            </a>
-            <a href="#" class="link-item soon" onclick="alert('即将上线，敬请期待')">
-                <div class="link-left"><span class="link-icon">🤖</span><div><div class="link-name">AI辩论聚合器</div><div class="link-desc">两个AI互相辩论，你来裁判</div></div></div><span class="arrow">→</span>
-            </a>
-            <a href="#" class="link-item soon" onclick="alert('正在测试，联系kiss购买')">
-                <div class="link-left"><span class="link-icon">🎮</span><div><div class="link-name">游戏脚本/代挂</div><div class="link-desc">种花收菜 · DNF手游 · 自动点击</div></div></div><span class="arrow">→</span>
-            </a>
-            <a href="#" class="link-item" onclick="window.location.href='https://m.tb.cn/h.xxxxx';alert('请复制闲鱼链接打开，商品标题：AdSense代申请79元')">
-                <div class="link-left"><span class="link-icon">💰</span><div><div class="link-name">AdSense代申请</div><div class="link-desc">79元/单 · 包通过</div></div></div><span class="arrow">→</span>
+            <div class="link-item" onclick="alert('正在测试，联系站长购买')">
+                <div class="link-left"><span class="link-icon">🎮</span><div><div class="link-name">游戏助手</div><div class="link-desc">种花收菜 · DNF手游 · 自动点击</div></div></div><span class="arrow">→</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片二：站长服务 -->
+    <div class="card">
+        <div class="card-title">💼 站长服务</div>
+        <div class="grid">
+            <a href="https://h5.m.goofish.com/item?forceFlush=1&itemId=1054661999216&hitNativeDetail=true&xy_refer=%7B%22campaignId%22%3A1119%2C%22sceneInfo%22%3A%22share.detail.1054661999216.system_share%22%7D&needNotPreGet=true&id=1054661999216&from_kun_share=default&ut_sk=1.aE0NX99nUU0DAAF%2F4rAevkVM_21407387_1780684881940.system_share.detail.1054661999216.2560757500" class="link-item" target="_blank" rel="noopener noreferrer">
+                <div class="link-left"><span class="link-icon">💰</span><div><div class="link-name">AdSense代申请</div><div class="link-desc">79元/单 · 不成功不收钱</div></div></div><span class="arrow">→</span>
             </a>
         </div>
     </div>
 
+    <!-- 卡片三：即将上线 -->
+    <div class="card">
+        <div class="card-title">🚧 即将上线</div>
+        <div class="grid">
+            <div class="link-item" onclick="alert('开发中，敬请期待')">
+                <div class="link-left"><span class="link-icon">🤖</span><div><div class="link-name">AI讨论室</div><div class="link-desc">双AI辩论，你来当裁判</div></div></div><span class="arrow">→</span>
+            </div>
+            <div class="link-item" onclick="alert('开发中，敬请期待')">
+                <div class="link-left"><span class="link-icon">🛒</span><div><div class="link-name">更多工具</div><div class="link-desc">持续开发中</div></div></div><span class="arrow">→</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 下方导航区 -->
     <div class="card">
         <div class="card-title">🧭 AI工具导航</div>
         <div class="grid">
@@ -63,27 +81,16 @@
     <div class="card">
         <div class="card-title">📖 关于</div>
         <div class="grid">
-            <a href="story.html" class="link-item"><div class="link-left"><span class="link-icon">📝</span><div><div class="link-name">我的故事</div><div class="link-desc">从上班族到独立站长</div></div></div><span class="arrow">→</span></a>
+            <a href="story.html" class="link-item"><div class="link-left"><span class="link-icon">📝</span><div><div class="link-name">我的故事</div></div></div><span class="arrow">→</span></a>
             <a href="about.html" class="link-item"><div class="link-left"><span class="link-icon">👤</span><div><div class="link-name">关于我们</div></div></div><span class="arrow">→</span></a>
             <a href="contact.html" class="link-item"><div class="link-left"><span class="link-icon">📧</span><div><div class="link-name">联系我们</div></div></div><span class="arrow">→</span></a>
             <a href="privacy.html" class="link-item"><div class="link-left"><span class="link-icon">🔒</span><div><div class="link-name">隐私政策</div></div></div><span class="arrow">→</span></a>
         </div>
     </div>
 
-    <div class="install-guide" id="installGuide">
-        📱 点击浏览器菜单 → 添加到主屏幕，下次像APP一样打开
-    </div>
     <div class="footer">
         © GameTactics · 每个网页都是独立工具
     </div>
 </div>
-<script>
-    if(window.matchMedia('(display-mode: standalone)').matches){
-        document.getElementById('installGuide').style.display = 'none';
-    }
-    document.getElementById('installGuide').onclick = function(){
-        alert('Safari: 点底部分享→添加到主屏幕\nChrome: 点右上角菜单→添加到主屏幕');
-    };
-</script>
 </body>
 </html>
