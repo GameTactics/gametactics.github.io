@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" id="viewportMeta" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>生活帮AI</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#f5f7fb;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:16px;color:#1f2f3e;}
+        .container{max-width:550px;margin:0 auto;position:relative;z-index:1;}
+        h1{font-size:1.8rem;font-weight:700;color:#ff7b2c;text-align:center;margin-bottom:4px;}
+        .sub{text-align:center;color:#5b6e8c;font-size:0.85rem;margin-bottom:1rem;}
+        .visitor-count{background:#eef2f8;border-radius:40px;padding:6px 12px;display:inline-block;font-size:0.7rem;color:#ff7b2c;margin:0 auto 12px;text-align:center;width:auto;}
+        .stats-bar{text-align:center;margin-bottom:8px;}
+        .ad-top{background:#f8fafc;border-radius:20px;padding:12px;text-align:center;margin:12px 0 20px;border:1px dashed #cbd5e1;font-size:0.75rem;color:#6c7f8f;}
+        .toolbar{background:white;border-radius:3rem;padding:8px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border:1px solid #eef2f8;}
+        .share-btn,.install-app-btn{background:#ff7b2c;color:white;border:none;padding:10px 16px;border-radius:2rem;font-size:0.85rem;font-weight:600;cursor:pointer;flex:1;text-align:center;}
+        .font-controls{display:flex;gap:8px;background:#f0f2f8;border-radius:2rem;padding:4px;}
+        .font-btn{background:white;border:none;width:2.2rem;height:2.2rem;border-radius:50%;font-size:1.2rem;font-weight:bold;cursor:pointer;}
+        .reset-font{width:auto;padding:0 12px;border-radius:2rem;}
+        .ai-card{background:white;border-radius:1.75rem;margin-bottom:1.5rem;padding:1.25rem;border:1px solid #eef2f8;}
+        .ai-name{font-size:1.4rem;font-weight:700;color:#ff7b2c;margin-bottom:0.4rem;}
+        .tag{display:inline-block;background:#f0f2f5;padding:0.2rem 0.8rem;border-radius:2rem;font-size:0.7rem;font-weight:500;color:#e67e22;margin-bottom:0.9rem;}
+        .question-samples{background:#f8fafc;border-radius:1.25rem;padding:0.75rem 1rem;margin:0.75rem 0;list-style:none;}
+        .question-samples li{font-size:0.85rem;padding:0.4rem 0;border-bottom:1px solid #edf2f7;color:#2c3e50;}
+        .question-samples li:last-child{border-bottom:none;}
+        .reason{background:#fff9f0;padding:0.75rem 1rem;border-radius:1.25rem;font-size:0.85rem;color:#8a6e3d;border-left:3px solid #ffb347;margin:0.75rem 0 1rem 0;}
+        .ask-btn{display:block;background:#ff7b2c;color:white;text-align:center;padding:0.75rem 1rem;border-radius:2rem;font-size:0.9rem;font-weight:600;text-decoration:none;width:100%;cursor:pointer;border:none;}
+        .back-home{text-align:center;margin:20px 0 12px;}
+        .back-home a{display:inline-block;background:#eef2f8;color:#ff7b2c;text-decoration:none;padding:8px 20px;border-radius:30px;font-size:0.8rem;font-weight:500;}
+        .footer{text-align:center;font-size:0.7rem;color:#8ba0bc;margin-top:8px;padding-bottom:8px;}
+        @media (max-width:500px){.toolbar{justify-content:center;}.share-btn,.install-app-btn{min-width:120px;}}
+        .splash-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.5s ease;backdrop-filter:blur(8px);}
+        .splash-content{text-align:center;color:white;animation:bounce 0.6s;}
+        .splash-content h2{font-size:2.2rem;margin-bottom:16px;letter-spacing:2px;color:#ff7b2c;}
+        .splash-content p{font-size:1rem;opacity:0.9;}
+        @keyframes bounce{0%{transform:scale(0.8);opacity:0;}80%{transform:scale(1.05);}100%{transform:scale(1);opacity:1;}}
+    </style>
+</head>
+<body>
+<div id="splash" class="splash-screen"><div class="splash-content"><h2>生活帮AI</h2><p>你身边的智能助手</p><p style="font-size:0.8rem; margin-top:20px;">⏱️ 自动关闭 · 点击任意位置跳过</p></div></div>
+<div class="container">
+    <h1>生活帮AI</h1>
+    <div class="sub">“我有个问题，该问谁？”</div>
+    <div class="stats-bar"><div class="visitor-count" id="visitorCount">📊 访问人数：加载中...</div></div>
+    <div class="ad-top">📢 Google AdSense 广告位（顶部）</div>
+    <div class="toolbar">
+        <button class="share-btn" id="shareBtn">📤 分享</button>
+        <button class="install-app-btn" id="installBtn">📲 安装应用</button>
+        <div class="font-controls">
+            <button class="font-btn" id="fontMinus">A−</button>
+            <button class="font-btn" id="fontPlus">A+</button>
+            <button class="font-btn reset-font" id="fontReset">默认</button>
+        </div>
+    </div>
+    <div class="ai-card"><div class="ai-name">豆包</div><div class="tag">🏥 医疗健康型 · 全科家庭助手</div><ul class="question-samples"><li>忘记吃药了，会有什么影响？</li><li>感冒了能喝姜茶吗？</li><li>最近总失眠，有什么建议？</li><li>血压偏高，日常要注意什么？</li></ul><div class="reason">💡 问养生、小毛病，找它最稳。</div><button class="ask-btn" onclick="window.location.href='https://www.doubao.com/chat/'">🏥 问健康</button></div>
+    <div class="ai-card"><div class="ai-name">DeepSeek</div><div class="tag">☀️ 天气穿衣型 · 出行小助手</div><ul class="question-samples"><li>明天上海天气怎么样？要带伞吗？</li><li>后天去北京，穿什么衣服合适？</li><li>未来一周三亚冷不冷？</li><li>现在这个季节去西藏该带什么？</li></ul><div class="reason">💡 问天气、问穿衣，找它最细。</div><button class="ask-btn" onclick="window.location.href='https://chat.deepseek.com/'">☀️ 问天气</button></div>
+    <div class="ai-card"><div class="ai-name">Kimi</div><div class="tag">✈️ 旅游攻略型 · 行程规划师</div><ul class="question-samples"><li>去大理玩三天，怎么安排路线？</li><li>杭州有哪些小众景点？</li><li>重庆火锅哪家最地道？</li><li>带老人去北京，哪些景点不累？</li></ul><div class="reason">💡 问旅游攻略、路线规划，找它最省心。</div><button class="ask-btn" onclick="window.location.href='https://kimi.moonshot.cn/'">✈️ 问攻略</button></div>
+    <div class="ai-card"><div class="ai-name">通义千问</div><div class="tag">🍲 生活常识型 · 居家百事通</div><ul class="question-samples"><li>冰箱里的肉放三天还能吃吗？</li><li>衣服沾了油渍怎么洗掉？</li><li>新装修的房子怎么除甲醛？</li><li>水垢太厚怎么清理？</li></ul><div class="reason">💡 问生活常识、日常小事，找它最稳妥。</div><button class="ask-btn" onclick="window.location.href='https://tongyi.aliyun.com/qianwen/'">🍲 问家务</button></div>
+    <div class="back-home"><a href="/">🏠 返回主站</a></div>
+    <div class="footer">点击按钮打开对应AI，然后用语音提问。</div>
+</div>
+<script>
+    // 开场动画
+    const splash = document.getElementById('splash');
+    function hideSplash(){if(splash){splash.style.opacity='0';setTimeout(()=>splash.style.display='none',500);}}
+    setTimeout(hideSplash,1500);
+    splash.addEventListener('click',hideSplash);
+    
+    // 访客计数器
+    const namespace='shenghuobang', key='visitors';
+    const countUrl=`https://api.countapi.xyz/update/${namespace}/${key}?amount=1`;
+    function updateAndShowCount(){
+        fetch(countUrl).then(res=>res.json()).then(data=>{if(data&&data.value)document.getElementById('visitorCount').innerHTML=`📊 累计访问：${data.value} 次`;}).catch(()=>{fetch(`https://api.countapi.xyz/get/${namespace}/${key}`).then(r=>r.json()).then(d=>{if(d&&d.value)document.getElementById('visitorCount').innerHTML=`📊 累计访问：${d.value} 次`;}).catch(()=>{document.getElementById('visitorCount').innerHTML='📊 访问人数：统计服务暂不可用';});});
+    }
+    updateAndShowCount();
+    
+    // 字体缩放
+    const viewportMeta=document.getElementById('viewportMeta');let currentScale=1.0;const MIN=0.8,MAX=1.8,STEP=0.1;
+    function setScale(s){let ns=Math.min(MAX,Math.max(MIN,s));ns=Math.round(ns*10)/10;viewportMeta.content=`width=device-width,initial-scale=${ns},user-scalable=yes`;currentScale=ns;localStorage.setItem('pageScale',ns);}
+    const saved=parseFloat(localStorage.getItem('pageScale'));if(!isNaN(saved)&&saved>=MIN&&saved<=MAX)setScale(saved);else setScale(1);
+    document.getElementById('fontPlus').onclick=()=>setScale(currentScale+STEP);
+    document.getElementById('fontMinus').onclick=()=>setScale(currentScale-STEP);
+    document.getElementById('fontReset').onclick=()=>setScale(1);
+    
+    // 分享功能
+    const shareBtn=document.getElementById('shareBtn');
+    shareBtn.onclick=()=>{const isWeChat=/MicroMessenger/i.test(navigator.userAgent);const url=location.href;if(isWeChat){const t=document.createElement('textarea');t.value=url;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('链接已复制，可粘贴到微信聊天发送');}else if(navigator.share){navigator.share({title:'生活帮AI',url}).catch(()=>{});}else{const t=document.createElement('textarea');t.value=url;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('链接已复制，可分享给好友');}};
+    
+    // PWA 安装逻辑
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'block';
+    });
+    installBtn.addEventListener('click', () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('用户接受了安装');
+                }
+                deferredPrompt = null;
+            });
+        } else {
+            alert('您的浏览器不支持一键安装，或已安装应用。您可以在菜单中手动添加到主屏幕。');
+        }
+    });
+    if(window.matchMedia('(display-mode: standalone)').matches){
+        installBtn.style.display = 'none';
+    }
+    
+    // 注册 Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+            console.log('Service Worker 注册成功', reg);
+        }).catch(err => {
+            console.log('Service Worker 注册失败', err);
+        });
+    }
+</script>
+</body>
+</html>
