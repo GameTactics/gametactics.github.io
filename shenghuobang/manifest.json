@@ -1,0 +1,13 @@
+{
+  "name": "生活帮AI",
+  "short_name": "生活帮",
+  "description": "一键问健康、天气、攻略、家务",
+  "start_url": "/shenghuobang/",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#ff7b2c",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
