@@ -16,7 +16,7 @@
         .stats-bar{text-align:center;margin-bottom:8px;}
         .toolbar{background:white;border-radius:3rem;padding:8px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border:1px solid #eef2f8;}
         .share-btn{background:#ff7b2c;color:white;border:none;padding:10px 16px;border-radius:2rem;font-size:0.85rem;font-weight:600;cursor:pointer;flex:1;text-align:center;}
-        .font-controls{display:flex;gap:8px;background:#f0f2f8;border-radius:2rem;padding:4px;}
+        .font-controls{display:flex;align-items:center;gap:8px;background:#f0f2f8;border-radius:2rem;padding:4px;}
         .font-btn{background:white;border:none;width:2.2rem;height:2.2rem;border-radius:50%;font-size:1.2rem;font-weight:bold;cursor:pointer;}
         .reset-font{width:auto;padding:0 12px;border-radius:2rem;}
         .ai-card{background:white;border-radius:1.75rem;margin-bottom:1.5rem;padding:1.25rem;border:1px solid #eef2f8;}
@@ -47,10 +47,12 @@
     <div class="stats-bar"><div class="visitor-count" id="visitorCount">📊 访问人数：加载中...</div></div>
     <div class="toolbar">
         <button class="share-btn" id="shareBtn">📤 分享</button>
+        <!-- 字体控制部分已按你的要求替换 -->
         <div class="font-controls">
-            <button class="font-btn" id="fontMinus">A−</button>
-            <button class="font-btn" id="fontPlus">A+</button>
-            <button class="font-btn reset-font" id="fontReset">默认</button>
+            <span style="font-size:0.7rem;color:#666;padding:0 6px;white-space:nowrap;">字号</span>
+            <button class="font-btn" id="fontMinus" style="font-size:0.8rem;">A-</button>
+            <button class="font-btn reset-font" id="fontReset" style="font-size:0.7rem;">默认</button>
+            <button class="font-btn" id="fontPlus" style="font-size:0.8rem;">A+</button>
         </div>
     </div>
     <div class="ai-card"><div class="ai-name">豆包</div><div class="tag">🏥 医疗健康型 · 全科家庭助手</div><ul class="question-samples"><li>忘记吃药了，会有什么影响？</li><li>感冒了能喝姜茶吗？</li><li>最近总失眠，有什么建议？</li><li>血压偏高，日常要注意什么？</li></ul><div class="reason">💡 问养生、小毛病，找它最稳。</div><button class="ask-btn" onclick="window.location.href='https://www.doubao.com/chat/'">🏥 问健康</button></div>
@@ -66,7 +68,7 @@
     setTimeout(hideSplash,1500);
     splash.addEventListener('click',hideSplash);
     
-    // 新的计数服务（已更新）
+    // 新的计数服务
     const namespace = 'shenghuobang';
     const key = 'visitors';
     const countUrl = `https://countapi.mileshilliard.com/api/v1/hit/${namespace}-${key}`;
@@ -86,15 +88,49 @@
     }
     updateAndShowCount();
     
-    const viewportMeta=document.getElementById('viewportMeta');let currentScale=1.0;const MIN=0.8,MAX=1.8,STEP=0.1;
-    function setScale(s){let ns=Math.min(MAX,Math.max(MIN,s));ns=Math.round(ns*10)/10;viewportMeta.content=`width=device-width,initial-scale=${ns},user-scalable=yes`;currentScale=ns;localStorage.setItem('pageScale',ns);}
-    const saved=parseFloat(localStorage.getItem('pageScale'));if(!isNaN(saved)&&saved>=MIN&&saved<=MAX)setScale(saved);else setScale(1);
+    // 字体缩放（保留原有功能，但按钮已替换，需重新绑定事件）
+    const viewportMeta=document.getElementById('viewportMeta');
+    let currentScale=1.0;
+    const MIN=0.8,MAX=1.8,STEP=0.1;
+    function setScale(s){
+        let ns=Math.min(MAX,Math.max(MIN,s));
+        ns=Math.round(ns*10)/10;
+        viewportMeta.content=`width=device-width,initial-scale=${ns},user-scalable=yes`;
+        currentScale=ns;
+        localStorage.setItem('pageScale',ns);
+    }
+    const saved=parseFloat(localStorage.getItem('pageScale'));
+    if(!isNaN(saved)&&saved>=MIN&&saved<=MAX) setScale(saved);
+    else setScale(1);
+    
     document.getElementById('fontPlus').onclick=()=>setScale(currentScale+STEP);
     document.getElementById('fontMinus').onclick=()=>setScale(currentScale-STEP);
     document.getElementById('fontReset').onclick=()=>setScale(1);
     
     const shareBtn=document.getElementById('shareBtn');
-    shareBtn.onclick=()=>{const isWeChat=/MicroMessenger/i.test(navigator.userAgent);const url=location.href;if(isWeChat){const t=document.createElement('textarea');t.value=url;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('链接已复制，可粘贴到微信聊天发送');}else if(navigator.share){navigator.share({title:'生活帮AI',url}).catch(()=>{});}else{const t=document.createElement('textarea');t.value=url;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('链接已复制，可分享给好友');}};
+    shareBtn.onclick=()=>{
+        const isWeChat=/MicroMessenger/i.test(navigator.userAgent);
+        const url=location.href;
+        if(isWeChat){
+            const t=document.createElement('textarea');
+            t.value=url;
+            document.body.appendChild(t);
+            t.select();
+            document.execCommand('copy');
+            document.body.removeChild(t);
+            alert('链接已复制，可粘贴到微信聊天发送');
+        }else if(navigator.share){
+            navigator.share({title:'生活帮AI',url}).catch(()=>{});
+        }else{
+            const t=document.createElement('textarea');
+            t.value=url;
+            document.body.appendChild(t);
+            t.select();
+            document.execCommand('copy');
+            document.body.removeChild(t);
+            alert('链接已复制，可分享给好友');
+        }
+    };
 </script>
 </body>
 </html>
