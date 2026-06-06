@@ -23,6 +23,7 @@
         .link-desc{font-size:0.75rem;color:#6c7f8f;margin-top:2px;}
         .arrow{color:#94a3b8;font-size:1.2rem;}
         .footer{text-align:center;font-size:0.7rem;color:#8ba0bc;margin-top:32px;padding-bottom:20px;}
+        .soon{opacity:0.7;}
     </style>
 </head>
 <body>
@@ -60,31 +61,47 @@
     <div class="card">
         <div class="card-title">🚧 即将上线</div>
         <div class="grid">
-            <div class="link-item" onclick="alert('开发中，敬请期待')">
-                <div class="link-left"><span class="link-icon">🤖</span><div><div class="link-name">AI研究讨论室</div><div class="link-desc">双AI辩论，你来当裁判</div></div></div><span class="arrow">→</span>
+            <div class="link-item soon" onclick="alert('开发中，敬请期待')">
+                <div class="link-left"><span class="link-icon">🤖</span><div><div class="link-name">AI讨论室</div><div class="link-desc">双AI辩论，你来当裁判</div></div></div><span class="arrow">→</span>
             </div>
-            <div class="link-item" onclick="alert('开发中，敬请期待')">
+            <div class="link-item soon" onclick="alert('开发中，敬请期待')">
                 <div class="link-left"><span class="link-icon">🛒</span><div><div class="link-name">更多工具</div><div class="link-desc">持续开发中</div></div></div><span class="arrow">→</span>
             </div>
         </div>
     </div>
 
-    <!-- 下方导航区 -->
+    <!-- 卡片四：AI工具导航（包含生活帮AI、国内AI大全、国外AI大全） -->
     <div class="card">
         <div class="card-title">🧭 AI工具导航</div>
         <div class="grid">
-            <a href="list-cn.html" class="link-item"><div class="link-left"><span class="link-icon">🇨🇳</span><div><div class="link-name">国内AI大全</div><div class="link-desc">豆包 · DeepSeek · Kimi · 通义千问等</div></div></div><span class="arrow">→</span></a>
-            <a href="list-en.html" class="link-item"><div class="link-left"><span class="link-icon">🌍</span><div><div class="link-name">国外AI大全</div><div class="link-desc">ChatGPT · Claude · Gemini · Perplexity</div></div></div><span class="arrow">→</span></a>
+            <a href="/shenghuobang/" class="link-item">
+                <div class="link-left"><span class="link-icon">🏥</span><div><div class="link-name">生活帮AI</div><div class="link-desc">健康 / 天气 / 攻略 / 家务 · 一键问AI</div></div></div><span class="arrow">→</span>
+            </a>
+            <a href="list-cn.html" class="link-item">
+                <div class="link-left"><span class="link-icon">🇨🇳</span><div><div class="link-name">国内AI大全</div><div class="link-desc">豆包 · DeepSeek · Kimi · 通义千问等</div></div></div><span class="arrow">→</span>
+            </a>
+            <a href="list-en.html" class="link-item">
+                <div class="link-left"><span class="link-icon">🌍</span><div><div class="link-name">国外AI大全</div><div class="link-desc">ChatGPT · Claude · Gemini · Perplexity</div></div></div><span class="arrow">→</span>
+            </a>
         </div>
     </div>
 
+    <!-- 卡片五：关于（包含我的故事、关于我们、联系我们、隐私政策） -->
     <div class="card">
         <div class="card-title">📖 关于</div>
         <div class="grid">
-            <a href="story.html" class="link-item"><div class="link-left"><span class="link-icon">📝</span><div><div class="link-name">我的故事</div></div></div><span class="arrow">→</span></a>
-            <a href="about.html" class="link-item"><div class="link-left"><span class="link-icon">👤</span><div><div class="link-name">关于我们</div></div></div><span class="arrow">→</span></a>
-            <a href="contact.html" class="link-item"><div class="link-left"><span class="link-icon">📧</span><div><div class="link-name">联系我们</div></div></div><span class="arrow">→</span></a>
-            <a href="privacy.html" class="link-item"><div class="link-left"><span class="link-icon">🔒</span><div><div class="link-name">隐私政策</div></div></div><span class="arrow">→</span></a>
+            <a href="story.html" class="link-item">
+                <div class="link-left"><span class="link-icon">📝</span><div><div class="link-name">我的故事</div><div class="link-desc">从上班族到独立站长</div></div></div><span class="arrow">→</span>
+            </a>
+            <a href="about.html" class="link-item">
+                <div class="link-left"><span class="link-icon">👤</span><div><div class="link-name">关于我们</div></div></div><span class="arrow">→</span>
+            </a>
+            <a href="contact.html" class="link-item">
+                <div class="link-left"><span class="link-icon">📧</span><div><div class="link-name">联系我们</div></div></div><span class="arrow">→</span>
+            </a>
+            <a href="privacy.html" class="link-item">
+                <div class="link-left"><span class="link-icon">🔒</span><div><div class="link-name">隐私政策</div></div></div><span class="arrow">→</span>
+            </a>
         </div>
     </div>
 
