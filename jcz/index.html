@@ -1,5 +1,3 @@
-06.16 20:27
-index
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -565,10 +563,11 @@ textarea {
 <div class="modal" id="shareModal">
   <div class="modal-content">
     <div class="modal-title"> 分享给好友</div>
-    <p style="margin-bottom:12px;">点击下方按钮复制链接，分享给好友即可获得1次快速分析（每天最多3次）</p>
-    <input type="text" id="shareLinkInput" readonly style="width:100%; padding:8px; margin-bottom:12px;">
-    <button id="copyLinkBtn" class="btn btn-primary" style="width:100%;">复制链接</button>
-    <button class="feedback-btn" id="closeShareModal">关闭</button>
+    <p style="margin-bottom:12px;">选择一种方式分享给好友，即可获得1次快速分析（每天最多3次）</p>
+    <button id="shareWechatBtn" class="share-btn" style="background:#07c160;color:#fff;margin-bottom:8px;">💬 分享到微信</button>
+    <button id="shareQQBtn" class="share-btn" style="background:#12b7f5;color:#fff;margin-bottom:8px;">🐧 分享到QQ</button>
+    <button id="shareCopyBtn" class="share-btn" style="background:#6366f1;color:#fff;">📋 复制下载链接</button>
+    <button class="feedback-btn" id="closeShareModal" style="margin-top:8px;">关闭</button>
   </div>
 </div>
 <button id="answerFloatBtn" class="float-btn">答案已出</button>
@@ -619,6 +618,7 @@ function showMainScreen() {
   document.getElementById("mainScreen").style.display = "block";
   updateUI();
 }
+// ===== 修改：注册不自动登录 =====
 function register() {
   const username = document.getElementById("loginUsername").value.trim();
   const password = document.getElementById("loginPassword").value;
@@ -627,10 +627,9 @@ function register() {
   if (users[username]) return showLoginError("用户名已存在");
   users[username] = { password, fastCount: 0, fullCount: 0, points: 0, shareCount: 0, shareDate: new Date().toDateString(), shareLastTime: 0 };
   saveUsersToStorage();
-  currentUser = username;
-  const today = new Date().toDateString();
-  if (users[currentUser].shareDate !== today) { users[currentUser].shareCount = 0; users[currentUser].shareDate = today; saveUsersToStorage(); }
-  showMainScreen();
+  alert("注册成功！请登录");
+  document.getElementById("loginPassword").value = "";
+  document.getElementById("loginError").textContent = "";
 }
 function login() {
   const username = document.getElementById("loginUsername").value.trim();
@@ -731,8 +730,8 @@ async function startDiscussion() {
 async function callAIAndDisplay(ai, roundNum, isDebate = false, context = "") {
   const today = new Date().toISOString().slice(0, 10);
   const sys = isDebate 
-    ? `你是${ai.name}，请针对其他AI的方案发表评价或补充观点。重要：今天是${today}，你必须基于当前最新数据和实时信息进行分析，严格避免过时信息。当你在发言中提到其他AI时，请统一使用“分析者”来称呼，不要说出具体名字。`
-    : `${ai.prompt} 重要：今天是${today}，你必须基于当前最新数据和实时信息进行分析，严格避免过时信息，确保回答直接针对用户问题。当你在发言中提到其他AI时，请统一使用“分析者”来称呼，不要说出具体名字。`;
+    ? `你是${ai.name}，请针对其他AI的方案发表评价或补充观点。重要：今天是${today}，你必须基于当前最新数据和实时信息进行分析，严格避免过时信息。当你在发言中提到其他AI时，请统一使用"分析者"来称呼，不要说出具体名字。`
+    : `${ai.prompt} 重要：今天是${today}，你必须基于当前最新数据和实时信息进行分析，严格避免过时信息，确保回答直接针对用户问题。当你在发言中提到其他AI时，请统一使用"分析者"来称呼，不要说出具体名字。`;
   let user = "";
   if (isDebate) {
     user = `问题：${currentQuestion}\n\n重要：今天是${today}，请务必基于当前最新数据回答。已有的方案：\n${context}\n\n请发表你的观点。`;
@@ -831,26 +830,47 @@ async function sendInterrupt() {
   if (currentMode === "fast") finishDiscussion();
   else { document.getElementById("interruptPanel").classList.add("show"); await runDebateRounds(); }
 }
+// ===== 分享功能（修改：微信/QQ跳转） =====
 function showShareModal() {
-  const modal = document.getElementById("shareModal");
-  document.getElementById("shareLinkInput").value = window.location.href;
-  modal.classList.add("show");
+  document.getElementById("shareModal").classList.add("show");
 }
-async function copyShareLink() {
-  const link = document.getElementById("shareLinkInput").value;
-  try {
-    await navigator.clipboard.writeText(link);
-    const u = users[currentUser];
-    const now = Date.now();
-    const today = new Date().toDateString();
-    if (u.shareDate !== today) { u.shareCount = 0; u.shareDate = today; u.shareLastTime = 0; }
-    if (u.shareCount >= 3) return alert("今日分享已达上限（3次）");
-    if (now - (u.shareLastTime || 0) < 5 * 60 * 1000) return alert("两次分享至少间隔5分钟");
-    u.shareCount++; u.shareLastTime = now; u.fastCount += 1;
-    saveUsersToStorage(); updateUI();
-    alert("分享成功！获得1次快速分析。");
-    closeModal("shareModal");
-  } catch (err) { alert("复制失败，请手动复制"); }
+function closeShareModal() {
+  document.getElementById("shareModal").classList.remove("show");
+}
+function grantShareReward() {
+  const u = users[currentUser];
+  const now = Date.now();
+  const today = new Date().toDateString();
+  if (u.shareDate !== today) { u.shareCount = 0; u.shareDate = today; u.shareLastTime = 0; }
+  if (u.shareCount >= 3) { alert("今日分享已达上限（3次）"); return false; }
+  if (now - (u.shareLastTime || 0) < 5 * 60 * 1000) { alert("两次分享至少间隔5分钟"); return false; }
+  u.shareCount++; u.shareLastTime = now; u.fastCount += 1;
+  saveUsersToStorage(); updateUI();
+  alert("✅ 分享成功！获得1次快速分析");
+  return true;
+}
+function doShare(target) {
+  const downloadUrl = window.location.href;
+  if (target === 'wechat') {
+    window.location.href = 'weixin://';
+    setTimeout(function() { grantShareReward(); }, 600);
+  } else if (target === 'qq') {
+    window.location.href = 'mqq://';
+    setTimeout(function() { grantShareReward(); }, 600);
+  } else if (target === 'copy') {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(downloadUrl).catch(() => {});
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = downloadUrl;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    grantShareReward();
+    closeShareModal();
+  }
 }
 function showRechargeModal() {
   const modal = document.getElementById("rechargeModal");
@@ -904,8 +924,10 @@ function init() {
   document.getElementById("submitBtn").onclick = startDiscussion;
   document.getElementById("interruptBtn").onclick = sendInterrupt;
   document.getElementById("shareRewardBtn").onclick = showShareModal;
-  document.getElementById("copyLinkBtn").onclick = copyShareLink;
-  document.getElementById("closeShareModal").onclick = () => closeModal("shareModal");
+  document.getElementById("closeShareModal").onclick = closeShareModal;
+  document.getElementById("shareWechatBtn").onclick = function(){ doShare('wechat'); };
+  document.getElementById("shareQQBtn").onclick = function(){ doShare('qq'); };
+  document.getElementById("shareCopyBtn").onclick = function(){ doShare('copy'); };
   setMode("fast");
   renderAIGrid();
 }
@@ -913,4 +935,3 @@ init();
 </script>
 </body>
 </html>
-
