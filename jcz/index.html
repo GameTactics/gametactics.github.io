@@ -639,11 +639,19 @@ function login() {
   const user = users[username];
   if (!user || user.password !== password) return showLoginError("用户名或密码错误");
   currentUser = username;
+  // 保存登录状态
+  localStorage.setItem("aiJudge_remember", username);
   const today = new Date().toDateString();
   if (users[currentUser].shareDate !== today) { users[currentUser].shareCount = 0; users[currentUser].shareDate = today; saveUsersToStorage(); }
   showMainScreen();
 }
-function logout() { currentUser = null; showAuthScreen(); hideFloatBtn(); }
+function logout() { 
+  currentUser = null; 
+  // 清除登录状态
+  localStorage.removeItem("aiJudge_remember");
+  showAuthScreen(); 
+  hideFloatBtn(); 
+}
 function showLoginError(msg) { const err = document.getElementById("loginError"); err.textContent = msg; setTimeout(() => err.textContent = "", 2000); }
 function updateUI() {
   if (!currentUser) return;
@@ -909,7 +917,16 @@ function showToast(msg) {
 function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[m])); }
 function init() {
   loadUsersFromStorage();
-  showAuthScreen();
+  
+  // ===== 关键修复：检查是否已登录 =====
+  const savedUser = localStorage.getItem("aiJudge_remember");
+  if (savedUser && users[savedUser]) {
+    currentUser = savedUser;
+    showMainScreen();
+  } else {
+    showAuthScreen();
+  }
+  
   document.getElementById("registerBtn").onclick = register;
   document.getElementById("loginBtn").onclick = login;
   document.getElementById("logoutBtn").onclick = logout;
