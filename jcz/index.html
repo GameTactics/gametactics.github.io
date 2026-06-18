@@ -213,6 +213,7 @@ textarea:focus { border-color: #4f46e5; }
 .submit-btn:active { background: #4338ca; transform: scale(0.98); }
 .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* ===== 进度 ===== */
 .progress {
   display: none;
   text-align: center;
@@ -234,6 +235,23 @@ textarea:focus { border-color: #4f46e5; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .progress-text { font-size: 0.9rem; color: #475569; }
 
+/* ===== 强制停止按钮 ===== */
+.stop-btn {
+  margin-top: 12px;
+  padding: 10px 24px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.stop-btn:active { background: #b91c1c; transform: scale(0.96); }
+.stop-btn.hidden { display: none; }
+
+/* ===== 消息 ===== */
 .message-card {
   background: #f8fafc;
   border-radius: 16px;
@@ -253,6 +271,7 @@ textarea:focus { border-color: #4f46e5; }
 .badge-con { background: #fee2e2; color: #b91c1c; }
 .message-content { font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
 
+/* ===== 最终答案 ===== */
 .final-answer {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -264,6 +283,7 @@ textarea:focus { border-color: #4f46e5; }
 .final-answer .answer { font-size: 1.2rem; font-weight: 700; margin: 8px 0; }
 .final-answer .reason { font-size: 0.9rem; opacity: 0.85; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 8px; }
 
+/* ===== 弹窗 ===== */
 .modal-overlay {
   position: fixed;
   top:0; left:0; width:100%; height:100%;
@@ -308,7 +328,6 @@ textarea:focus { border-color: #4f46e5; }
 }
 .toast.show { opacity: 1; }
 
-/* 刷新按钮 */
 .refresh-btn {
   background: rgba(255,255,255,0.2);
   border: 1px solid rgba(255,255,255,0.3);
@@ -400,13 +419,16 @@ textarea:focus { border-color: #4f46e5; }
       <button class="submit-btn" id="startBtn">开始分析</button>
     </div>
 
+    <div id="finalAnswerArea"></div>
+
+    <!-- ===== 进度（含强制停止按钮） ===== -->
     <div class="progress" id="progress">
       <div class="spinner"></div>
       <div class="progress-text" id="progressText">分析中…</div>
+      <button class="stop-btn hidden" id="stopBtn">⏹ 强制停止</button>
     </div>
 
     <div id="discussionArea"></div>
-    <div id="finalAnswerArea"></div>
   </div>
 </div>
 
@@ -463,17 +485,13 @@ textarea:focus { border-color: #4f46e5; }
 
 <script>
 // ================================================================
-//  主程序 - 三重保障数据同步
-//  1. BroadcastChannel 监听
-//  2. storage 事件监听
-//  3. 页面获得焦点时自动刷新（visibilitychange + focus）
-//  4. 手动刷新按钮
+//  主程序 - 含强制停止功能 + 数据自动同步
 // ================================================================
 
 // ===== 配置 =====
 const CONFIG = {
   APP_NAME: '裁决者',
-  VERSION: '3.0.4-final',
+  VERSION: '3.0.5-final',
   API_KEY: 'sk-77c9585915d74ea09093d6994f33d68b',
   API_URL: 'https://api.deepseek.com/v1/chat/completions',
   MODEL_FAST: 'deepseek-chat',
@@ -521,6 +539,7 @@ const AppState = {
   discussionMessages: [],
   finalAnswer: null,
   isDiscussing: false,
+  isStopped: false,
   currentRound: 0
 };
 
@@ -600,7 +619,6 @@ const Renderer = {
     document.getElementById('fullCountDisplay').textContent = user.fullCount || 0;
     document.getElementById('pointsDisplay').textContent = user.points || 0;
     document.getElementById('selectedCount').textContent = AppState.selectedAIs.length;
-    console.log('🔄 UI已刷新，能量点:', user.points);
   },
   renderAIGrid() {
     const grid = document.getElementById('aiGrid');
@@ -662,9 +680,12 @@ const Renderer = {
   showProgress(text) {
     document.getElementById('progress').classList.add('show');
     document.getElementById('progressText').textContent = text || '分析中…';
+    // 显示停止按钮
+    document.getElementById('stopBtn').classList.remove('hidden');
   },
   hideProgress() {
     document.getElementById('progress').classList.remove('show');
+    document.getElementById('stopBtn').classList.add('hidden');
   },
   addMessage(type, content, ai) {
     const area = document.getElementById('discussionArea');
@@ -692,6 +713,22 @@ const Renderer = {
     this.hideProgress();
   }
 };
+
+// ===== 强制停止 =====
+function stopAnalysis() {
+  if (!AppState.isDiscussing) {
+    showToast('当前没有正在进行的分析');
+    return;
+  }
+  if (confirm('强制停止将不会退还已扣除的能量点，确定停止吗？')) {
+    AppState.isStopped = true;
+    AppState.isDiscussing = false;
+    Renderer.setStartEnabled(true);
+    Renderer.hideProgress();
+    Renderer.addMessage('system', '⛔ 用户强制停止分析');
+    showToast('⛔ 已强制停止分析');
+  }
+}
 
 // ===== 业务逻辑 =====
 const Actions = {
@@ -852,6 +889,7 @@ const Actions = {
     showToast('密码重置成功，请用新密码登录');
   },
 
+  // ===== 核心：分析（含强制停止支持） =====
   async startAnalysis() {
     if (AppState.isDiscussing) return;
 
@@ -883,6 +921,7 @@ const Actions = {
     AppState.finalAnswer = null;
     AppState.currentRound = 0;
     AppState.isDiscussing = true;
+    AppState.isStopped = false;
     Renderer.setStartEnabled(false);
     Renderer.clearDiscussion();
 
@@ -892,7 +931,7 @@ const Actions = {
     const model = CONFIG.MODEL_FAST;
 
     for (let round = 1; round <= roundLimit; round++) {
-      if (!AppState.isDiscussing) break;
+      if (AppState.isStopped) break;
       AppState.currentRound = round;
       Renderer.showProgress('分析中…');
 
@@ -904,7 +943,7 @@ const Actions = {
       }
 
       for (let i = 0; i < AppState.selectedAIs.length; i++) {
-        if (!AppState.isDiscussing) break;
+        if (AppState.isStopped) break;
         const ai = AppState.selectedAIs[i];
         ai.role = i % 2 === 0 ? 'pro' : 'con';
         Renderer.showProgress('AI思考中…');
@@ -916,7 +955,7 @@ const Actions = {
       if (AppState.currentMode === 'fast') {
         if (round >= 3) break;
       } else {
-        if (round >= 3 && round < 7 && Math.random() > 0.6) {
+        if (round >= 3 && round < 7 && Math.random() > 0.6 && !AppState.isStopped) {
           Renderer.addMessage('system', '⏹ 裁判判定：讨论已充分，结论已清晰。');
           break;
         }
@@ -928,6 +967,12 @@ const Actions = {
     Renderer.setStartEnabled(true);
     Renderer.hideProgress();
 
+    if (AppState.isStopped) {
+      // 已通过停止按钮处理
+      AppState.isStopped = false;
+      return;
+    }
+
     this.extractFinalAnswer();
     if (AppState.finalAnswer) {
       Renderer.showFinalAnswer(AppState.finalAnswer.answer, AppState.finalAnswer.reason);
@@ -938,6 +983,7 @@ const Actions = {
   },
 
   async callAI(ai, roundNum, isDebate, context, model) {
+    if (AppState.isStopped) return null;
     const today = new Date().toISOString().slice(0, 10);
     const roleLabel = ai.role === 'pro' ? '正方' : '反方';
 
@@ -1079,6 +1125,9 @@ function bindEvents() {
 
   document.getElementById('startBtn').addEventListener('click', Actions.startAnalysis);
 
+  // ===== 强制停止按钮 =====
+  document.getElementById('stopBtn').addEventListener('click', stopAnalysis);
+
   // ===== 手动刷新按钮 =====
   document.getElementById('refreshDataBtn').addEventListener('click', function() {
     Renderer.updateUI();
@@ -1086,15 +1135,13 @@ function bindEvents() {
   });
 }
 
-// ===== 刷新数据（供外部调用） =====
+// ===== 刷新数据 =====
 function refreshData() {
   Renderer.updateUI();
-  console.log('🔄 数据已刷新（外部调用）');
 }
 
 // ===== 初始化 =====
 function init() {
-  // 检查是否有 refresh 参数
   if (window.location.search.includes('refresh=true')) {
     window.location.replace(window.location.pathname);
     return;
@@ -1110,7 +1157,7 @@ function init() {
 
   bindEvents();
 
-  // ===== 1. BroadcastChannel 监听 =====
+  // BroadcastChannel 监听
   try {
     var channel = new BroadcastChannel('judge_channel');
     channel.onmessage = function(e) {
@@ -1122,37 +1169,29 @@ function init() {
     window.addEventListener('beforeunload', function() {
       try { channel.close(); } catch(e) {}
     });
-    console.log('✅ BroadcastChannel 监听已启动');
-  } catch(e) {
-    console.log('⚠️ BroadcastChannel 不支持');
-  }
+  } catch(e) {}
 
-  // ===== 2. storage 事件监听 =====
+  // storage 监听
   window.addEventListener('storage', function(e) {
     if (e.key === 'aiJudge_users') {
       Renderer.updateUI();
-      console.log('🔄 storage 事件触发，数据已刷新');
     }
   });
 
-  // ===== 3. 页面获得焦点时自动刷新 =====
+  // 页面切换回来自动刷新
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
       Renderer.updateUI();
-      console.log('🔄 页面切换回来，数据已刷新');
     }
   });
 
   window.addEventListener('focus', function() {
     Renderer.updateUI();
-    console.log('🔄 页面获得焦点，数据已刷新');
   });
 
-  // 暴露刷新函数到全局
   window.refreshData = refreshData;
 
-  console.log('✅ 主程序已加载，三重数据同步机制已启用');
-  console.log('💡 点击🔄按钮可手动刷新数据');
+  console.log('✅ 主程序已加载（含强制停止）');
 }
 
 document.addEventListener('DOMContentLoaded', init);
