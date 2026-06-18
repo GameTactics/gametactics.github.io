@@ -2,133 +2,184 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>商城</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="apple-mobile-web-app-title" content="裁决者" />
+    <title>裁决者 · 商城</title>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: #f5f7fb;
             padding: 20px;
             max-width: 1100px;
             margin: 0 auto;
         }
-        h1 { text-align:center; font-size:24px; margin-bottom:20px; color:#1a1a2e; }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #1a1a2e;
+        }
         .card {
             background: white;
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
         .card h2 {
-            font-size:18px;
-            margin-bottom:16px;
-            color:#16213e;
-            border-bottom:2px solid #e8edf5;
-            padding-bottom:10px;
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #16213e;
+            border-bottom: 2px solid #e8edf5;
+            padding-bottom: 10px;
         }
         table {
-            width:100%;
-            border-collapse:collapse;
-            font-size:14px;
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
         }
-        th, td {
-            border:1px solid #dce1ec;
-            padding:10px 8px;
-            text-align:center;
+        th,
+        td {
+            border: 1px solid #dce1ec;
+            padding: 10px 8px;
+            text-align: center;
         }
         th {
-            background:#1a1a2e;
-            color:white;
-            font-weight:600;
+            background: #1a1a2e;
+            color: white;
+            font-weight: 600;
         }
-        tr:nth-child(even) { background:#f8faff; }
+        tr:nth-child(even) {
+            background: #f8faff;
+        }
         .btn-buy {
-            background:#4a6cf7;
-            color:white;
-            border:none;
-            padding:6px 16px;
-            border-radius:8px;
-            font-size:13px;
-            cursor:pointer;
-            transition:0.2s;
-            font-weight:600;
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
         }
-        .btn-buy:hover { background:#3a56d4; transform:scale(1.02); }
-        .btn-buy:active { transform:scale(0.96); }
+        .btn-buy:hover {
+            background: #3a56d4;
+            transform: scale(1.02);
+        }
+        .btn-buy:active {
+            transform: scale(0.96);
+        }
         .code-area {
-            display:flex;
-            gap:12px;
-            flex-wrap:wrap;
-            align-items:center;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
         }
         .code-area input {
-            flex:1;
-            min-width:200px;
-            padding:10px 14px;
-            border:1.5px solid #dce1ec;
-            border-radius:10px;
-            font-size:15px;
-            outline:none;
-            transition:0.2s;
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 14px;
+            border: 1.5px solid #dce1ec;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.2s;
         }
-        .code-area input:focus { border-color:#4a6cf7; }
+        .code-area input:focus {
+            border-color: #4a6cf7;
+        }
         .btn {
-            background:#4a6cf7;
-            color:white;
-            border:none;
-            padding:10px 24px;
-            border-radius:10px;
-            font-size:15px;
-            font-weight:600;
-            cursor:pointer;
-            transition:0.2s;
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .btn:hover { background:#3a56d4; }
-        .btn:active { transform:scale(0.96); }
+        .btn:hover {
+            background: #3a56d4;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
         .msg {
-            margin-top:12px;
-            padding:10px 14px;
-            border-radius:8px;
-            font-size:14px;
-            display:none;
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
         }
-        .msg.success { display:block; background:#e6f7e6; color:#1e7e34; border:1px solid #b8e0b8; }
-        .msg.error { display:block; background:#fde8e8; color:#b33636; border:1px solid #f5c6c6; }
-        .msg.info { display:block; background:#e6f0ff; color:#2a5bb5; border:1px solid #b8d0f0; }
-        .record-empty { color:#888; text-align:center; padding:20px 0; font-size:14px; }
+        .msg.success {
+            display: block;
+            background: #e6f7e6;
+            color: #1e7e34;
+            border: 1px solid #b8e0b8;
+        }
+        .msg.error {
+            display: block;
+            background: #fde8e8;
+            color: #b33636;
+            border: 1px solid #f5c6c6;
+        }
+        .msg.info {
+            display: block;
+            background: #e6f0ff;
+            color: #2a5bb5;
+            border: 1px solid #b8d0f0;
+        }
+        .record-empty {
+            color: #888;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 14px;
+        }
         .back-link {
-            display:inline-block;
-            margin-top:8px;
-            color:#4a6cf7;
-            text-decoration:none;
-            font-weight:500;
+            display: inline-block;
+            margin-top: 8px;
+            color: #4a6cf7;
+            text-decoration: none;
+            font-weight: 500;
         }
-        .back-link:hover { text-decoration:underline; }
+        .back-link:hover {
+            text-decoration: underline;
+        }
         .status-bar {
-            background:#e8edf5;
-            border-radius:10px;
-            padding:12px 16px;
-            margin-bottom:20px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            flex-wrap:wrap;
-            gap:8px;
-            font-size:14px;
+            background: #e8edf5;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 14px;
         }
-        .status-bar .user { font-weight:600; color:#1a1a2e; }
+        .status-bar .user {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
         .status-bar .logout-btn {
-            background:#e74c3c;
-            color:white;
-            border:none;
-            padding:6px 16px;
-            border-radius:8px;
-            cursor:pointer;
-            font-size:13px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
         }
-        .status-bar .logout-btn:hover { background:#c0392b; }
+        .status-bar .logout-btn:hover {
+            background: #c0392b;
+        }
 
         .upgrade-card {
             background: linear-gradient(135deg, #f0f4ff, #e6edfe);
@@ -171,19 +222,29 @@
             transition: 0.2s;
             white-space: nowrap;
         }
-        .btn-upgrade:hover { background:#3a56d4; transform:scale(1.02); }
-        .btn-upgrade:active { transform:scale(0.96); }
+        .btn-upgrade:hover {
+            background: #3a56d4;
+            transform: scale(1.02);
+        }
+        .btn-upgrade:active {
+            transform: scale(0.96);
+        }
 
         .modal-overlay {
             position: fixed;
-            top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.5);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 999;
         }
-        .modal-overlay.active { display: flex; }
+        .modal-overlay.active {
+            display: flex;
+        }
         .modal-box {
             background: white;
             border-radius: 20px;
@@ -192,7 +253,7 @@
             width: 92%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             position: relative;
         }
         .modal-box h2 {
@@ -212,7 +273,9 @@
             margin-bottom: 16px;
             font-size: 14px;
         }
-        .modal-box .current-pkg strong { color: #1a1a2e; }
+        .modal-box .current-pkg strong {
+            color: #1a1a2e;
+        }
         .modal-box .pkg-list {
             display: flex;
             flex-direction: column;
@@ -230,97 +293,162 @@
             transition: 0.2s;
             background: #fafcff;
         }
-        .modal-box .pkg-option:hover { border-color: #4a6cf7; background:#f0f4ff; }
-        .modal-box .pkg-option.selected { border-color: #4a6cf7; background:#e6edfe; }
-        .modal-box .pkg-option .name { font-weight:600; color:#1a1a2e; }
-        .modal-box .pkg-option .price { font-size:14px; color:#4a6cf7; font-weight:600; }
-        .modal-box .pkg-option .diff { font-size:13px; color:#e74c3c; font-weight:600; }
+        .modal-box .pkg-option:hover {
+            border-color: #4a6cf7;
+            background: #f0f4ff;
+        }
+        .modal-box .pkg-option.selected {
+            border-color: #4a6cf7;
+            background: #e6edfe;
+        }
+        .modal-box .pkg-option .name {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        .modal-box .pkg-option .price {
+            font-size: 14px;
+            color: #4a6cf7;
+            font-weight: 600;
+        }
+        .modal-box .pkg-option .diff {
+            font-size: 13px;
+            color: #e74c3c;
+            font-weight: 600;
+        }
         .modal-box .btn-group {
             display: flex;
-            gap:12px;
+            gap: 12px;
             margin-top: 16px;
             flex-wrap: wrap;
         }
         .modal-box .btn-group .btn-confirm {
-            flex:1;
-            background:#4a6cf7;
-            color:white;
-            border:none;
-            padding:12px;
-            border-radius:10px;
-            font-size:16px;
-            font-weight:600;
-            cursor:pointer;
-            transition:0.2s;
-            min-width:120px;
+            flex: 1;
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 120px;
         }
-        .modal-box .btn-group .btn-confirm:hover { background:#3a56d4; }
+        .modal-box .btn-group .btn-confirm:hover {
+            background: #3a56d4;
+        }
         .modal-box .btn-group .btn-confirm:disabled {
-            background:#ccc;
-            cursor:not-allowed;
+            background: #ccc;
+            cursor: not-allowed;
         }
         .modal-box .btn-group .btn-cancel {
-            flex:1;
-            background:#e8edf5;
-            color:#333;
-            border:none;
-            padding:12px;
-            border-radius:10px;
-            font-size:16px;
-            font-weight:600;
-            cursor:pointer;
-            transition:0.2s;
-            min-width:120px;
+            flex: 1;
+            background: #e8edf5;
+            color: #333;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 120px;
         }
-        .modal-box .btn-group .btn-cancel:hover { background:#d5dce6; }
+        .modal-box .btn-group .btn-cancel:hover {
+            background: #d5dce6;
+        }
         .modal-box .empty-tip {
-            text-align:center;
-            padding:20px 0;
-            color:#888;
-            font-size:15px;
+            text-align: center;
+            padding: 20px 0;
+            color: #888;
+            font-size: 15px;
         }
         .modal-box .empty-tip .btn-go-buy {
-            display:inline-block;
-            margin-top:12px;
-            background:#4a6cf7;
-            color:white;
-            border:none;
-            padding:8px 24px;
-            border-radius:8px;
-            cursor:pointer;
-            font-size:14px;
-            font-weight:600;
+            display: inline-block;
+            margin-top: 12px;
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
         }
-        .modal-box .empty-tip .btn-go-buy:hover { background:#3a56d4; }
+        .modal-box .empty-tip .btn-go-buy:hover {
+            background: #3a56d4;
+        }
         .modal-box .close-icon {
             position: absolute;
-            top:12px; right:16px;
-            font-size:24px;
-            cursor:pointer;
-            color:#999;
-            background:none;
-            border:none;
+            top: 12px;
+            right: 16px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            background: none;
+            border: none;
         }
-        .modal-box .close-icon:hover { color:#333; }
+        .modal-box .close-icon:hover {
+            color: #333;
+        }
 
-        @media (max-width:600px) {
-            body { padding:12px; }
-            table { font-size:12px; }
-            th, td { padding:6px 4px; }
-            .code-area { flex-direction:column; }
-            .code-area input { width:100%; }
-            .btn { width:100%; text-align:center; }
-            .btn-buy { padding:4px 12px; font-size:12px; }
-            .upgrade-card { flex-direction:column; align-items:stretch; text-align:center; }
-            .btn-upgrade { width:100%; text-align:center; }
-            .modal-box { padding:20px; }
-            .modal-box .pkg-option { flex-wrap:wrap; gap:4px; }
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+            table {
+                font-size: 12px;
+            }
+            th,
+            td {
+                padding: 6px 4px;
+            }
+            .code-area {
+                flex-direction: column;
+            }
+            .code-area input {
+                width: 100%;
+            }
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+            .btn-buy {
+                padding: 4px 12px;
+                font-size: 12px;
+            }
+            .upgrade-card {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .btn-upgrade {
+                width: 100%;
+                text-align: center;
+            }
+            .modal-box {
+                padding: 20px;
+            }
+            .modal-box .pkg-option {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            #splash .title {
+                font-size: 2rem;
+            }
+        }
+        /* 安全区域适配 */
+        @supports (padding: max(0px)) {
+            #app {
+                padding-bottom: max(32px, env(safe-area-inset-bottom));
+            }
+            .toast {
+                bottom: max(40px, env(safe-area-inset-bottom));
+            }
         }
     </style>
 </head>
 <body>
-
-    <!-- ===== 顶部标题：只保留“商城” ===== -->
     <h1>🏪 商城</h1>
 
     <div class="status-bar" id="statusBar">
@@ -351,14 +479,16 @@
                     <th>购买</th>
                 </tr>
             </thead>
-            <tbody id="priceBody"></tbody>
+            <tbody id="priceBody">
+                <!-- JS生成 -->
+            </tbody>
         </table>
     </div>
 
     <div class="card">
         <h2>🎫 兑换码</h2>
         <div class="code-area">
-            <input type="text" id="codeInput" placeholder="请输入兑换码，如 K3-XXXX" />
+            <input type="text" id="codeInput" placeholder="请输入兑换码，如 E-TEST" />
             <button class="btn" id="redeemBtn">兑换</button>
         </div>
         <div id="msgBox" class="msg"></div>
@@ -369,9 +499,9 @@
         <div id="recordContainer"></div>
     </div>
 
-    <!-- ===== 底部返回链接：改为“回到主页” ===== -->
+    <!-- ===== 返回链接：已加 refresh=true ===== -->
     <div style="text-align:center; margin-top:10px;">
-        <a href="index.html" class="back-link">← 回到主页</a>
+        <a href="index.html?refresh=true" class="back-link">← 返回 裁决者 主程序</a>
     </div>
 
     <div class="modal-overlay" id="upgradeModal">
@@ -385,7 +515,7 @@
 
     <script>
         // ============================================================
-        // 套餐数据 —— 保留“AI”
+        // 套餐数据
         // ============================================================
         const PACKAGES = [
             { id: 'K2', label: '快速2AI', price: 3, count: 20, level: '普通', buyLink: '#' },
@@ -401,57 +531,77 @@
         ];
 
         const CODE_PREFIX_MAP = {
-            'K2-':'K2','K3-':'K3','K4-':'K4',
-            'W2F-':'W2F','W2D-':'W2D',
-            'W3F-':'W3F','W3D-':'W3D',
-            'W4F-':'W4F','W4D-':'W4D',
-            'E-':'E'
+            'K2-': 'K2',
+            'K3-': 'K3',
+            'K4-': 'K4',
+            'W2F-': 'W2F',
+            'W2D-': 'W2D',
+            'W3F-': 'W3F',
+            'W3D-': 'W3D',
+            'W4F-': 'W4F',
+            'W4D-': 'W4D',
+            'E-': 'E'
         };
 
+        // ============================================================
+        // localStorage 工具
+        // ============================================================
         function getUsers() {
             try { return JSON.parse(localStorage.getItem('aiJudge_users')) || {}; } catch { return {}; }
         }
+
         function saveUsers(users) {
             localStorage.setItem('aiJudge_users', JSON.stringify(users));
         }
+
         function getRememberUser() {
             return localStorage.getItem('aiJudge_remember') || null;
         }
+
         function setRememberUser(name) {
             if (name) localStorage.setItem('aiJudge_remember', name);
             else localStorage.removeItem('aiJudge_remember');
         }
 
+        // ============================================================
+        // 状态栏
+        // ============================================================
         function updateStatusBar() {
             const name = getRememberUser();
             document.getElementById('displayUser').textContent = name || '未登录';
         }
+
         document.getElementById('logoutBtn').addEventListener('click', function() {
             setRememberUser(null);
             updateStatusBar();
             renderRecords();
             showMsg('已退出登录', 'info');
+            // 退出后跳转到主程序登录页（带刷新）
+            setTimeout(function() {
+                window.location.href = 'index.html?refresh=true';
+            }, 300);
         });
 
+        // ============================================================
+        // 渲染价格表
+        // ============================================================
         function renderPriceTable() {
             const tbody = document.getElementById('priceBody');
-            tbody.innerHTML = PACKAGES.map((p, index) => {
-                return `<tr>
-                    <td><strong>${p.label}</strong></td>
-                    <td>${p.price} 元</td>
-                    <td>${p.count} 次</td>
-                    <td>${p.level}</td>
-                    <td>
-                        <button class="btn-buy" data-index="${index}">购买</button>
-                    </td>
-                </tr>`;
+            tbody.innerHTML = PACKAGES.map(function(p, index) {
+                return '<tr>' +
+                    '<td><strong>' + p.label + '</strong></td>' +
+                    '<td>' + p.price + ' 元</td>' +
+                    '<td>' + p.count + ' 次</td>' +
+                    '<td>' + p.level + '</td>' +
+                    '<td><button class="btn-buy" data-index="' + index + '">购买</button></td>' +
+                    '</tr>';
             }).join('');
 
-            document.querySelectorAll('.btn-buy').forEach(btn => {
+            document.querySelectorAll('.btn-buy').forEach(function(btn) {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const idx = parseInt(this.dataset.index);
-                    const pkg = PACKAGES[idx];
+                    var idx = parseInt(this.dataset.index);
+                    var pkg = PACKAGES[idx];
                     if (pkg.buyLink === '#') {
                         alert('该套餐即将上线，敬请期待！');
                     } else {
@@ -461,91 +611,152 @@
             });
         }
 
+        // ============================================================
+        // 渲染消费记录
+        // ============================================================
         function renderRecords() {
-            const container = document.getElementById('recordContainer');
-            const username = getRememberUser();
+            var container = document.getElementById('recordContainer');
+            var username = getRememberUser();
             if (!username) {
-                container.innerHTML = `<div class="record-empty">⚠️ 请先登录，再查看消费记录。</div>`;
+                container.innerHTML = '<div class="record-empty">⚠️ 请先登录，再查看消费记录。</div>';
                 return;
             }
-            const users = getUsers();
-            const user = users[username];
+            var users = getUsers();
+            var user = users[username];
             if (!user) {
-                container.innerHTML = `<div class="record-empty">⚠️ 用户数据不存在，请重新登录。</div>`;
+                container.innerHTML = '<div class="record-empty">⚠️ 用户数据不存在，请重新登录。</div>';
                 return;
             }
-            const records = user.records || [];
+            var records = user.records || [];
             if (records.length === 0) {
-                container.innerHTML = `<div class="record-empty">📭 暂无消费记录。</div>`;
+                container.innerHTML = '<div class="record-empty">📭 暂无消费记录。</div>';
                 return;
             }
-            let html = `<table><thead><tr><th>时间</th><th>快速变化</th><th>快速剩余</th><th>完整变化</th><th>完整剩余</th><th>能量变化</th><th>能量剩余</th></tr></thead><tbody>`;
-            const list = records.slice(-30).reverse();
-            list.forEach(r => {
-                html += `<tr><td>${r.time||''}</td><td>${r.fastChange??'-'}</td><td>${r.fastRemain??'-'}</td><td>${r.fullChange??'-'}</td><td>${r.fullRemain??'-'}</td><td>${r.energyChange??'-'}</td><td>${r.energyRemain??'-'}</td></tr>`;
+            var html = '<table><thead><tr><th>时间</th><th>快速变化</th><th>快速剩余</th><th>完整变化</th><th>完整剩余</th><th>能量变化</th><th>能量剩余</th></tr></thead><tbody>';
+            var list = records.slice(-30).reverse();
+            list.forEach(function(r) {
+                html += '<tr><td>' + (r.time || '') + '</td><td>' + (r.fastChange || '-') + '</td><td>' + (r
+                    .fastRemain || '-') + '</td><td>' + (r.fullChange || '-') + '</td><td>' + (r.fullRemain ||
+                    '-') + '</td><td>' + (r.energyChange || '-') + '</td><td>' + (r.energyRemain || '-') +
+                    '</td></tr>';
             });
-            html += `</tbody></table>`;
+            html += '</tbody></table>';
             container.innerHTML = html;
         }
 
+        // ============================================================
+        // 消息提示
+        // ============================================================
         function showMsg(text, type) {
-            const box = document.getElementById('msgBox');
+            var box = document.getElementById('msgBox');
             box.textContent = text;
             box.className = 'msg ' + type;
             box.style.display = 'block';
-            setTimeout(() => { box.style.display = 'none'; }, 5000);
+            setTimeout(function() {
+                box.style.display = 'none';
+            }, 5000);
         }
 
+        // ============================================================
+        // 兑换逻辑（含一次有效）
+        // ============================================================
         function redeemCode() {
-            const input = document.getElementById('codeInput');
-            const code = input.value.trim();
-            if (!code) { showMsg('请输入兑换码', 'error'); return; }
-            const username = getRememberUser();
-            if (!username) { showMsg('⚠️ 请先在主程序登录', 'error'); return; }
-            const users = getUsers();
-            const user = users[username];
-            if (!user) { showMsg('⚠️ 用户数据不存在', 'error'); return; }
+            var input = document.getElementById('codeInput');
+            var code = input.value.trim().toUpperCase();
+            var msgBox = document.getElementById('msgBox');
+            msgBox.className = 'msg';
+            msgBox.textContent = '';
+            msgBox.style.display = 'none';
 
+            if (!code) {
+                showMsg('请输入兑换码', 'error');
+                return;
+            }
+
+            var username = getRememberUser();
+            if (!username) {
+                showMsg('⚠️ 请先在主程序登录', 'error');
+                return;
+            }
+
+            var users = getUsers();
+            var user = users[username];
+            if (!user) {
+                showMsg('⚠️ 用户数据不存在', 'error');
+                return;
+            }
+
+            // 检查是否已使用
             if (user.usedCodes && user.usedCodes.indexOf(code) !== -1) {
                 showMsg('❌ 该兑换码已使用，无法重复兑换', 'error');
                 return;
             }
 
-            let matchedPkgId = null;
-            for (const [prefix, pkgId] of Object.entries(CODE_PREFIX_MAP)) {
-                if (code.startsWith(prefix)) { matchedPkgId = pkgId; break; }
+            // 匹配前缀
+            var matchedPkgId = null;
+            var matchedPrefix = null;
+            for (var prefix in CODE_PREFIX_MAP) {
+                if (code.startsWith(prefix)) {
+                    matchedPkgId = CODE_PREFIX_MAP[prefix];
+                    matchedPrefix = prefix;
+                    break;
+                }
             }
-            if (!matchedPkgId) { showMsg('❌ 无效的兑换码前缀', 'error'); return; }
+            if (!matchedPkgId) {
+                showMsg('❌ 无效的兑换码前缀', 'error');
+                return;
+            }
 
-            const pkg = PACKAGES.find(p => p.id === matchedPkgId);
-            if (!pkg) { showMsg('❌ 套餐不存在', 'error'); return; }
+            // 查找套餐
+            var pkg = null;
+            for (var i = 0; i < PACKAGES.length; i++) {
+                if (PACKAGES[i].id === matchedPkgId) {
+                    pkg = PACKAGES[i];
+                    break;
+                }
+            }
+            if (!pkg) {
+                showMsg('❌ 套餐不存在', 'error');
+                return;
+            }
 
+            // 初始化字段
             if (!user.fastCount) user.fastCount = 0;
             if (!user.fullCount) user.fullCount = 0;
             if (!user.energy) user.energy = 0;
             if (!user.usedCodes) user.usedCodes = [];
             if (!user.records) user.records = [];
 
-            let fastChange = 0, fullChange = 0, energyChange = 0;
-            const id = pkg.id;
+            var fastChange = 0,
+                fullChange = 0,
+                energyChange = 0;
+            var id = pkg.id;
+            var changeDesc = '';
             if (id.startsWith('K')) {
                 user.fastCount += pkg.count;
                 fastChange = pkg.count;
+                changeDesc = '+' + pkg.count + ' 快速次数';
             } else if (id.startsWith('W')) {
                 user.fullCount += pkg.count;
                 fullChange = pkg.count;
+                changeDesc = '+' + pkg.count + ' 完整次数';
             } else if (id === 'E') {
                 user.energy += pkg.count;
                 energyChange = pkg.count;
+                changeDesc = '+' + pkg.count + ' 能量点';
             } else {
                 showMsg('❌ 未知套餐类型', 'error');
                 return;
             }
 
             user.usedCodes.push(code);
-            const now = new Date();
-            const timeStr =
-                `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            var now = new Date();
+            var timeStr =
+                now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate())
+                .padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes())
+                .padStart(2, '0');
+
             user.records.push({
                 time: timeStr,
                 fastChange: fastChange || 0,
@@ -558,10 +769,13 @@
 
             saveUsers(users);
             input.value = '';
-            showMsg(`✅ 兑换成功！+${pkg.count} 次（${pkg.label}）`, 'success');
+            showMsg('✅ 兑换成功！' + changeDesc + '（' + pkg.label + '）', 'success');
             renderRecords();
         }
 
+        // ============================================================
+        // 升级套餐逻辑
+        // ============================================================
         function getPkgType(id) {
             if (id.startsWith('K')) return 'fast';
             if (id.startsWith('W')) return 'full';
@@ -569,56 +783,52 @@
         }
 
         function getUserPackages(user) {
-            const list = [];
+            var list = [];
             if (user.fastCount > 0) {
-                PACKAGES.filter(p => p.id.startsWith('K')).forEach(p => {
+                PACKAGES.filter(function(p) { return p.id.startsWith('K'); }).forEach(function(p) {
                     list.push({ pkg: p, remain: user.fastCount, type: 'fast' });
                 });
             }
             if (user.fullCount > 0) {
-                PACKAGES.filter(p => p.id.startsWith('W')).forEach(p => {
+                PACKAGES.filter(function(p) { return p.id.startsWith('W'); }).forEach(function(p) {
                     list.push({ pkg: p, remain: user.fullCount, type: 'full' });
                 });
             }
             if (user.energy > 0) {
-                const ep = PACKAGES.find(p => p.id === 'E');
+                var ep = PACKAGES.find(function(p) { return p.id === 'E'; });
                 if (ep) list.push({ pkg: ep, remain: user.energy, type: 'energy' });
             }
             return list;
         }
 
         function calcUpgradePrice(currentPkg, targetPkg, usedCount) {
-            const totalPrice = currentPkg.price;
-            const unitPrice = totalPrice / currentPkg.count;
-            const usedValue = usedCount * unitPrice;
-            const remainValue = Math.max(0, totalPrice - usedValue);
-            const diff = Math.max(0, targetPkg.price - remainValue);
-            return { remainValue, usedValue, diff, unitPrice };
+            var totalPrice = currentPkg.price;
+            var unitPrice = totalPrice / currentPkg.count;
+            var usedValue = usedCount * unitPrice;
+            var remainValue = Math.max(0, totalPrice - usedValue);
+            var diff = Math.max(0, targetPkg.price - remainValue);
+            return { remainValue: remainValue, usedValue: usedValue, diff: diff, unitPrice: unitPrice };
         }
 
         function renderUpgradeModal() {
-            const container = document.getElementById('modalContent');
-            const username = getRememberUser();
+            var container = document.getElementById('modalContent');
+            var username = getRememberUser();
             if (!username) {
-                container.innerHTML = `<div class="empty-tip">⚠️ 请先登录，再升级套餐。</div>`;
+                container.innerHTML = '<div class="empty-tip">⚠️ 请先登录，再升级套餐。</div>';
                 return;
             }
-            const users = getUsers();
-            const user = users[username];
+            var users = getUsers();
+            var user = users[username];
             if (!user) {
-                container.innerHTML = `<div class="empty-tip">⚠️ 用户数据不存在，请重新登录。</div>`;
+                container.innerHTML = '<div class="empty-tip">⚠️ 用户数据不存在，请重新登录。</div>';
                 return;
             }
 
-            const packages = getUserPackages(user);
+            var packages = getUserPackages(user);
             if (packages.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-tip">
-                        <p>您还没有任何套餐，请先购买套餐后再升级。</p>
-                        <button class="btn-go-buy" id="goBuyBtn">去购买套餐</button>
-                    </div>
-                `;
-                const goBtn = document.getElementById('goBuyBtn');
+                container.innerHTML =
+                    '<div class="empty-tip"><p>您还没有任何套餐，请先购买套餐后再升级。</p><button class="btn-go-buy" id="goBuyBtn">去购买套餐</button></div>';
+                var goBtn = document.getElementById('goBuyBtn');
                 if (goBtn) {
                     goBtn.addEventListener('click', function() {
                         document.getElementById('upgradeModal').classList.remove('active');
@@ -628,88 +838,87 @@
                 return;
             }
 
-            let html = `<div style="margin-bottom:12px;font-size:14px;color:#555;">当前拥有的套餐：</div>`;
-            html += `<div class="current-pkg">`;
-            packages.forEach((item, idx) => {
-                html += `<div style="margin-bottom:4px;">
-                    <strong>${item.pkg.label}</strong>（剩余 ${item.remain} 次）
-                    ${packages.length > 1 ? `<button class="btn-upgrade" style="padding:2px 12px;font-size:12px;margin-left:8px;" data-select="${idx}">选择</button>` : ''}
-                </div>`;
+            var html = '<div style="margin-bottom:12px;font-size:14px;color:#555;">当前拥有的套餐：</div>';
+            html += '<div class="current-pkg">';
+            packages.forEach(function(item, idx) {
+                html += '<div style="margin-bottom:4px;"><strong>' + item.pkg.label + '</strong>（剩余 ' + item
+                    .remain + ' 次）' +
+                    (packages.length > 1 ?
+                        '<button class="btn-upgrade" style="padding:2px 12px;font-size:12px;margin-left:8px;" data-select="' +
+                        idx + '">选择</button>' : '') +
+                    '</div>';
             });
-            html += `</div>`;
+            html += '</div>';
 
-            html += `<div style="font-size:14px;font-weight:600;margin:12px 0 8px;">选择目标套餐：</div>`;
-            html += `<div class="pkg-list" id="targetPkgList">`;
-            html += `</div>`;
+            html += '<div style="font-size:14px;font-weight:600;margin:12px 0 8px;">选择目标套餐：</div>';
+            html += '<div class="pkg-list" id="targetPkgList"></div>';
 
-            html += `
-                <div class="btn-group">
-                    <button class="btn-confirm" id="confirmUpgradeBtn" disabled>确认升级</button>
-                    <button class="btn-cancel" id="cancelUpgradeBtn">取消</button>
-                </div>
-            `;
+            html +=
+                '<div class="btn-group"><button class="btn-confirm" id="confirmUpgradeBtn" disabled>确认升级</button><button class="btn-cancel" id="cancelUpgradeBtn">取消</button></div>';
             container.innerHTML = html;
 
-            let currentSelectedIdx = 0;
-            for (let i = 0; i < packages.length; i++) {
+            var currentSelectedIdx = 0;
+            for (var i = 0; i < packages.length; i++) {
                 if (packages[i].type !== 'energy') {
                     currentSelectedIdx = i;
                     break;
                 }
             }
-            const hasNonEnergy = packages.some(p => p.type !== 'energy');
+            var hasNonEnergy = packages.some(function(p) { return p.type !== 'energy'; });
             if (!hasNonEnergy) {
-                container.innerHTML = `<div class="empty-tip">能量包暂不支持升级，您可以购买其他套餐。</div>`;
+                container.innerHTML = '<div class="empty-tip">能量包暂不支持升级，您可以购买其他套餐。</div>';
                 return;
             }
 
             function renderTargetList(selectedIdx) {
-                const currentItem = packages[selectedIdx];
+                var currentItem = packages[selectedIdx];
                 if (!currentItem) return;
-                const currentPkg = currentItem.pkg;
-                const currentRemain = currentItem.remain;
-                const usedCount = currentPkg.count - currentRemain;
+                var currentPkg = currentItem.pkg;
+                var currentRemain = currentItem.remain;
+                var usedCount = currentPkg.count - currentRemain;
 
-                let targets = [];
+                var targets = [];
                 if (currentItem.type === 'fast') {
-                    targets = PACKAGES.filter(p => p.id.startsWith('K') && p.price > currentPkg.price);
+                    targets = PACKAGES.filter(function(p) { return p.id.startsWith('K') && p.price > currentPkg
+                        .price; });
                 } else if (currentItem.type === 'full') {
-                    targets = PACKAGES.filter(p => p.id.startsWith('W') && p.price > currentPkg.price);
+                    targets = PACKAGES.filter(function(p) { return p.id.startsWith('W') && p.price > currentPkg
+                        .price; });
                 } else {
                     targets = [];
                 }
 
-                const listContainer = document.getElementById('targetPkgList');
+                var listContainer = document.getElementById('targetPkgList');
                 if (!listContainer) return;
                 if (targets.length === 0) {
-                    listContainer.innerHTML = `<div style="color:#888;padding:8px 0;">当前套餐已是最高配置，无需升级。</div>`;
+                    listContainer.innerHTML = '<div style="color:#888;padding:8px 0;">当前套餐已是最高配置，无需升级。</div>';
                     return;
                 }
 
-                let listHtml = '';
-                targets.forEach((target, idx) => {
-                    const result = calcUpgradePrice(currentPkg, target, usedCount);
-                    listHtml += `
-                        <div class="pkg-option" data-target="${idx}" style="cursor:pointer;">
-                            <span class="name">${target.label}</span>
-                            <span>
-                                <span class="price">${target.price}元/${target.count}次</span>
-                                <span class="diff"> → 补差价 ${result.diff.toFixed(2)}元</span>
-                            </span>
-                        </div>
-                    `;
+                var listHtml = '';
+                targets.forEach(function(target, idx) {
+                    var result = calcUpgradePrice(currentPkg, target, usedCount);
+                    listHtml +=
+                        '<div class="pkg-option" data-target="' + idx +
+                        '" style="cursor:pointer;"><span class="name">' + target.label +
+                        '</span><span><span class="price">' + target.price + '元/' + target.count +
+                        '次</span><span class="diff"> → 补差价 ' + result.diff.toFixed(2) +
+                        '元</span></span></div>';
                 });
-                listHtml += `<div style="font-size:13px;color:#888;margin-top:6px;">* 已用次数：${usedCount} 次，当前剩余价值：${calcUpgradePrice(currentPkg, targets[0] || currentPkg, usedCount).remainValue.toFixed(2)} 元</div>`;
+                listHtml += '<div style="font-size:13px;color:#888;margin-top:6px;">* 已用次数：' + usedCount +
+                    ' 次，当前剩余价值：' + calcUpgradePrice(currentPkg, targets[0] || currentPkg, usedCount).remainValue
+                    .toFixed(2) + ' 元</div>';
                 listContainer.innerHTML = listHtml;
 
-                listContainer.querySelectorAll('.pkg-option').forEach(el => {
+                listContainer.querySelectorAll('.pkg-option').forEach(function(el) {
                     el.addEventListener('click', function() {
-                        const idx = parseInt(this.dataset.target);
-                        const target = targets[idx];
+                        var idx = parseInt(this.dataset.target);
+                        var target = targets[idx];
                         if (!target) return;
-                        listContainer.querySelectorAll('.pkg-option').forEach(e => e.classList.remove('selected'));
+                        listContainer.querySelectorAll('.pkg-option').forEach(function(e) { e.classList
+                                .remove('selected'); });
                         this.classList.add('selected');
-                        const confirmBtn = document.getElementById('confirmUpgradeBtn');
+                        var confirmBtn = document.getElementById('confirmUpgradeBtn');
                         if (confirmBtn) {
                             confirmBtn.disabled = false;
                             confirmBtn.dataset.targetId = target.id;
@@ -719,33 +928,35 @@
                 });
             }
 
-            const nonEnergyPackages = packages.filter(p => p.type !== 'energy');
+            var nonEnergyPackages = packages.filter(function(p) { return p.type !== 'energy'; });
             if (nonEnergyPackages.length > 1) {
-                const pickContainer = document.createElement('div');
+                var pickContainer = document.createElement('div');
                 pickContainer.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;';
-                nonEnergyPackages.forEach((item, idx) => {
-                    const btn = document.createElement('button');
+                nonEnergyPackages.forEach(function(item, idx) {
+                    var btn = document.createElement('button');
                     btn.className = 'btn-upgrade';
                     btn.style.cssText =
-                        `padding:4px 16px;font-size:13px;background:${idx === currentSelectedIdx ? '#4a6cf7' : '#e8edf5'};color:${idx === currentSelectedIdx ? 'white' : '#333'};`;
-                    btn.textContent = `${item.pkg.label}（剩${item.remain}次）`;
+                        'padding:4px 16px;font-size:13px;background:' + (idx === currentSelectedIdx ?
+                            '#4a6cf7' : '#e8edf5') + ';color:' + (idx === currentSelectedIdx ? 'white' :
+                            '#333') + ';';
+                    btn.textContent = item.pkg.label + '（剩' + item.remain + '次）';
                     btn.dataset.pick = idx;
                     pickContainer.appendChild(btn);
                 });
-                const targetList = document.getElementById('targetPkgList');
+                var targetList = document.getElementById('targetPkgList');
                 targetList.parentNode.insertBefore(pickContainer, targetList);
-                pickContainer.querySelectorAll('[data-pick]').forEach(btn => {
+                pickContainer.querySelectorAll('[data-pick]').forEach(function(btn) {
                     btn.addEventListener('click', function() {
-                        const idx = parseInt(this.dataset.pick);
+                        var idx = parseInt(this.dataset.pick);
                         currentSelectedIdx = idx;
-                        pickContainer.querySelectorAll('[data-pick]').forEach(b => {
+                        pickContainer.querySelectorAll('[data-pick]').forEach(function(b) {
                             b.style.background = '#e8edf5';
                             b.style.color = '#333';
                         });
                         this.style.background = '#4a6cf7';
                         this.style.color = 'white';
                         renderTargetList(idx);
-                        const confirmBtn = document.getElementById('confirmUpgradeBtn');
+                        var confirmBtn = document.getElementById('confirmUpgradeBtn');
                         if (confirmBtn) {
                             confirmBtn.disabled = true;
                             confirmBtn.dataset.currentIdx = idx;
@@ -756,37 +967,40 @@
 
             renderTargetList(currentSelectedIdx);
 
-            const confirmBtn = document.getElementById('confirmUpgradeBtn');
+            var confirmBtn = document.getElementById('confirmUpgradeBtn');
             if (confirmBtn) {
                 confirmBtn.addEventListener('click', function() {
-                    const targetId = this.dataset.targetId;
-                    const currentIdx = parseInt(this.dataset.currentIdx);
+                    var targetId = this.dataset.targetId;
+                    var currentIdx = parseInt(this.dataset.currentIdx);
                     if (!targetId) {
                         alert('请先选择目标套餐');
                         return;
                     }
-                    const currentItem = packages[currentIdx];
+                    var currentItem = packages[currentIdx];
                     if (!currentItem) {
                         alert('当前套餐数据异常');
                         return;
                     }
-                    const targetPkg = PACKAGES.find(p => p.id === targetId);
+                    var targetPkg = null;
+                    for (var k = 0; k < PACKAGES.length; k++) {
+                        if (PACKAGES[k].id === targetId) {
+                            targetPkg = PACKAGES[k];
+                            break;
+                        }
+                    }
                     if (!targetPkg) {
                         alert('目标套餐不存在');
                         return;
                     }
-                    const usedCount = currentItem.pkg.count - currentItem.remain;
-                    const result = calcUpgradePrice(currentItem.pkg, targetPkg, usedCount);
-                    const confirmMsg = `确认升级？
-当前套餐：${currentItem.pkg.label}（剩余 ${currentItem.remain} 次）
-目标套餐：${targetPkg.label}（${targetPkg.count} 次）
-补差价：${result.diff.toFixed(2)} 元
-
-升级后，当前套餐剩余次数将清零，替换为目标套餐。`;
+                    var usedCount = currentItem.pkg.count - currentItem.remain;
+                    var result = calcUpgradePrice(currentItem.pkg, targetPkg, usedCount);
+                    var confirmMsg = '确认升级？\n当前套餐：' + currentItem.pkg.label + '（剩余 ' + currentItem.remain +
+                        ' 次）\n目标套餐：' + targetPkg.label + '（' + targetPkg.count + ' 次）\n补差价：' + result
+                        .diff.toFixed(2) + ' 元\n\n升级后，当前套餐剩余次数将清零，替换为目标套餐。';
                     if (!confirm(confirmMsg)) return;
 
-                    const usersData = getUsers();
-                    const userData = usersData[username];
+                    var usersData = getUsers();
+                    var userData = usersData[username];
                     if (!userData) {
                         alert('用户数据异常');
                         return;
@@ -800,27 +1014,29 @@
                         return;
                     }
                     if (!userData.records) userData.records = [];
-                    const now = new Date();
-                    const timeStr =
-                        `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                    var now = new Date();
+                    var timeStr =
+                        now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now
+                            .getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') +
+                        ':' + String(now.getMinutes()).padStart(2, '0');
                     userData.records.push({
                         time: timeStr,
-                        fastChange: currentItem.type === 'fast' ? `升级→${targetPkg.label}` : '-',
+                        fastChange: currentItem.type === 'fast' ? '升级→' + targetPkg.label : '-',
                         fastRemain: userData.fastCount || 0,
-                        fullChange: currentItem.type === 'full' ? `升级→${targetPkg.label}` : '-',
+                        fullChange: currentItem.type === 'full' ? '升级→' + targetPkg.label : '-',
                         fullRemain: userData.fullCount || 0,
                         energyChange: '-',
                         energyRemain: userData.energy || 0
                     });
                     saveUsers(usersData);
-                    alert(`✅ 升级成功！已升级为 ${targetPkg.label}，剩余 ${targetPkg.count} 次。`);
+                    alert('✅ 升级成功！已升级为 ' + targetPkg.label + '，剩余 ' + targetPkg.count + ' 次。');
                     document.getElementById('upgradeModal').classList.remove('active');
                     renderRecords();
                     updateStatusBar();
                 });
             }
 
-            const cancelBtn = document.getElementById('cancelUpgradeBtn');
+            var cancelBtn = document.getElementById('cancelUpgradeBtn');
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', function() {
                     document.getElementById('upgradeModal').classList.remove('active');
@@ -829,7 +1045,7 @@
         }
 
         document.getElementById('openUpgradeBtn').addEventListener('click', function() {
-            const modal = document.getElementById('upgradeModal');
+            var modal = document.getElementById('upgradeModal');
             modal.classList.add('active');
             renderUpgradeModal();
         });
@@ -844,6 +1060,9 @@
             }
         });
 
+        // ============================================================
+        // 初始化
+        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             renderPriceTable();
             updateStatusBar();
@@ -860,6 +1079,5 @@
             });
         });
     </script>
-
 </body>
 </html>
