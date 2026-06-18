@@ -4,124 +4,384 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="apple-mobile-web-app-title" content="裁决者">
-<title>裁决者 - 多AI辩论决策工具</title>
+<title>裁决者</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: system-ui, -apple-system, sans-serif; background: #f0f2f5; color: #1a1a2e; line-height:1.5; }
 .container { max-width:600px; margin:0 auto; padding:16px; position:relative; }
-.header { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; border-radius:16px; padding:16px 20px; margin-bottom:20px; display:flex; flex-direction:column; gap:8px; }
-.user-row { display:flex; justify-content:space-between; align-items:center; }
-.username { font-size:1.2rem; font-weight:600; }
-.counts-row { display:flex; gap:16px; font-size:0.85rem; background:rgba(255,255,255,0.15); padding:6px 12px; border-radius:40px; align-self:flex-start; }
-.buttons-row { display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap; }
-.btn { padding:8px 18px; border:none; border-radius:40px; cursor:pointer; font-size:0.85rem; font-weight:500; transition:all 0.2s; background:white; color:#4f46e5; }
-.btn-outline { background:transparent; border:1px solid rgba(255,255,255,0.5); color:white; text-decoration:none; }
-.btn-primary { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; }
-.mode-switch { display:flex; gap:8px; margin-bottom:8px; }
-.mode-btn { flex:1; padding:12px; border-radius:40px; border:2px solid #e2e8f0; background:white; text-align:center; cursor:pointer; transition:all 0.2s; }
-.mode-btn.active { border-color:#4f46e5; background:#eef2ff; }
-.mode-btn.fast.active { border-color:#10b981; background:#ecfdf5; color:#047857; }
-.mode-btn.full.active { border-color:#f59e0b; background:#fffbeb; color:#d97706; }
-.mode-name { font-weight:600; font-size:1rem; }
-.mode-desc { font-size:0.7rem; opacity:0.7; }
-.sub-mode-switch { display:none; gap:8px; margin:8px 0 12px 0; justify-content:center; }
-.sub-mode-btn { padding:6px 20px; border-radius:30px; border:2px solid #e2e8f0; background:white; cursor:pointer; font-size:0.8rem; font-weight:500; transition:all 0.2s; }
-.sub-mode-btn.speed.active { border-color:#10b981; background:#ecfdf5; color:#047857; }
-.sub-mode-btn.deep.active { border-color:#8b5cf6; background:#f5f3ff; color:#7c3aed; }
-.mode-info { background:white; border-radius:16px; padding:14px; margin-bottom:20px; border-left:4px solid #e2e8f0; font-size:0.85rem; line-height:1.5; display:none; }
-.mode-info.show { display:block; }
-.mode-info.fast { border-left-color:#10b981; background:#ecfdf5; }
-.mode-info.full { border-left-color:#f59e0b; background:#fffbeb; }
-.card { background:white; border-radius:20px; padding:16px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
-.card-title { font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:8px; color:#1e293b; }
-.ai-grid { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:12px; }
-.ai-chip { background:#f1f5f9; padding:8px 16px; border-radius:40px; border:1px solid #e2e8f0; cursor:pointer; transition:all 0.2s; font-size:0.85rem; -webkit-tap-highlight-color:transparent; }
-.ai-chip.selected { background:#e0e7ff; border-color:#4f46e5; color:#4f46e5; }
-.ai-hint { font-size:0.75rem; color:#94a3b8; margin-top:4px; }
-textarea { width:100%; min-height:100px; padding:14px; border:1px solid #cbd5e1; border-radius:16px; font-size:0.95rem; resize:vertical; font-family:inherit; }
-.submit-btn { width:100%; background:#4f46e5; color:white; border:none; padding:14px; border-radius:40px; font-size:1rem; font-weight:600; cursor:pointer; margin-top:16px; }
-.submit-btn:disabled { opacity:0.5; cursor:not-allowed; }
-.progress { display:none; text-align:center; padding:20px; background:white; border-radius:20px; margin-bottom:16px; }
-.progress.show { display:block; }
-.spinner { width:28px; height:28px; border:3px solid #e2e8f0; border-top-color:#4f46e5; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 12px; }
-@keyframes spin { to { transform:rotate(360deg); } }
-.message-card { background:#f8fafc; border-radius:16px; padding:14px; margin-bottom:12px; }
-.message-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.avatar { width:32px; height:32px; border-radius:50%; background:#e0e7ff; display:flex; align-items:center; justify-content:center; }
-.message-name { font-weight:600; }
-.message-badge { font-size:0.7rem; padding:2px 8px; border-radius:20px; }
-.message-badge.pro { background:#dbeafe; color:#1d4ed8; }
-.message-badge.con { background:#fee2e2; color:#b91c1c; }
-.message-content { font-size:0.9rem; line-height:1.5; white-space:pre-wrap; }
-.final-answer { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; border-radius:20px; padding:18px; margin-bottom:20px; text-align:center; }
-.final-answer .answer { font-size:1.3rem; font-weight:700; margin:8px 0; }
-.final-answer .reason { border:none; color:rgba(255,255,255,0.8); font-size:0.9rem; }
-.interrupt-panel { background:#fffbeb; border:1px solid #fcd34d; border-radius:16px; padding:16px; margin-bottom:16px; display:none; }
-.interrupt-panel.show { display:block; }
-.modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1000; padding:16px; }
-.modal.show { display:flex; }
-.modal-content { background:white; border-radius:24px; padding:24px; max-width:400px; width:100%; max-height:80vh; overflow-y:auto; }
-.modal-title { font-size:1.3rem; font-weight:700; margin-bottom:16px; text-align:center; }
-.exchange-input { width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:12px; margin:12px 0; }
-.feedback-btn, .share-btn { background:#f1f5f9; border:none; padding:12px; border-radius:40px; width:100%; cursor:pointer; margin-bottom:12px; font-weight:500; }
-.share-btn { background:#10b981; color:white; }
-.toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#1e293b; color:white; padding:8px 16px; border-radius:40px; font-size:0.85rem; z-index:1100; opacity:0; transition:opacity 0.3s; pointer-events:none; }
-.toast.show { opacity:1; }
-.float-btn { position:fixed; bottom:30px; right:20px; background:#4f46e5; color:white; border:none; border-radius:60px; padding:12px 24px; font-size:1rem; font-weight:600; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:1100; transition:all 0.2s; display:none; }
-.float-btn:hover { background:#4338ca; transform:scale(1.02); }
-.auth-card { background:white; border-radius:20px; padding:24px 20px; box-shadow:0 1px 3px rgba(0,0,0,0.05); text-align:center; display:flex; flex-direction:column; gap:14px; }
-.auth-card h2 { font-size:1.4rem; color:#1e293b; margin-bottom:4px; }
-.auth-input { width:100%; padding:14px 16px; border-radius:40px; border:1px solid #cbd5e1; font-size:1rem; background:#f8fafc; transition:border-color 0.2s; }
-.auth-input:focus { outline:none; border-color:#4f46e5; background:white; }
-.auth-btn { width:100%; padding:14px; border:none; border-radius:40px; font-size:1.05rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
-.auth-btn-login { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; border:2px solid #667eea; }
-.auth-btn-register { background:white; color:#4f46e5; border:2px solid #e2e8f0; }
-.auth-error { color:#dc2626; font-size:0.85rem; min-height:20px; }
-.auth-divider { border:none; border-top:1px solid #e2e8f0; margin:4px 0; }
+
+/* ===== 认证卡片 ===== */
+.auth-card {
+  background: white;
+  border-radius: 20px;
+  padding: 24px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.auth-card h2 { font-size: 1.4rem; color: #1e293b; }
+.auth-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 40px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+  background: #f8fafc;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.auth-input:focus { border-color: #4f46e5; background: white; }
+.auth-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 40px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.auth-btn-login {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: 2px solid #667eea;
+}
+.auth-btn-login:hover { transform: scale(1.01); }
+.auth-btn-register {
+  background: white;
+  color: #4f46e5;
+  border: 2px solid #e2e8f0;
+}
+.auth-btn-register:hover { background: #f8fafc; border-color: #4f46e5; }
+.auth-error { color: #dc2626; font-size: 0.85rem; min-height: 20px; }
+.auth-divider { border: none; border-top: 1px solid #e2e8f0; margin: 4px 0; }
+.links { display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 4px; }
+.links a { color: #4f46e5; text-decoration: none; font-weight: 500; }
+
+/* ===== 主界面 ===== */
+#mainScreen { display: none; }
+
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header .username { font-size: 1.2rem; font-weight: 600; }
+.header .btn-outline {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.5);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 40px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.header .btn-outline:active { background: rgba(255,255,255,0.15); }
+.counts-row {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  background: rgba(255,255,255,0.15);
+  padding: 4px 12px;
+  border-radius: 40px;
+  align-self: flex-start;
+}
+
+.mode-switch { display: flex; gap: 8px; margin-bottom: 8px; }
+.mode-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 40px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mode-btn.active { border-color: #4f46e5; background: #eef2ff; }
+.mode-btn.fast.active { border-color: #10b981; background: #ecfdf5; color: #047857; }
+.mode-btn.full.active { border-color: #f59e0b; background: #fffbeb; color: #d97706; }
+.mode-name { font-weight: 600; font-size: 1rem; }
+.mode-desc { font-size: 0.7rem; opacity: 0.7; }
+
+.sub-mode-switch {
+  display: none;
+  gap: 8px;
+  margin: 8px 0 12px 0;
+  justify-content: center;
+}
+.sub-mode-btn {
+  padding: 6px 20px;
+  border-radius: 30px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.sub-mode-btn.speed.active { border-color: #10b981; background: #ecfdf5; color: #047857; }
+.sub-mode-btn.deep.active { border-color: #8b5cf6; background: #f5f3ff; color: #7c3aed; }
+
+.mode-info {
+  background: white;
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 20px;
+  border-left: 4px solid #e2e8f0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  display: none;
+}
+.mode-info.show { display: block; }
+.mode-info.fast { border-left-color: #10b981; background: #ecfdf5; }
+.mode-info.full { border-left-color: #f59e0b; background: #fffbeb; }
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.card-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #1e293b;
+}
+.ai-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.ai-chip {
+  background: #f1f5f9;
+  padding: 8px 16px;
+  border-radius: 40px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+  -webkit-tap-highlight-color: transparent;
+}
+.ai-chip.selected { background: #e0e7ff; border-color: #4f46e5; color: #4f46e5; }
+.ai-hint { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+.count-badge { background: #e8edf5; padding: 2px 12px; border-radius: 30px; font-size: 0.85rem; }
+
+/* ===== 输入区 ===== */
+textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  resize: vertical;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+textarea:focus { border-color: #4f46e5; }
+
+.submit-btn {
+  width: 100%;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 40px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: all 0.2s;
+}
+.submit-btn:active { background: #4338ca; transform: scale(0.98); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== 进度 ===== */
+.progress {
+  display: none;
+  text-align: center;
+  padding: 20px;
+  background: white;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+.progress.show { display: block; }
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.progress-text { font-size: 0.9rem; color: #475569; }
+
+/* ===== 讨论消息 ===== */
+.message-card {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #e0e7ff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.message-name { font-weight: 600; }
+.message-badge { font-size: 0.65rem; padding: 2px 10px; border-radius: 20px; }
+.badge-pro { background: #dbeafe; color: #1d4ed8; }
+.badge-con { background: #fee2e2; color: #b91c1c; }
+.message-content { font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+
+/* ===== 最终答案 ===== */
+.final-answer {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.final-answer .answer { font-size: 1.2rem; font-weight: 700; margin: 8px 0; }
+.final-answer .reason { font-size: 0.9rem; opacity: 0.85; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 8px; }
+
+/* ===== 弹窗 ===== */
+.modal-overlay {
+  position: fixed;
+  top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  background: white;
+  border-radius: 24px;
+  padding: 28px 24px;
+  max-width: 400px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-box h3 { font-size: 1.3rem; margin-bottom: 4px; text-align: center; }
+.modal-box .sub { color: #64748b; font-size: 0.9rem; text-align: center; margin-bottom: 16px; }
+.modal-box .form-group { margin-bottom: 12px; }
+.modal-box .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+.modal-box .btn-group { display: flex; gap: 10px; margin-top: 16px; }
+.modal-box .btn-group .btn { flex: 1; text-align: center; }
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-size: 0.85rem;
+  z-index: 1100;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
 </style>
 </head>
 <body>
+
 <div class="container">
-  <!-- 登录/注册 -->
+
+  <!-- ===== 登录页 ===== -->
   <div id="authScreen" class="auth-card">
-    <h2>⚖️ 登录</h2>
+    <h2>登录</h2>
     <input type="text" id="loginUsername" placeholder="用户名 (8-20字符)" class="auth-input">
     <input type="password" id="loginPassword" placeholder="密码 (至少6位)" class="auth-input">
     <div id="loginError" class="auth-error"></div>
     <button id="loginBtn" class="auth-btn auth-btn-login">登 录</button>
     <hr class="auth-divider">
     <button id="registerBtn" class="auth-btn auth-btn-register">注册新账号</button>
+    <div class="links">
+      <span></span>
+      <a href="#" id="forgotPwdLink">忘记密码？</a>
+    </div>
   </div>
-  <!-- 主界面 -->
-  <div id="mainScreen" style="display: none;">
+
+  <!-- ===== 主界面 ===== -->
+  <div id="mainScreen">
     <div class="header">
-      <div class="user-row">
-        <span class="username" id="usernameDisplay"></span>
+      <div class="header-top">
+        <span class="username" id="usernameDisplay">用户</span>
+        <div>
+          <!-- 商城入口跳转到 biao.html -->
+          <a href="biao.html" class="btn-outline" style="margin-right:6px;display:inline-block;text-decoration:none;">🏪 商城</a>
+          <button class="btn-outline" id="logoutBtn">退出</button>
+        </div>
       </div>
       <div class="counts-row">
-        <span>⚡ 快速: <span id="fastCountDisplay">0</span>次</span>
-        <span>🧠 完整: <span id="fullCountDisplay">0</span>次</span>
-        <span>✨ 能量: <span id="pointsDisplay">0</span>点</span>
-      </div>
-      <div class="buttons-row">
-        <a href="biao.html" class="btn btn-outline">🏪 商城</a>
-        <button class="btn btn-outline" id="feedbackBtn">反馈</button>
-        <button class="btn btn-outline" id="logoutBtn">退出</button>
+        <span>⚡ 快速: <span id="fastCountDisplay">0</span></span>
+        <span>🧠 完整: <span id="fullCountDisplay">0</span></span>
+        <span>✨ 能量: <span id="pointsDisplay">0</span></span>
       </div>
     </div>
+
     <div class="mode-switch">
-      <div class="mode-btn fast active" id="modeFast"><div class="mode-name">⚡ 快速分析</div><div class="mode-desc">极速响应</div></div>
-      <div class="mode-btn full" id="modeFull"><div class="mode-name">🧠 完整讨论</div><div class="mode-desc">深度思辨</div></div>
+      <div class="mode-btn fast active" id="modeFast">
+        <div class="mode-name">⚡ 快速分析</div>
+        <div class="mode-desc">极速响应</div>
+      </div>
+      <div class="mode-btn full" id="modeFull">
+        <div class="mode-name">🧠 完整讨论</div>
+        <div class="mode-desc">深度思辨</div>
+      </div>
     </div>
-    <div class="sub-mode-switch" id="subModeSwitch" style="display:none;">
+
+    <div class="sub-mode-switch" id="subModeSwitch">
       <button class="sub-mode-btn speed active" id="subSpeed">⚡ 极速</button>
       <button class="sub-mode-btn deep" id="subDeep">🧠 深度</button>
     </div>
-    <div class="mode-info fast show" id="infoFast"><strong>⚡ 快速分析</strong><br>适合日常决策，快速得出参考方案。</div>
-    <div class="mode-info full" id="infoFull"><strong>🧠 完整讨论</strong><br>多轮深度辩论，动态停止。</div>
+
+    <div class="mode-info fast show" id="infoFast">
+      <strong>⚡ 快速分析</strong><br>适合日常决策，快速得出参考方案。
+    </div>
+    <div class="mode-info full" id="infoFull">
+      <strong>🧠 完整讨论</strong><br>多轮深度辩论，动态停止。
+    </div>
+
     <div class="card">
-      <div class="card-title">🤖 选择AI角色（至少2个）<span id="selectedCount">0</span></div>
-      <!-- AI按钮直接硬编码在HTML里，确保显示 -->
+      <div class="card-title">
+        <span>🤖 选择AI角色（至少2个）</span>
+        <span class="count-badge" id="selectedCount">0</span>
+      </div>
       <div class="ai-grid" id="aiGrid">
         <div class="ai-chip" data-id="ai1">小明</div>
         <div class="ai-chip" data-id="ai2">小智</div>
@@ -130,621 +390,703 @@ textarea { width:100%; min-height:100px; padding:14px; border:1px solid #cbd5e1;
       </div>
       <div class="ai-hint">💡 选择越多AI，分析越全面，但耗时也越长</div>
     </div>
+
     <div class="card">
-      <textarea id="question" placeholder="输入你的问题，例如：我应该辞职创业吗？"></textarea>
-      <button class="submit-btn" id="submitBtn">开始分析</button>
+      <textarea id="questionInput" placeholder="输入你的问题，例如：我应该辞职创业吗？"></textarea>
+      <button class="submit-btn" id="startBtn">开始分析</button>
     </div>
-    <div id="finalAnswerArea"></div>
+
     <div class="progress" id="progress">
       <div class="spinner"></div>
-      <div id="progressText">AI分析中...</div>
+      <div class="progress-text" id="progressText">分析中…</div>
     </div>
+
     <div id="discussionArea"></div>
-    <div class="interrupt-panel" id="interruptPanel">
-      <strong>🧩 补充条件</strong>
-      <textarea id="interruptInput" placeholder="例如：预算5000元以内" rows="2" style="margin-top:8px;"></textarea>
-      <button class="btn btn-primary" style="width:100%;margin-top:8px;" id="interruptBtn">重新分析（扣除1次）</button>
+    <div id="finalAnswerArea"></div>
+  </div>
+</div>
+
+<!-- ===== 注册弹窗 ===== -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal-box">
+    <h3>📝 注册</h3>
+    <div class="sub">填写信息创建账号</div>
+    <div id="regError" class="auth-error" style="display:none;"></div>
+    <div class="form-group"><label>用户名 (8-20字符)</label><input type="text" id="regUsername" class="auth-input"></div>
+    <div class="form-group"><label>密码 (至少6位)</label><input type="password" id="regPassword" class="auth-input"></div>
+    <div class="form-group">
+      <label>安全问题（用于找回密码）</label>
+      <select id="regQuestion" class="auth-input">
+        <option value="你的出生地是哪里？">你的出生地是哪里？</option>
+        <option value="你母亲的姓名是？">你母亲的姓名是？</option>
+        <option value="你第一所学校的名称是？">你第一所学校的名称是？</option>
+        <option value="你最喜欢的颜色是？">你最喜欢的颜色是？</option>
+        <option value="你的宠物名字是？">你的宠物名字是？</option>
+        <option value="__custom__">自定义问题</option>
+      </select>
+      <input type="text" id="regCustomQuestion" class="auth-input" placeholder="输入你的安全问题" style="margin-top:6px;display:none;">
     </div>
-    <div style="margin-top:16px;">
-      <button id="shareRewardBtn" class="share-btn">📤 分享得免费快速分析</button>
+    <div class="form-group"><label>安全答案</label><input type="text" id="regAnswer" class="auth-input"></div>
+    <div class="btn-group">
+      <button class="auth-btn auth-btn-login" id="regSubmitBtn">注册</button>
+      <button class="auth-btn auth-btn-register" id="regCancelBtn">取消</button>
     </div>
   </div>
 </div>
-<!-- 弹窗 -->
-<div class="modal" id="rechargeModal">
-  <div class="modal-content">
-    <div class="modal-title">🏪 购买次数/能量</div>
-    <div id="packageList"></div>
-    <div>
-      <input type="text" id="redeemCode" placeholder="兑换码" class="exchange-input">
-      <button class="btn btn-primary" style="width:100%;" id="redeemBtn">兑换</button>
+
+<!-- ===== 找回密码弹窗 ===== -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal-box">
+    <h3>🔐 找回密码</h3>
+    <div class="sub">验证身份后重置密码</div>
+    <div id="forgotError" class="auth-error" style="display:none;"></div>
+    <div class="form-group"><label>用户名</label><input type="text" id="forgotUsername" class="auth-input"></div>
+    <div id="forgotQuestionGroup" style="display:none;">
+      <div class="form-group"><label id="forgotQuestionLabel">安全问题</label><input type="text" id="forgotAnswer" class="auth-input" placeholder="输入安全答案"></div>
     </div>
-    <button class="feedback-btn" id="closeRechargeModal">关闭</button>
+    <div id="forgotNewPwdGroup" style="display:none;">
+      <div class="form-group"><label>新密码 (至少6位)</label><input type="password" id="forgotNewPwd" class="auth-input"></div>
+    </div>
+    <div class="btn-group">
+      <button class="auth-btn auth-btn-login" id="forgotStepBtn">验证</button>
+      <button class="auth-btn auth-btn-register" id="forgotCancelBtn">取消</button>
+    </div>
   </div>
 </div>
-<div class="modal" id="feedbackModal">
-  <div class="modal-content">
-    <div class="modal-title">💬 意见反馈</div>
-    <textarea id="feedbackContent" placeholder="请填写你的意见或建议..." rows="4" style="width:100%;margin-bottom:12px;"></textarea>
-    <button class="btn btn-primary" style="width:100%;" id="sendFeedbackBtn">发送</button>
-    <button class="feedback-btn" id="closeFeedbackModal">关闭</button>
-  </div>
-</div>
-<div class="modal" id="shareModal">
-  <div class="modal-content">
-    <div class="modal-title">📤 分享给好友</div>
-    <p style="margin-bottom:12px;">选择一种方式分享给好友，即可获得1次快速分析（每天最多3次）</p>
-    <button id="shareWechatBtn" class="share-btn" style="background:#07c160;color:#fff;margin-bottom:8px;">💬 分享到微信</button>
-    <button id="shareQQBtn" class="share-btn" style="background:#12b7f5;color:#fff;margin-bottom:8px;">🐧 分享到QQ</button>
-    <button id="shareCopyBtn" class="share-btn" style="background:#6366f1;color:#fff;">📋 复制链接</button>
-    <button class="feedback-btn" id="closeShareModal" style="margin-top:8px;">关闭</button>
-  </div>
-</div>
-<button id="answerFloatBtn" class="float-btn">📋 答案已出</button>
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast"></div>
 
 <script>
 // ================================================================
-//  配置
+//  第3批稳定版 - 无兑换码
+//  功能：登录/注册/找回密码 + AI选择 + 模式切换 + 分析 + 讨论 + 答案
+//  商城入口：跳转到 biao.html（兑换码在商城页面）
 // ================================================================
-const DEEPSEEK_API_KEY = "sk-77c9585915d74ea09093d6994f33d68b";
-const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
-const MODEL_FAST = "deepseek-v4-flash";
-const MODEL_DEEP = "deepseek-v4-pro";
 
-// ================================================================
-//  扣点规则（按AI数量区分）
-// ================================================================
-const POINTS_RULES = {
-  fast: { 2: 2, 3: 3, 4: 4 },
-  full_speed: { 2: 3, 3: 4, 4: 5 },
-  full_deep: { 2: 4, 3: 5, 4: 6 }
-};
-
-// ================================================================
-//  状态
-// ================================================================
-let currentUser = null;
-let users = {};
-let allAIs = [
-  { id: "ai1", name: "小明", prompt: "你是理性支持者，用数据和逻辑支持观点。" },
-  { id: "ai2", name: "小智", prompt: "你是乐观机会主义者，善于发现可能性。" },
-  { id: "ai3", name: "小慧", prompt: "你是谨慎质疑者，关注风险和问题。" },
-  { id: "ai4", name: "小能", prompt: "你是务实风险规避者，关注成本和可行性。" }
-];
-let selectedAIs = [];
-let currentMode = "fast";
-let currentSubMode = "speed";
-let currentQuestion = "";
-let discussionMessages = [];
-let currentRound = 0;
-let isDiscussing = false;
-let finalAnswer = null;
-
-const floatBtn = document.getElementById("answerFloatBtn");
-function hideFloatBtn() { if (floatBtn) floatBtn.style.display = "none"; }
-function showFloatBtn() { if (floatBtn) floatBtn.style.display = "block"; }
-floatBtn.onclick = () => {
-  const finalArea = document.getElementById("finalAnswerArea");
-  if (finalArea) { finalArea.scrollIntoView({ behavior: "smooth", block: "start" }); hideFloatBtn(); }
-};
-
-// ================================================================
-//  工具函数
-// ================================================================
-function loadUsersFromStorage() {
-  const stored = localStorage.getItem("aiJudge_users");
-  users = stored ? JSON.parse(stored) : {};
-}
-function saveUsersToStorage() { localStorage.setItem("aiJudge_users", JSON.stringify(users)); }
-
-function getPointsToDeduct() {
-  const aiCount = selectedAIs.length;
-  let key = "fast";
-  if (currentMode === "full") {
-    key = currentSubMode === "speed" ? "full_speed" : "full_deep";
+// ===== 配置 =====
+const CONFIG = {
+  APP_NAME: '裁决者',
+  VERSION: '3.0.0-final',
+  API_KEY: 'sk-77c9585915d74ea09093d6994f33d68b',
+  API_URL: 'https://api.deepseek.com/v1/chat/completions',
+  MODEL_FAST: 'deepseek-chat',
+  MODEL_DEEP: 'deepseek-chat',
+  POINTS_RULES: {
+    fast: { 2: 2, 3: 3, 4: 4 },
+    full_speed: { 2: 3, 3: 4, 4: 5 },
+    full_deep: { 2: 4, 3: 5, 4: 6 }
   }
-  return POINTS_RULES[key]?.[aiCount] || 1;
+};
+
+// ===== 数据层 =====
+const DataStore = {
+  getUsers() {
+    try { return JSON.parse(localStorage.getItem('aiJudge_users')) || {}; } catch { return {}; }
+  },
+  saveUsers(users) {
+    localStorage.setItem('aiJudge_users', JSON.stringify(users));
+  },
+  getRemember() {
+    return localStorage.getItem('aiJudge_remember') || null;
+  },
+  setRemember(name) {
+    if (name) localStorage.setItem('aiJudge_remember', name);
+    else localStorage.removeItem('aiJudge_remember');
+  },
+  getUser(username) {
+    const users = this.getUsers();
+    return users[username] || null;
+  }
+};
+
+// ===== 状态 =====
+const AppState = {
+  currentUser: null,
+  currentMode: 'fast',
+  currentSubMode: 'speed',
+  selectedAIs: [],
+  allAIs: [
+    { id: 'ai1', name: '小明', prompt: '你是理性支持者，用数据和逻辑支持观点。' },
+    { id: 'ai2', name: '小智', prompt: '你是乐观机会主义者，善于发现可能性。' },
+    { id: 'ai3', name: '小慧', prompt: '你是谨慎质疑者，关注风险和问题。' },
+    { id: 'ai4', name: '小能', prompt: '你是务实风险规避者，关注成本和可行性。' }
+  ],
+  discussionMessages: [],
+  finalAnswer: null,
+  isDiscussing: false,
+  currentRound: 0
+};
+
+// ===== 工具 =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function() { t.classList.remove('show'); }, 2000);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// ===== 扣费 =====
+function getPointsToDeduct() {
+  const aiCount = AppState.selectedAIs.length;
+  let key = 'fast';
+  if (AppState.currentMode === 'full') {
+    key = AppState.currentSubMode === 'speed' ? 'full_speed' : 'full_deep';
+  }
+  return CONFIG.POINTS_RULES[key]?.[aiCount] || 1;
 }
 
 function canUsePoints() {
-  const u = users[currentUser];
+  const user = DataStore.getUser(AppState.currentUser);
   const need = getPointsToDeduct();
-  return (u.points || 0) >= need;
+  return (user.points || 0) >= need;
 }
 
 function deductPoints() {
-  const u = users[currentUser];
+  const users = DataStore.getUsers();
+  const user = users[AppState.currentUser];
   const need = getPointsToDeduct();
-  u.points = (u.points || 0) - need;
-  saveUsersToStorage();
-  updateUI();
+  user.points = (user.points || 0) - need;
+  DataStore.saveUsers(users);
+  Renderer.updateUI();
 }
 
-// ================================================================
-//  认证
-// ================================================================
-function validateUsername(username) { return username && username.length >= 8 && username.length <= 20; }
-function validatePassword(password) { return password && password.length >= 6; }
+// ===== 渲染器 =====
+const Renderer = {
+  showAuth() {
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('mainScreen').style.display = 'none';
+  },
+  showMain() {
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('mainScreen').style.display = 'block';
+    this.updateUI();
+    this.renderAIGrid();
+    this.setMode('fast');
+  },
+  updateUI() {
+    if (!AppState.currentUser) return;
+    const user = DataStore.getUser(AppState.currentUser);
+    if (!user) return;
+    document.getElementById('usernameDisplay').textContent = AppState.currentUser;
+    document.getElementById('fastCountDisplay').textContent = user.fastCount || 0;
+    document.getElementById('fullCountDisplay').textContent = user.fullCount || 0;
+    document.getElementById('pointsDisplay').textContent = user.points || 0;
+    document.getElementById('selectedCount').textContent = AppState.selectedAIs.length;
+  },
+  renderAIGrid() {
+    const grid = document.getElementById('aiGrid');
+    if (!grid) return;
+    const chips = grid.querySelectorAll('.ai-chip');
+    chips.forEach(chip => {
+      const id = chip.dataset.id;
+      const isSelected = AppState.selectedAIs.some(s => s.id === id);
+      chip.classList.toggle('selected', isSelected);
+    });
+    document.getElementById('selectedCount').textContent = AppState.selectedAIs.length;
+  },
+  setMode(mode) {
+    AppState.currentMode = mode;
+    const fastBtn = document.getElementById('modeFast');
+    const fullBtn = document.getElementById('modeFull');
+    const infoFast = document.getElementById('infoFast');
+    const infoFull = document.getElementById('infoFull');
+    const subSwitch = document.getElementById('subModeSwitch');
 
-function showAuthScreen() {
-  document.getElementById("authScreen").style.display = "flex";
-  document.getElementById("mainScreen").style.display = "none";
-  hideFloatBtn();
-}
-function showMainScreen() {
-  document.getElementById("authScreen").style.display = "none";
-  document.getElementById("mainScreen").style.display = "block";
-  updateUI();
-}
+    fastBtn.className = 'mode-btn fast' + (mode === 'fast' ? ' active' : '');
+    fullBtn.className = 'mode-btn full' + (mode === 'full' ? ' active' : '');
+    infoFast.style.display = mode === 'fast' ? 'block' : 'none';
+    infoFull.style.display = mode === 'full' ? 'block' : 'none';
 
-function register() {
-  const username = document.getElementById("loginUsername").value.trim();
-  const password = document.getElementById("loginPassword").value;
-  if (!validateUsername(username)) return showLoginError("用户名需8-20字符");
-  if (!validatePassword(password)) return showLoginError("密码至少6位");
-  if (users[username]) return showLoginError("用户名已存在");
-  users[username] = { password, fastCount: 0, fullCount: 0, points: 0, shareCount: 0, shareDate: new Date().toDateString(), shareLastTime: 0 };
-  saveUsersToStorage();
-  alert("注册成功！请登录");
-  document.getElementById("loginPassword").value = "";
-  document.getElementById("loginError").textContent = "";
-}
+    if (mode === 'full') {
+      subSwitch.style.display = 'flex';
+      this.setSubMode(AppState.currentSubMode);
+    } else {
+      subSwitch.style.display = 'none';
+    }
+  },
+  setSubMode(sub) {
+    AppState.currentSubMode = sub;
+    const speedBtn = document.getElementById('subSpeed');
+    const deepBtn = document.getElementById('subDeep');
+    speedBtn.className = 'sub-mode-btn speed' + (sub === 'speed' ? ' active' : '');
+    deepBtn.className = 'sub-mode-btn deep' + (sub === 'deep' ? ' active' : '');
+  },
+  toggleAI(aiId) {
+    const ai = AppState.allAIs.find(a => a.id === aiId);
+    if (!ai) return;
+    const idx = AppState.selectedAIs.findIndex(s => s.id === aiId);
+    if (idx >= 0) {
+      if (AppState.selectedAIs.length <= 2) {
+        showToast('至少选择2个AI');
+        return;
+      }
+      AppState.selectedAIs.splice(idx, 1);
+    } else {
+      AppState.selectedAIs.push(ai);
+    }
+    this.renderAIGrid();
+    this.updateUI();
+  },
+  setStartEnabled(enabled) {
+    document.getElementById('startBtn').disabled = !enabled;
+  },
+  showProgress(text) {
+    document.getElementById('progress').classList.add('show');
+    document.getElementById('progressText').textContent = text || '分析中…';
+  },
+  hideProgress() {
+    document.getElementById('progress').classList.remove('show');
+  },
+  addMessage(type, content, ai) {
+    const area = document.getElementById('discussionArea');
+    const div = document.createElement('div');
+    div.className = 'message-card';
+    if (type === 'system') {
+      div.innerHTML = '<div class="message-header"><span style="font-weight:600;">系统</span></div><div class="message-content">' + escapeHtml(content) + '</div>';
+    } else if (type === 'user') {
+      div.innerHTML = '<div class="message-header"><span style="font-weight:600;">👤 你</span></div><div class="message-content">' + escapeHtml(content) + '</div>';
+    } else if (type === 'ai' && ai) {
+      const roleLabel = ai.role === 'pro' ? '正方' : '反方';
+      const badgeClass = ai.role === 'pro' ? 'badge-pro' : 'badge-con';
+      div.innerHTML = '<div class="message-header"><div class="avatar">🤖</div><span class="message-name">' + escapeHtml(ai.name) + '</span><span class="message-badge ' + badgeClass + '">' + roleLabel + '</span></div><div class="message-content">' + escapeHtml(content) + '</div>';
+    }
+    area.appendChild(div);
+    area.scrollTop = area.scrollHeight;
+  },
+  showFinalAnswer(answer, reason) {
+    const area = document.getElementById('finalAnswerArea');
+    area.innerHTML = '<div class="final-answer"><div class="answer">' + escapeHtml(answer) + '</div><div class="reason">理由：' + escapeHtml(reason || '无') + '</div></div>';
+  },
+  clearDiscussion() {
+    document.getElementById('discussionArea').innerHTML = '';
+    document.getElementById('finalAnswerArea').innerHTML = '';
+    this.hideProgress();
+  }
+};
 
-function login() {
-  const username = document.getElementById("loginUsername").value.trim();
-  const password = document.getElementById("loginPassword").value;
-  if (!validateUsername(username)) return showLoginError("用户名需8-20字符");
-  if (!validatePassword(password)) return showLoginError("密码至少6位");
-  const user = users[username];
-  if (!user || user.password !== password) return showLoginError("用户名或密码错误");
-  currentUser = username;
-  localStorage.setItem("aiJudge_remember", username);
-  const today = new Date().toDateString();
-  if (users[currentUser].shareDate !== today) { users[currentUser].shareCount = 0; users[currentUser].shareDate = today; saveUsersToStorage(); }
-  showMainScreen();
-}
-
-function logout() { 
-  currentUser = null; 
-  localStorage.removeItem("aiJudge_remember");
-  showAuthScreen(); 
-  hideFloatBtn(); 
-}
-function showLoginError(msg) { const err = document.getElementById("loginError"); err.textContent = msg; setTimeout(() => err.textContent = "", 2000); }
-
-function updateUI() {
-  if (!currentUser) return;
-  const u = users[currentUser];
-  document.getElementById("usernameDisplay").innerText = currentUser;
-  document.getElementById("fastCountDisplay").innerText = u.fastCount || 0;
-  document.getElementById("fullCountDisplay").innerText = u.fullCount || 0;
-  document.getElementById("pointsDisplay").innerText = u.points || 0;
-  document.getElementById("selectedCount").innerText = selectedAIs.length;
-}
-
-// ================================================================
-//  AI选择（使用事件委托）
-// ================================================================
-function initAISelection() {
-  const grid = document.getElementById("aiGrid");
-  if (!grid) return;
-  
-  // 清除所有AI芯片的选中状态，根据 selectedAIs 重新设置
-  const chips = grid.querySelectorAll(".ai-chip");
-  chips.forEach(chip => {
-    const id = chip.dataset.id;
-    const isSelected = selectedAIs.some(s => s.id === id);
-    chip.classList.toggle("selected", isSelected);
-  });
-  
-  // 更新计数
-  document.getElementById("selectedCount").innerText = selectedAIs.length;
-}
-
-// 点击AI芯片时切换选中状态
-document.addEventListener("click", function(e) {
-  const chip = e.target.closest(".ai-chip");
-  if (!chip) return;
-  if (isDiscussing) return;
-  
-  const id = chip.dataset.id;
-  const ai = allAIs.find(a => a.id === id);
-  if (!ai) return;
-  
-  const idx = selectedAIs.findIndex(s => s.id === id);
-  if (idx >= 0) {
-    if (selectedAIs.length <= 2) {
-      alert("至少选择2个AI");
+// ===== 业务逻辑 =====
+const Actions = {
+  register() {
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const questionSelect = document.getElementById('regQuestion');
+    let question = questionSelect.value;
+    if (question === '__custom__') {
+      question = document.getElementById('regCustomQuestion').value.trim();
+      if (!question) {
+        const errEl = document.getElementById('regError');
+        errEl.textContent = '请输入自定义安全问题';
+        errEl.style.display = 'block';
+        return;
+      }
+    }
+    const answer = document.getElementById('regAnswer').value.trim();
+    if (!answer) {
+      const errEl = document.getElementById('regError');
+      errEl.textContent = '请输入安全答案';
+      errEl.style.display = 'block';
       return;
     }
-    selectedAIs.splice(idx, 1);
-  } else {
-    selectedAIs.push(ai);
-  }
-  
-  initAISelection();
-  updateUI();
-});
+    if (username.length < 8 || username.length > 20) {
+      const errEl = document.getElementById('regError');
+      errEl.textContent = '用户名需8-20字符';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (password.length < 6) {
+      const errEl = document.getElementById('regError');
+      errEl.textContent = '密码至少6位';
+      errEl.style.display = 'block';
+      return;
+    }
 
-// ================================================================
-//  模式切换
-// ================================================================
-function setMode(mode) {
-  if (isDiscussing) return;
-  currentMode = mode;
-  document.getElementById("modeFast").classList.toggle("active", mode === "fast");
-  document.getElementById("modeFull").classList.toggle("active", mode === "full");
-  document.getElementById("infoFast").classList.toggle("show", mode === "fast");
-  document.getElementById("infoFull").classList.toggle("show", mode === "full");
-  const subSwitch = document.getElementById("subModeSwitch");
-  if (mode === "full") {
-    subSwitch.style.display = "flex";
-    setSubMode("speed");
-  } else {
-    subSwitch.style.display = "none";
-  }
-}
-function setSubMode(sub) {
-  if (isDiscussing) return;
-  currentSubMode = sub;
-  document.getElementById("subSpeed").classList.toggle("active", sub === "speed");
-  document.getElementById("subDeep").classList.toggle("active", sub === "deep");
-}
+    const users = DataStore.getUsers();
+    if (users[username]) {
+      const errEl = document.getElementById('regError');
+      errEl.textContent = '用户名已存在';
+      errEl.style.display = 'block';
+      return;
+    }
 
-// ================================================================
-//  核心：开始分析
-// ================================================================
-async function startDiscussion() {
-  if (isDiscussing) return;
-  const q = document.getElementById("question").value.trim();
-  if (!q) return alert("请输入问题");
-  if (selectedAIs.length < 2) return alert("请至少选择2个AI");
-  if (!currentUser) return alert("请先登录");
+    users[username] = {
+      password: password,
+      securityQuestion: question,
+      securityAnswer: answer,
+      fastCount: 0,
+      fullCount: 0,
+      points: 0,
+      shareCount: 0,
+      shareDate: new Date().toDateString(),
+      shareLastTime: 0,
+      usedCodes: [],
+      records: []
+    };
+    DataStore.saveUsers(users);
 
-  if (!canUsePoints()) {
-    alert(`能量点不足！需要 ${getPointsToDeduct()} 点，当前 ${users[currentUser].points || 0} 点。请去商城购买能量包。`);
-    return;
-  }
-  deductPoints();
+    document.getElementById('registerModal').classList.remove('active');
+    AppState.currentUser = username;
+    DataStore.setRemember(username);
+    Renderer.showMain();
+    showToast('注册成功，已自动登录');
+  },
 
-  currentQuestion = q;
-  discussionMessages = [];
-  finalAnswer = null;
-  currentRound = 0;
-  isDiscussing = true;
-  document.getElementById("finalAnswerArea").innerHTML = "";
-  document.getElementById("discussionArea").innerHTML = "";
-  document.getElementById("interruptPanel").classList.remove("show");
-  document.getElementById("submitBtn").disabled = true;
-  hideFloatBtn();
+  login() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError');
+    errEl.textContent = '';
 
-  const roundLimit = currentMode === "fast" ? 3 : 7;
-  const model = (currentMode === "full" && currentSubMode === "deep") ? MODEL_DEEP : MODEL_FAST;
+    if (username.length < 8 || username.length > 20) {
+      errEl.textContent = '用户名需8-20字符';
+      return;
+    }
+    if (password.length < 6) {
+      errEl.textContent = '密码至少6位';
+      return;
+    }
 
-  for (let round = 1; round <= roundLimit; round++) {
-    if (!isDiscussing) break;
-    currentRound = round;
-    document.getElementById("progress").classList.add("show");
-    // ===== 唯一改动：把轮次文字改成“分析中…” =====
-    document.getElementById("progressText").innerText = "分析中…";
+    const users = DataStore.getUsers();
+    const user = users[username];
+    if (!user || user.password !== password) {
+      errEl.textContent = '用户名或密码错误';
+      return;
+    }
 
-    let ctx = "";
-    for (let msg of discussionMessages) {
-      if (msg.solution) {
-        ctx += `${msg.name}（${msg.role === 'pro' ? '正方' : '反方'}）：${msg.solution}\n理由：${msg.reason || '无'}\n\n`;
+    AppState.currentUser = username;
+    DataStore.setRemember(username);
+    Renderer.showMain();
+    showToast('登录成功');
+  },
+
+  logout() {
+    AppState.currentUser = null;
+    DataStore.setRemember(null);
+    Renderer.showAuth();
+  },
+
+  forgotPassword() {
+    const username = document.getElementById('forgotUsername').value.trim();
+    const errEl = document.getElementById('forgotError');
+    errEl.style.display = 'none';
+
+    if (!username) {
+      errEl.textContent = '请输入用户名';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const users = DataStore.getUsers();
+    const user = users[username];
+    if (!user) {
+      errEl.textContent = '用户不存在';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const qGroup = document.getElementById('forgotQuestionGroup');
+    const pwdGroup = document.getElementById('forgotNewPwdGroup');
+    const stepBtn = document.getElementById('forgotStepBtn');
+
+    if (qGroup.style.display === 'none') {
+      document.getElementById('forgotQuestionLabel').textContent = '安全问题：' + user.securityQuestion;
+      qGroup.style.display = 'block';
+      stepBtn.textContent = '验证答案';
+      document.getElementById('forgotAnswer').value = '';
+      document.getElementById('forgotNewPwd').value = '';
+      pwdGroup.style.display = 'none';
+      return;
+    }
+
+    const answer = document.getElementById('forgotAnswer').value.trim();
+    if (!answer) {
+      errEl.textContent = '请输入安全答案';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (answer !== user.securityAnswer) {
+      errEl.textContent = '答案错误';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const newPwd = document.getElementById('forgotNewPwd').value;
+    if (newPwd.length < 6) {
+      errEl.textContent = '新密码至少6位';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    users[username].password = newPwd;
+    DataStore.saveUsers(users);
+    document.getElementById('forgotModal').classList.remove('active');
+    document.getElementById('loginPassword').value = '';
+    showToast('密码重置成功，请用新密码登录');
+  },
+
+  async startAnalysis() {
+    if (AppState.isDiscussing) return;
+
+    const question = document.getElementById('questionInput').value.trim();
+    if (!question) {
+      showToast('请输入问题');
+      return;
+    }
+    if (AppState.selectedAIs.length < 2) {
+      showToast('请至少选择2个AI');
+      return;
+    }
+    if (!AppState.currentUser) {
+      showToast('请先登录');
+      return;
+    }
+
+    if (!canUsePoints()) {
+      const need = getPointsToDeduct();
+      const user = DataStore.getUser(AppState.currentUser);
+      showToast('能量点不足！需要 ' + need + ' 点，当前 ' + (user.points || 0) + ' 点');
+      return;
+    }
+
+    deductPoints();
+    Renderer.updateUI();
+
+    AppState.discussionMessages = [];
+    AppState.finalAnswer = null;
+    AppState.currentRound = 0;
+    AppState.isDiscussing = true;
+    Renderer.setStartEnabled(false);
+    Renderer.clearDiscussion();
+
+    Renderer.addMessage('user', question);
+
+    const roundLimit = AppState.currentMode === 'fast' ? 3 : 7;
+    const model = CONFIG.MODEL_FAST;
+
+    for (let round = 1; round <= roundLimit; round++) {
+      if (!AppState.isDiscussing) break;
+      AppState.currentRound = round;
+      Renderer.showProgress('分析中…');
+
+      let ctx = '';
+      for (const msg of AppState.discussionMessages) {
+        if (msg.solution) {
+          ctx += msg.name + '（' + (msg.role === 'pro' ? '正方' : '反方') + '）：' + msg.solution + '\n理由：' + (msg.reason || '无') + '\n\n';
+        }
+      }
+
+      for (let i = 0; i < AppState.selectedAIs.length; i++) {
+        if (!AppState.isDiscussing) break;
+        const ai = AppState.selectedAIs[i];
+        ai.role = i % 2 === 0 ? 'pro' : 'con';
+        Renderer.showProgress('AI思考中…');
+        await this.callAI(ai, round, round > 1, ctx, model);
+      }
+
+      Renderer.hideProgress();
+
+      if (AppState.currentMode === 'fast') {
+        if (round >= 3) break;
+      } else {
+        if (round >= 3 && round < 7 && Math.random() > 0.6) {
+          Renderer.addMessage('system', '⏹ 裁判判定：讨论已充分，结论已清晰。');
+          break;
+        }
+        if (round >= 7) break;
       }
     }
 
-    for (let i = 0; i < selectedAIs.length; i++) {
-      if (!isDiscussing) break;
-      const ai = selectedAIs[i];
-      const role = i % 2 === 0 ? 'pro' : 'con';
-      ai.role = role;
-      await callAIAndDisplay(ai, round, round > 1, ctx, model);
-    }
+    AppState.isDiscussing = false;
+    Renderer.setStartEnabled(true);
+    Renderer.hideProgress();
 
-    document.getElementById("progress").classList.remove("show");
-
-    if (currentMode === "fast") {
-      if (round >= 3) break;
+    this.extractFinalAnswer();
+    if (AppState.finalAnswer) {
+      Renderer.showFinalAnswer(AppState.finalAnswer.answer, AppState.finalAnswer.reason);
+      showToast('✅ 分析完成');
     } else {
-      if (round >= 3 && round < 7 && Math.random() > 0.6) {
-        addSystemMessage("⏹ 裁判判定：讨论已充分，结论已清晰。");
-        break;
+      Renderer.addMessage('system', '⚠️ 未能提取到明确答案，请参考上方各AI的发言。');
+    }
+  },
+
+  async callAI(ai, roundNum, isDebate, context, model) {
+    const today = new Date().toISOString().slice(0, 10);
+    const roleLabel = ai.role === 'pro' ? '正方' : '反方';
+
+    let sysPrompt = isDebate
+      ? '你是' + ai.name + '（' + roleLabel + '），请针对其他AI的方案发表评价或补充观点。重要：今天是' + today + '，你必须基于当前最新数据。当你在发言中提到其他AI时，请统一使用"分析者"来称呼。同时，请确保你的发言内容与前几轮的发言不重复，提出新的视角或论据。'
+      : ai.prompt + ' 重要：今天是' + today + '，你必须基于当前最新数据。当你在发言中提到其他AI时，请统一使用"分析者"来称呼。';
+
+    let userContent = isDebate
+      ? '问题：' + document.getElementById('questionInput').value.trim() + '\n\n重要：今天是' + today + '。已有的方案：\n' + context + '\n\n请发表你的观点（不要重复之前的内容）。'
+      : '问题：' + document.getElementById('questionInput').value.trim() + '\n\n重要：今天是' + today + '。请直接给出【方案】和【理由】。不要任何额外解释。';
+
+    try {
+      const res = await fetch(CONFIG.API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + CONFIG.API_KEY
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: 'system', content: sysPrompt },
+            { role: 'user', content: userContent }
+          ],
+          temperature: 0.7
+        })
+      });
+      const data = await res.json();
+
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        throw new Error(data.error ? data.error.message : 'API返回数据异常');
       }
-      if (round >= 7) break;
+
+      let content = data.choices[0].message.content;
+      let solution = content;
+      let reason = '';
+
+      if (content.includes('【理由】')) {
+        const parts = content.split('【理由】');
+        solution = parts[0].replace('【方案】', '').trim();
+        reason = parts[1].trim();
+      }
+
+      AppState.discussionMessages.push({
+        role: ai.role,
+        name: ai.name,
+        content: content,
+        solution: solution,
+        reason: reason
+      });
+
+      Renderer.addMessage('ai', content, ai);
+      return { solution, reason };
+    } catch (err) {
+      Renderer.addMessage('ai', '调用失败：' + err.message, ai);
+      AppState.discussionMessages.push({
+        role: ai.role,
+        name: ai.name,
+        content: '错误：' + err.message
+      });
+      return null;
     }
-  }
+  },
 
-  isDiscussing = false;
-  document.getElementById("submitBtn").disabled = false;
-  extractFinalAnswer();
-  if (finalAnswer) {
-    displayFinalAnswer();
-    showToast("✅ 分析完成");
-    showFloatBtn();
-  } else {
-    hideFloatBtn();
-  }
-  if (currentMode === "full") {
-    document.getElementById("interruptPanel").classList.add("show");
-  }
-}
-
-function addSystemMessage(text) {
-  const area = document.getElementById("discussionArea");
-  const div = document.createElement("div");
-  div.className = "message-card";
-  div.innerHTML = `<div class="message-header"><span class="message-name">系统</span></div><div class="message-content">${text}</div>`;
-  area.appendChild(div);
-}
-
-async function callAIAndDisplay(ai, roundNum, isDebate, context, model) {
-  const today = new Date().toISOString().slice(0, 10);
-  const roleLabel = ai.role === 'pro' ? '正方' : '反方';
-  let sysPrompt = isDebate
-    ? `你是${ai.name}（${roleLabel}），请针对其他AI的方案发表评价或补充观点。重要：今天是${today}，你必须基于当前最新数据。当你在发言中提到其他AI时，请统一使用"分析者"来称呼。同时，请确保你的发言内容与前几轮的发言不重复，提出新的视角或论据。`
-    : `${ai.prompt} 重要：今天是${today}，你必须基于当前最新数据。当你在发言中提到其他AI时，请统一使用"分析者"来称呼。`;
-  let userContent = "";
-  if (isDebate) {
-    userContent = `问题：${currentQuestion}\n\n重要：今天是${today}。已有的方案：\n${context}\n\n请发表你的观点（不要重复之前的内容）。`;
-  } else {
-    userContent = `问题：${currentQuestion}\n\n重要：今天是${today}。请直接给出【方案】和【理由】。不要任何额外解释。`;
-  }
-
-  try {
-    const res = await fetch(DEEPSEEK_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${DEEPSEEK_API_KEY}` },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: "system", content: sysPrompt },
-          { role: "user", content: userContent }
-        ],
-        temperature: 0.7
-      })
-    });
-    const data = await res.json();
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      throw new Error("API返回数据异常");
-    }
-    let content = data.choices[0].message.content;
-    let solution = content, reason = "";
-    if (content.includes("【理由】")) {
-      const parts = content.split("【理由】");
-      solution = parts[0].replace("【方案】", "").trim();
-      reason = parts[1].trim();
-    }
-    discussionMessages.push({ role: ai.role, name: ai.name, content, solution, reason });
-    displayMessage(ai, content, reason);
-    return { solution, reason };
-  } catch (err) {
-    const errorMsg = `调用失败：${err.message}`;
-    displayMessage(ai, errorMsg, "");
-    discussionMessages.push({ role: ai.role, name: ai.name, content: errorMsg });
-    return null;
-  }
-}
-
-function displayMessage(ai, content, reason) {
-  const area = document.getElementById("discussionArea");
-  const div = document.createElement("div");
-  div.className = "message-card";
-  const roleLabel = ai.role === 'pro' ? '正方' : '反方';
-  div.innerHTML = `
-    <div class="message-header">
-      <div class="avatar">🤖</div>
-      <span class="message-name">${escapeHtml(ai.name)}</span>
-      <span class="message-badge ${ai.role === 'pro' ? 'pro' : 'con'}">${roleLabel}</span>
-    </div>
-    <div class="message-content">${escapeHtml(content)}</div>
-  `;
-  area.appendChild(div);
-  area.scrollTop = area.scrollHeight;
-}
-
-function extractFinalAnswer() {
-  let best = null;
-  for (let msg of discussionMessages) {
-    if (msg.solution && (!best || msg.solution.length < best.solution.length)) best = msg;
-  }
-  if (best) finalAnswer = { answer: best.solution, reason: best.reason || "" };
-}
-function displayFinalAnswer() {
-  document.getElementById("finalAnswerArea").innerHTML = `<div class="final-answer"><div class="answer">${escapeHtml(finalAnswer.answer)}</div><div class="reason">理由：${escapeHtml(finalAnswer.reason)}</div></div>`;
-}
-
-// ================================================================
-//  补充条件重新分析
-// ================================================================
-async function sendInterrupt() {
-  const extra = document.getElementById("interruptInput").value.trim();
-  if (!extra) return alert("请输入补充条件");
-  if (!canUsePoints()) {
-    alert(`能量点不足！需要 ${getPointsToDeduct()} 点，当前 ${users[currentUser].points || 0} 点。`);
-    return;
-  }
-  deductPoints();
-  const originalQuestion = currentQuestion;
-  currentQuestion = originalQuestion + "\n补充条件：" + extra;
-  discussionMessages = [];
-  finalAnswer = null;
-  currentRound = 0;
-  isDiscussing = true;
-  document.getElementById("discussionArea").innerHTML = "";
-  document.getElementById("finalAnswerArea").innerHTML = "";
-  document.getElementById("interruptPanel").classList.remove("show");
-  document.getElementById("submitBtn").disabled = true;
-  hideFloatBtn();
-
-  const roundLimit = currentMode === "fast" ? 3 : 7;
-  const model = (currentMode === "full" && currentSubMode === "deep") ? MODEL_DEEP : MODEL_FAST;
-
-  for (let round = 1; round <= roundLimit; round++) {
-    if (!isDiscussing) break;
-    currentRound = round;
-    document.getElementById("progress").classList.add("show");
-    document.getElementById("progressText").innerText = "分析中…";
-    let ctx = "";
-    for (let msg of discussionMessages) {
-      if (msg.solution) {
-        ctx += `${msg.name}（${msg.role === 'pro' ? '正方' : '反方'}）：${msg.solution}\n理由：${msg.reason || '无'}\n\n`;
+  extractFinalAnswer() {
+    let best = null;
+    for (const msg of AppState.discussionMessages) {
+      if (msg.solution && (!best || msg.solution.length < best.solution.length)) {
+        best = msg;
       }
     }
-    for (let i = 0; i < selectedAIs.length; i++) {
-      if (!isDiscussing) break;
-      const ai = selectedAIs[i];
-      const role = i % 2 === 0 ? 'pro' : 'con';
-      ai.role = role;
-      await callAIAndDisplay(ai, round, round > 1, ctx, model);
-    }
-    document.getElementById("progress").classList.remove("show");
-    if (currentMode === "fast") {
-      if (round >= 3) break;
-    } else {
-      if (round >= 3 && round < 7 && Math.random() > 0.6) {
-        addSystemMessage("⏹ 裁判判定：讨论已充分，结论已清晰。");
-        break;
-      }
-      if (round >= 7) break;
+    if (best) {
+      AppState.finalAnswer = { answer: best.solution, reason: best.reason || '' };
     }
   }
-  isDiscussing = false;
-  document.getElementById("submitBtn").disabled = false;
-  extractFinalAnswer();
-  if (finalAnswer) {
-    displayFinalAnswer();
-    showToast("✅ 分析完成");
-    showFloatBtn();
-  } else hideFloatBtn();
-  if (currentMode === "full") {
-    document.getElementById("interruptPanel").classList.add("show");
-  }
+};
+
+// ===== 事件绑定 =====
+function bindEvents() {
+  document.getElementById('loginBtn').addEventListener('click', Actions.login);
+  document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') Actions.login();
+  });
+
+  document.getElementById('registerBtn').addEventListener('click', function() {
+    openModal('registerModal');
+    document.getElementById('regUsername').value = '';
+    document.getElementById('regPassword').value = '';
+    document.getElementById('regAnswer').value = '';
+    document.getElementById('regCustomQuestion').value = '';
+    document.getElementById('regCustomQuestion').style.display = 'none';
+    document.getElementById('regError').style.display = 'none';
+  });
+  document.getElementById('regCancelBtn').addEventListener('click', function() {
+    closeModal('registerModal');
+  });
+  document.getElementById('regSubmitBtn').addEventListener('click', Actions.register);
+  document.getElementById('regQuestion').addEventListener('change', function() {
+    document.getElementById('regCustomQuestion').style.display = this.value === '__custom__' ? 'block' : 'none';
+  });
+
+  document.getElementById('forgotPwdLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    openModal('forgotModal');
+    document.getElementById('forgotQuestionGroup').style.display = 'none';
+    document.getElementById('forgotNewPwdGroup').style.display = 'none';
+    document.getElementById('forgotStepBtn').textContent = '验证';
+    document.getElementById('forgotUsername').value = '';
+    document.getElementById('forgotAnswer').value = '';
+    document.getElementById('forgotNewPwd').value = '';
+    document.getElementById('forgotError').style.display = 'none';
+  });
+  document.getElementById('forgotStepBtn').addEventListener('click', Actions.forgotPassword);
+  document.getElementById('forgotCancelBtn').addEventListener('click', function() {
+    closeModal('forgotModal');
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', Actions.logout);
+
+  document.getElementById('modeFast').addEventListener('click', function() {
+    Renderer.setMode('fast');
+  });
+  document.getElementById('modeFull').addEventListener('click', function() {
+    Renderer.setMode('full');
+  });
+  document.getElementById('subSpeed').addEventListener('click', function() {
+    Renderer.setSubMode('speed');
+  });
+  document.getElementById('subDeep').addEventListener('click', function() {
+    Renderer.setSubMode('deep');
+  });
+
+  document.getElementById('aiGrid').addEventListener('click', function(e) {
+    const chip = e.target.closest('.ai-chip');
+    if (!chip) return;
+    const id = chip.dataset.id;
+    Renderer.toggleAI(id);
+  });
+
+  document.getElementById('startBtn').addEventListener('click', Actions.startAnalysis);
 }
 
-// ================================================================
-//  分享、兑换、反馈
-// ================================================================
-function showShareModal() { document.getElementById("shareModal").classList.add("show"); }
-function closeShareModal() { document.getElementById("shareModal").classList.remove("show"); }
-function grantShareReward() {
-  const u = users[currentUser];
-  const now = Date.now();
-  const today = new Date().toDateString();
-  if (u.shareDate !== today) { u.shareCount = 0; u.shareDate = today; u.shareLastTime = 0; }
-  if (u.shareCount >= 3) { alert("今日分享已达上限（3次）"); return false; }
-  if (now - (u.shareLastTime || 0) < 5 * 60 * 1000) { alert("两次分享至少间隔5分钟"); return false; }
-  u.shareCount++; u.shareLastTime = now; u.fastCount += 1;
-  saveUsersToStorage(); updateUI();
-  alert("✅ 分享成功！获得1次快速分析");
-  return true;
-}
-function doShare(target) {
-  const url = window.location.href;
-  if (target === 'wechat') {
-    window.open(`https://api.addthis.com/oexchange/0.8/forward/wechat/offer?url=${encodeURIComponent(url)}`, '_blank');
-    setTimeout(() => { if (document.getElementById("shareModal").classList.contains("show")) grantShareReward(); }, 6000);
-  } else if (target === 'qq') {
-    window.open(`https://api.addthis.com/oexchange/0.8/forward/qq/offer?url=${encodeURIComponent(url)}`, '_blank');
-    setTimeout(() => { if (document.getElementById("shareModal").classList.contains("show")) grantShareReward(); }, 6000);
-  } else if (target === 'copy') {
-    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(url).catch(() => {}); }
-    else { const ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }
-    alert("链接已复制，分享给好友可获得奖励（需通过微信/QQ分享）");
-    closeShareModal();
-  }
-}
-function showRechargeModal() {
-  const modal = document.getElementById("rechargeModal");
-  const container = document.getElementById("packageList");
-  container.innerHTML = `
-    <div class="package-item" data-type="energy"><strong>✨ 能量包</strong> 10元 / 10点</div>
-    <div class="package-item" data-type="fast"><strong>⚡ 快速包</strong> 3-8元 / 20次</div>
-    <div class="package-item" data-type="full"><strong>🧠 完整包</strong> 10-30元 / 15-20次</div>
-  `;
-  document.querySelectorAll(".package-item").forEach(el => el.onclick = () => { window.location.href = "biao.html"; });
-  modal.classList.add("show");
-}
-function redeemCode() {
-  const code = document.getElementById("redeemCode").value.trim().toUpperCase();
-  if (!code) return alert("请输入兑换码");
-  const map = {
-    'K2-': { type:'fast', count:20 }, 'K3-': { type:'fast', count:20 }, 'K4-': { type:'fast', count:20 },
-    'W2F-': { type:'full', count:15 }, 'W2D-': { type:'full', count:15 },
-    'W3F-': { type:'full', count:15 }, 'W3D-': { type:'full', count:15 },
-    'W4F-': { type:'full', count:20 }, 'W4D-': { type:'full', count:20 },
-    'E-': { type:'energy', count:10 }
-  };
-  let matched = null;
-  for (const [prefix, info] of Object.entries(map)) {
-    if (code.startsWith(prefix)) { matched = info; break; }
-  }
-  if (!matched) return alert("无效兑换码");
-  const u = users[currentUser];
-  if (matched.type === 'fast') { u.fastCount = (u.fastCount||0) + matched.count; alert(`兑换成功！+${matched.count}次快速`); }
-  else if (matched.type === 'full') { u.fullCount = (u.fullCount||0) + matched.count; alert(`兑换成功！+${matched.count}次完整`); }
-  else if (matched.type === 'energy') { u.points = (u.points||0) + matched.count; alert(`兑换成功！+${matched.count}能量点`); }
-  saveUsersToStorage(); updateUI();
-  document.getElementById("redeemCode").value = "";
-  closeModal("rechargeModal");
-}
-function showFeedbackModal() { document.getElementById("feedbackModal").classList.add("show"); }
-function sendFeedback() {
-  const content = document.getElementById("feedbackContent").value.trim();
-  if (!content) return alert("请输入反馈内容");
-  window.location.href = `mailto:luoyang451134850@gmail.com?subject=裁决者用户反馈&body=${encodeURIComponent(content)}`;
-  document.getElementById("feedbackContent").value = "";
-  closeModal("feedbackModal");
-  alert("已打开邮件客户端，请发送即可。");
-}
-function closeModal(id) { document.getElementById(id).classList.remove("show"); }
-function showToast(msg) {
-  const toast = document.getElementById("toast");
-  toast.textContent = msg;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 2000);
-}
-function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[m])); }
-
-// ================================================================
-//  初始化
-// ================================================================
+// ===== 初始化 =====
 function init() {
-  loadUsersFromStorage();
-  const savedUser = localStorage.getItem("aiJudge_remember");
-  if (savedUser && users[savedUser]) {
-    currentUser = savedUser;
-    showMainScreen();
-  } else {
-    showAuthScreen();
+  Renderer.showAuth();
+
+  const savedUser = DataStore.getRemember();
+  if (savedUser && DataStore.getUser(savedUser)) {
+    AppState.currentUser = savedUser;
+    Renderer.showMain();
   }
-  document.getElementById("registerBtn").onclick = register;
-  document.getElementById("loginBtn").onclick = login;
-  document.getElementById("logoutBtn").onclick = logout;
-  document.getElementById("feedbackBtn").onclick = showFeedbackModal;
-  document.getElementById("closeRechargeModal").onclick = () => closeModal("rechargeModal");
-  document.getElementById("closeFeedbackModal").onclick = () => closeModal("feedbackModal");
-  document.getElementById("redeemBtn").onclick = redeemCode;
-  document.getElementById("sendFeedbackBtn").onclick = sendFeedback;
-  document.getElementById("modeFast").onclick = () => setMode("fast");
-  document.getElementById("modeFull").onclick = () => setMode("full");
-  document.getElementById("subSpeed").onclick = () => setSubMode("speed");
-  document.getElementById("subDeep").onclick = () => setSubMode("deep");
-  document.getElementById("submitBtn").onclick = startDiscussion;
-  document.getElementById("interruptBtn").onclick = sendInterrupt;
-  document.getElementById("shareRewardBtn").onclick = showShareModal;
-  document.getElementById("closeShareModal").onclick = closeShareModal;
-  document.getElementById("shareWechatBtn").onclick = () => doShare('wechat');
-  document.getElementById("shareQQBtn").onclick = () => doShare('qq');
-  document.getElementById("shareCopyBtn").onclick = () => doShare('copy');
-  document.getElementById("rechargeBtn").onclick = showRechargeModal;
-  setMode("fast");
-  
-  // 初始化AI选择状态
-  initAISelection();
+
+  bindEvents();
+
+  console.log('✅ 第3批稳定版已加载（无兑换码）');
+  console.log('🏪 点击"商城"跳转到 biao.html 进行兑换');
 }
-init();
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
