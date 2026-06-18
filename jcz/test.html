@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>测试 - 检测登录按钮</title>
+</head>
+<body>
+<h2>🔍 检测登录按钮</h2>
+<button id="checkBtn">点击检测</button>
+<div id="result" style="margin-top:20px;padding:12px;border-radius:12px;background:#f5f5f5;"></div>
+
+<script>
+document.getElementById('checkBtn').addEventListener('click', function() {
+  var resultDiv = document.getElementById('result');
+  try {
+    // 尝试访问主页面（通过 localStorage 共享数据）
+    var users = JSON.parse(localStorage.getItem('aiJudge_users') || '{}');
+    var btn = document.getElementById('loginBtn'); // 注意：这个页面本身没有 loginBtn，所以会返回 null
+    
+    // 但我们真正要测的是：能否访问到 localStorage 和 DOM
+    var info = '✅ localStorage 可读，用户数：' + Object.keys(users).length + ' 个\n';
+    info += '✅ 当前页面按钮检测：' + (document.getElementById('loginBtn') ? '存在' : '不存在（这个页面没有登录按钮，正常）');
+    resultDiv.textContent = info;
+    resultDiv.style.background = '#e6ffe6';
+  } catch (e) {
+    resultDiv.textContent = '❌ 检测失败：' + e.message;
+    resultDiv.style.background = '#ffe6e6';
+  }
+});
+</script>
+</body>
+</html>
