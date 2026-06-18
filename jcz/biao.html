@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI裁决者 · 商店</title>
+    <title>商城</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -130,7 +130,6 @@
         }
         .status-bar .logout-btn:hover { background:#c0392b; }
 
-        /* 升级套餐卡片 */
         .upgrade-card {
             background: linear-gradient(135deg, #f0f4ff, #e6edfe);
             border: 2px dashed #4a6cf7;
@@ -172,10 +171,9 @@
             transition: 0.2s;
             white-space: nowrap;
         }
-        .btn-upgrade:hover { background: #3a56d4; transform:scale(1.02); }
+        .btn-upgrade:hover { background:#3a56d4; transform:scale(1.02); }
         .btn-upgrade:active { transform:scale(0.96); }
 
-        /* 弹窗遮罩 */
         .modal-overlay {
             position: fixed;
             top:0; left:0; width:100%; height:100%;
@@ -322,14 +320,14 @@
 </head>
 <body>
 
-    <h1>🏪 AI裁决者 · 商店</h1>
+    <!-- ===== 顶部标题：只保留“商城” ===== -->
+    <h1>🏪 商城</h1>
 
     <div class="status-bar" id="statusBar">
         <span>👤 <span id="displayUser" class="user">未登录</span></span>
         <button class="logout-btn" id="logoutBtn">退出登录</button>
     </div>
 
-    <!-- ===== 升级套餐入口 ===== -->
     <div class="upgrade-card" id="upgradeCard">
         <div class="info">
             <span class="icon">🔄</span>
@@ -341,7 +339,6 @@
         <button class="btn-upgrade" id="openUpgradeBtn">点击查看可升级套餐 →</button>
     </div>
 
-    <!-- ===== 价格表 ===== -->
     <div class="card">
         <h2>📋 套餐价格</h2>
         <table>
@@ -350,7 +347,7 @@
                     <th>套餐</th>
                     <th>价格</th>
                     <th>次数</th>
-                    <th>等级</th>   <!-- 已彻底移除“模型”，改为“等级” -->
+                    <th>等级</th>
                     <th>购买</th>
                 </tr>
             </thead>
@@ -358,7 +355,6 @@
         </table>
     </div>
 
-    <!-- ===== 兑换码 ===== -->
     <div class="card">
         <h2>🎫 兑换码</h2>
         <div class="code-area">
@@ -368,31 +364,28 @@
         <div id="msgBox" class="msg"></div>
     </div>
 
-    <!-- ===== 消费记录 ===== -->
     <div class="card">
         <h2>📊 消费记录</h2>
         <div id="recordContainer"></div>
     </div>
 
+    <!-- ===== 底部返回链接：改为“回到主页” ===== -->
     <div style="text-align:center; margin-top:10px;">
-        <a href="index.html" class="back-link">← 返回 AI裁决者 主程序</a>
+        <a href="index.html" class="back-link">← 回到主页</a>
     </div>
 
-    <!-- ===== 升级弹窗 ===== -->
     <div class="modal-overlay" id="upgradeModal">
         <div class="modal-box">
             <button class="close-icon" id="closeModalBtn">✕</button>
             <h2>🔄 升级套餐</h2>
             <div class="sub">选择目标套餐，系统自动计算补差价</div>
-            <div id="modalContent">
-                <!-- 动态渲染 -->
-            </div>
+            <div id="modalContent"></div>
         </div>
     </div>
 
     <script>
         // ============================================================
-        // 套餐数据 —— 已移除所有模型字段，仅保留等级（普通/进阶/专业）
+        // 套餐数据 —— 保留“AI”
         // ============================================================
         const PACKAGES = [
             { id: 'K2', label: '快速2AI', price: 3, count: 20, level: '普通', buyLink: '#' },
@@ -415,9 +408,6 @@
             'E-':'E'
         };
 
-        // ============================================================
-        // localStorage 工具
-        // ============================================================
         function getUsers() {
             try { return JSON.parse(localStorage.getItem('aiJudge_users')) || {}; } catch { return {}; }
         }
@@ -432,9 +422,6 @@
             else localStorage.removeItem('aiJudge_remember');
         }
 
-        // ============================================================
-        // 状态栏
-        // ============================================================
         function updateStatusBar() {
             const name = getRememberUser();
             document.getElementById('displayUser').textContent = name || '未登录';
@@ -446,9 +433,6 @@
             showMsg('已退出登录', 'info');
         });
 
-        // ============================================================
-        // 渲染价格表
-        // ============================================================
         function renderPriceTable() {
             const tbody = document.getElementById('priceBody');
             tbody.innerHTML = PACKAGES.map((p, index) => {
@@ -456,7 +440,7 @@
                     <td><strong>${p.label}</strong></td>
                     <td>${p.price} 元</td>
                     <td>${p.count} 次</td>
-                    <td>${p.level}</td>   <!-- 这里显示等级，不再显示模型 -->
+                    <td>${p.level}</td>
                     <td>
                         <button class="btn-buy" data-index="${index}">购买</button>
                     </td>
@@ -477,9 +461,6 @@
             });
         }
 
-        // ============================================================
-        // 消费记录
-        // ============================================================
         function renderRecords() {
             const container = document.getElementById('recordContainer');
             const username = getRememberUser();
@@ -507,9 +488,6 @@
             container.innerHTML = html;
         }
 
-        // ============================================================
-        // 消息提示
-        // ============================================================
         function showMsg(text, type) {
             const box = document.getElementById('msgBox');
             box.textContent = text;
@@ -518,9 +496,6 @@
             setTimeout(() => { box.style.display = 'none'; }, 5000);
         }
 
-        // ============================================================
-        // 兑换逻辑
-        // ============================================================
         function redeemCode() {
             const input = document.getElementById('codeInput');
             const code = input.value.trim();
@@ -569,7 +544,8 @@
 
             user.usedCodes.push(code);
             const now = new Date();
-            const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            const timeStr =
+                `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
             user.records.push({
                 time: timeStr,
                 fastChange: fastChange || 0,
@@ -586,9 +562,6 @@
             renderRecords();
         }
 
-        // ============================================================
-        // 升级套餐逻辑
-        // ============================================================
         function getPkgType(id) {
             if (id.startsWith('K')) return 'fast';
             if (id.startsWith('W')) return 'full';
@@ -677,9 +650,7 @@
             `;
             container.innerHTML = html;
 
-            // 处理当前套餐选择
             let currentSelectedIdx = 0;
-            // 默认选第一个非能量包
             for (let i = 0; i < packages.length; i++) {
                 if (packages[i].type !== 'energy') {
                     currentSelectedIdx = i;
@@ -748,7 +719,6 @@
                 });
             }
 
-            // 如果有多个非能量包，让用户选择当前套餐
             const nonEnergyPackages = packages.filter(p => p.type !== 'energy');
             if (nonEnergyPackages.length > 1) {
                 const pickContainer = document.createElement('div');
@@ -756,15 +726,14 @@
                 nonEnergyPackages.forEach((item, idx) => {
                     const btn = document.createElement('button');
                     btn.className = 'btn-upgrade';
-                    btn.style.cssText = `padding:4px 16px;font-size:13px;background:${idx === currentSelectedIdx ? '#4a6cf7' : '#e8edf5'};color:${idx === currentSelectedIdx ? 'white' : '#333'};`;
+                    btn.style.cssText =
+                        `padding:4px 16px;font-size:13px;background:${idx === currentSelectedIdx ? '#4a6cf7' : '#e8edf5'};color:${idx === currentSelectedIdx ? 'white' : '#333'};`;
                     btn.textContent = `${item.pkg.label}（剩${item.remain}次）`;
                     btn.dataset.pick = idx;
                     pickContainer.appendChild(btn);
                 });
-                // 插入到目标列表之前
                 const targetList = document.getElementById('targetPkgList');
                 targetList.parentNode.insertBefore(pickContainer, targetList);
-                // 绑定事件
                 pickContainer.querySelectorAll('[data-pick]').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const idx = parseInt(this.dataset.pick);
@@ -832,7 +801,8 @@
                     }
                     if (!userData.records) userData.records = [];
                     const now = new Date();
-                    const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                    const timeStr =
+                        `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
                     userData.records.push({
                         time: timeStr,
                         fastChange: currentItem.type === 'fast' ? `升级→${targetPkg.label}` : '-',
@@ -858,9 +828,6 @@
             }
         }
 
-        // ============================================================
-        // 升级弹窗开关
-        // ============================================================
         document.getElementById('openUpgradeBtn').addEventListener('click', function() {
             const modal = document.getElementById('upgradeModal');
             modal.classList.add('active');
@@ -877,9 +844,6 @@
             }
         });
 
-        // ============================================================
-        // 初始化
-        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             renderPriceTable();
             updateStatusBar();
@@ -896,5 +860,6 @@
             });
         });
     </script>
+
 </body>
 </html>
