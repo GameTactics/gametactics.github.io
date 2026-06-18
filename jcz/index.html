@@ -335,7 +335,7 @@ textarea:focus { border-color: #4f46e5; }
       <div class="header-top">
         <span class="username" id="usernameDisplay">用户</span>
         <div>
-          <a href="biao.html" class="btn-outline" style="margin-right:6px;display:inline-block;text-decoration:none;">🏪 商城</a>
+          <a href="biao.html?refresh=true" class="btn-outline" style="margin-right:6px;display:inline-block;text-decoration:none;">🏪 商城</a>
           <button class="btn-outline" id="logoutBtn">退出</button>
         </div>
       </div>
@@ -451,14 +451,14 @@ textarea:focus { border-color: #4f46e5; }
 
 <script>
 // ================================================================
-//  第3批稳定版 - 修复数据同步和登录框残留问题
-//  改动：showAuth 清空输入框，showMain 强制刷新数据
+//  第3批稳定版 - 修复数据同步 + 登录框残留 + 强制刷新
+//  改动：init() 检测 refresh=true 并强制刷新页面
 // ================================================================
 
 // ===== 配置 =====
 const CONFIG = {
   APP_NAME: '裁决者',
-  VERSION: '3.0.1-fix',
+  VERSION: '3.0.2-fix',
   API_KEY: 'sk-77c9585915d74ea09093d6994f33d68b',
   API_URL: 'https://api.deepseek.com/v1/chat/completions',
   MODEL_FAST: 'deepseek-chat',
@@ -565,7 +565,7 @@ const Renderer = {
   showAuth() {
     document.getElementById('authScreen').style.display = 'flex';
     document.getElementById('mainScreen').style.display = 'none';
-    // 修复：清空输入框，避免残留
+    // 清空输入框，避免残留
     document.getElementById('loginUsername').value = '';
     document.getElementById('loginPassword').value = '';
     document.getElementById('loginError').textContent = '';
@@ -573,21 +573,13 @@ const Renderer = {
   showMain() {
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('mainScreen').style.display = 'block';
-    // 修复：强制重新加载用户数据
-    if (AppState.currentUser) {
-      const freshUser = DataStore.getUser(AppState.currentUser);
-      if (freshUser) {
-        // 更新 AppState 中的数据（如果有缓存的的话），但此处直接更新UI
-        // 实际 updateUI 会重新读取，但为了保险，我们在这里先重新读取一次
-      }
-    }
-    this.updateUI(); // 会重新从 DataStore 读取最新数据
+    // 强制重新读取数据
+    this.updateUI();
     this.renderAIGrid();
     this.setMode('fast');
   },
   updateUI() {
     if (!AppState.currentUser) return;
-    // 每次都从 DataStore 重新获取最新数据
     const user = DataStore.getUser(AppState.currentUser);
     if (!user) return;
     document.getElementById('usernameDisplay').textContent = AppState.currentUser;
@@ -1076,6 +1068,13 @@ function bindEvents() {
 
 // ===== 初始化 =====
 function init() {
+  // 检查是否有 refresh 参数，若有则强制刷新页面（去掉参数）
+  if (window.location.search.includes('refresh=true')) {
+    // 去掉参数并刷新，确保重新加载
+    window.location.replace(window.location.pathname);
+    return; // 不再继续执行
+  }
+
   Renderer.showAuth();
 
   const savedUser = DataStore.getRemember();
@@ -1086,8 +1085,8 @@ function init() {
 
   bindEvents();
 
-  console.log('✅ 第3批稳定版（修复数据同步 + 清空登录框）已加载');
-  console.log('🏪 点击"商城"跳转到 biao.html 进行兑换');
+  console.log('✅ 第3批稳定版（修复数据同步 + 清空登录框 + 强制刷新）已加载');
+  console.log('🏪 点击"商城"跳转到 biao.html?refresh=true 进行兑换');
 }
 
 document.addEventListener('DOMContentLoaded', init);
