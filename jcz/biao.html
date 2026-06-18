@@ -129,14 +129,182 @@
             font-size:13px;
         }
         .status-bar .logout-btn:hover { background:#c0392b; }
-        .soon-tag {
-            font-size:12px;
-            color:#999;
-            background:#f0f0f0;
-            padding:4px 12px;
-            border-radius:12px;
-            display:inline-block;
+
+        /* 升级套餐卡片 */
+        .upgrade-card {
+            background: linear-gradient(135deg, #f0f4ff, #e6edfe);
+            border: 2px dashed #4a6cf7;
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
         }
+        .upgrade-card .info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .upgrade-card .info .icon {
+            font-size: 28px;
+        }
+        .upgrade-card .info .text h3 {
+            font-size: 17px;
+            color: #1a1a2e;
+        }
+        .upgrade-card .info .text p {
+            font-size: 14px;
+            color: #555;
+            margin-top: 2px;
+        }
+        .btn-upgrade {
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .btn-upgrade:hover { background: #3a56d4; transform:scale(1.02); }
+        .btn-upgrade:active { transform:scale(0.96); }
+
+        /* 弹窗遮罩 */
+        .modal-overlay {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 20px;
+            padding: 28px 32px;
+            max-width: 560px;
+            width: 92%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .modal-box h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #1a1a2e;
+        }
+        .modal-box .sub {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 18px;
+        }
+        .modal-box .current-pkg {
+            background: #f5f7fb;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .modal-box .current-pkg strong { color: #1a1a2e; }
+        .modal-box .pkg-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 12px 0 20px 0;
+        }
+        .modal-box .pkg-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border: 2px solid #e8edf5;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #fafcff;
+        }
+        .modal-box .pkg-option:hover { border-color: #4a6cf7; background:#f0f4ff; }
+        .modal-box .pkg-option.selected { border-color: #4a6cf7; background:#e6edfe; }
+        .modal-box .pkg-option .name { font-weight:600; color:#1a1a2e; }
+        .modal-box .pkg-option .price { font-size:14px; color:#4a6cf7; font-weight:600; }
+        .modal-box .pkg-option .diff { font-size:13px; color:#e74c3c; font-weight:600; }
+        .modal-box .btn-group {
+            display: flex;
+            gap:12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .modal-box .btn-group .btn-confirm {
+            flex:1;
+            background:#4a6cf7;
+            color:white;
+            border:none;
+            padding:12px;
+            border-radius:10px;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.2s;
+            min-width:120px;
+        }
+        .modal-box .btn-group .btn-confirm:hover { background:#3a56d4; }
+        .modal-box .btn-group .btn-confirm:disabled {
+            background:#ccc;
+            cursor:not-allowed;
+        }
+        .modal-box .btn-group .btn-cancel {
+            flex:1;
+            background:#e8edf5;
+            color:#333;
+            border:none;
+            padding:12px;
+            border-radius:10px;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.2s;
+            min-width:120px;
+        }
+        .modal-box .btn-group .btn-cancel:hover { background:#d5dce6; }
+        .modal-box .empty-tip {
+            text-align:center;
+            padding:20px 0;
+            color:#888;
+            font-size:15px;
+        }
+        .modal-box .empty-tip .btn-go-buy {
+            display:inline-block;
+            margin-top:12px;
+            background:#4a6cf7;
+            color:white;
+            border:none;
+            padding:8px 24px;
+            border-radius:8px;
+            cursor:pointer;
+            font-size:14px;
+            font-weight:600;
+        }
+        .modal-box .empty-tip .btn-go-buy:hover { background:#3a56d4; }
+        .modal-box .close-icon {
+            position: absolute;
+            top:12px; right:16px;
+            font-size:24px;
+            cursor:pointer;
+            color:#999;
+            background:none;
+            border:none;
+        }
+        .modal-box .close-icon:hover { color:#333; }
+
         @media (max-width:600px) {
             body { padding:12px; }
             table { font-size:12px; }
@@ -145,6 +313,10 @@
             .code-area input { width:100%; }
             .btn { width:100%; text-align:center; }
             .btn-buy { padding:4px 12px; font-size:12px; }
+            .upgrade-card { flex-direction:column; align-items:stretch; text-align:center; }
+            .btn-upgrade { width:100%; text-align:center; }
+            .modal-box { padding:20px; }
+            .modal-box .pkg-option { flex-wrap:wrap; gap:4px; }
         }
     </style>
 </head>
@@ -157,7 +329,19 @@
         <button class="logout-btn" id="logoutBtn">退出登录</button>
     </div>
 
-    <!-- 价格表 -->
+    <!-- ===== 升级套餐入口 ===== -->
+    <div class="upgrade-card" id="upgradeCard">
+        <div class="info">
+            <span class="icon">🔄</span>
+            <div class="text">
+                <h3>升级套餐</h3>
+                <p>从低配套餐升级到高配，只需补差价即可</p>
+            </div>
+        </div>
+        <button class="btn-upgrade" id="openUpgradeBtn">点击查看可升级套餐 →</button>
+    </div>
+
+    <!-- ===== 价格表 ===== -->
     <div class="card">
         <h2>📋 套餐价格</h2>
         <table>
@@ -166,7 +350,7 @@
                     <th>套餐</th>
                     <th>价格</th>
                     <th>次数</th>
-                    <th>模型</th>
+                    <th>等级</th>
                     <th>购买</th>
                 </tr>
             </thead>
@@ -174,7 +358,7 @@
         </table>
     </div>
 
-    <!-- 兑换码 -->
+    <!-- ===== 兑换码 ===== -->
     <div class="card">
         <h2>🎫 兑换码</h2>
         <div class="code-area">
@@ -184,7 +368,7 @@
         <div id="msgBox" class="msg"></div>
     </div>
 
-    <!-- 消费记录 -->
+    <!-- ===== 消费记录 ===== -->
     <div class="card">
         <h2>📊 消费记录</h2>
         <div id="recordContainer"></div>
@@ -194,21 +378,33 @@
         <a href="index.html" class="back-link">← 返回 AI裁决者 主程序</a>
     </div>
 
+    <!-- ===== 升级弹窗 ===== -->
+    <div class="modal-overlay" id="upgradeModal">
+        <div class="modal-box">
+            <button class="close-icon" id="closeModalBtn">✕</button>
+            <h2>🔄 升级套餐</h2>
+            <div class="sub">选择目标套餐，系统自动计算补差价</div>
+            <div id="modalContent">
+                <!-- 动态渲染 -->
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================================
-        // 套餐数据（buyLink 暂时为 #，等面包多链接来了替换）
+        // 套餐数据
         // ============================================================
         const PACKAGES = [
-            { id: 'K2', label: '快速2AI', price: 3, count: 20, model: 'deepseek-chat', buyLink: '#' },
-            { id: 'K3', label: '快速3AI', price: 5.5, count: 20, model: 'deepseek-chat', buyLink: '#' },
-            { id: 'K4', label: '快速4AI', price: 8, count: 20, model: 'deepseek-chat', buyLink: '#' },
-            { id: 'W2F', label: '完整2AI-极速', price: 10, count: 15, model: 'deepseek-chat', buyLink: '#' },
-            { id: 'W2D', label: '完整2AI-深度', price: 15, count: 15, model: 'deepseek-v4-pro', buyLink: '#' },
-            { id: 'W3F', label: '完整3AI-极速', price: 15, count: 15, model: 'deepseek-chat', buyLink: '#' },
-            { id: 'W3D', label: '完整3AI-深度', price: 22, count: 15, model: 'deepseek-v4-pro', buyLink: '#' },
-            { id: 'W4F', label: '完整4AI-极速', price: 20, count: 20, model: 'deepseek-chat', buyLink: '#' },
-            { id: 'W4D', label: '完整4AI-深度', price: 30, count: 20, model: 'deepseek-v4-pro', buyLink: '#' },
-            { id: 'E', label: '能量包', price: 8, count: 10, model: '用户自选', buyLink: '#' }
+            { id: 'K2', label: '快速2AI', price: 3, count: 20, level: '普通', buyLink: '#' },
+            { id: 'K3', label: '快速3AI', price: 5.5, count: 20, level: '普通', buyLink: '#' },
+            { id: 'K4', label: '快速4AI', price: 8, count: 20, level: '普通', buyLink: '#' },
+            { id: 'W2F', label: '完整2AI-极速', price: 10, count: 15, level: '进阶', buyLink: '#' },
+            { id: 'W2D', label: '完整2AI-深度', price: 15, count: 15, level: '专业', buyLink: '#' },
+            { id: 'W3F', label: '完整3AI-极速', price: 15, count: 15, level: '进阶', buyLink: '#' },
+            { id: 'W3D', label: '完整3AI-深度', price: 22, count: 15, level: '专业', buyLink: '#' },
+            { id: 'W4F', label: '完整4AI-极速', price: 20, count: 20, level: '进阶', buyLink: '#' },
+            { id: 'W4D', label: '完整4AI-深度', price: 30, count: 20, level: '专业', buyLink: '#' },
+            { id: 'E', label: '能量包', price: 8, count: 10, level: '灵活', buyLink: '#' }
         ];
 
         const CODE_PREFIX_MAP = {
@@ -251,7 +447,7 @@
         });
 
         // ============================================================
-        // 渲染价格表（含购买按钮，点击弹窗提示）
+        // 渲染价格表
         // ============================================================
         function renderPriceTable() {
             const tbody = document.getElementById('priceBody');
@@ -260,24 +456,21 @@
                     <td><strong>${p.label}</strong></td>
                     <td>${p.price} 元</td>
                     <td>${p.count} 次</td>
-                    <td>${p.model}</td>
+                    <td>${p.level}</td>
                     <td>
                         <button class="btn-buy" data-index="${index}">购买</button>
                     </td>
                 </tr>`;
             }).join('');
 
-            // 给所有购买按钮绑定点击事件
             document.querySelectorAll('.btn-buy').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const idx = parseInt(this.dataset.index);
                     const pkg = PACKAGES[idx];
-                    // 如果链接为 '#' 则弹窗提示即将上线
                     if (pkg.buyLink === '#') {
                         alert('该套餐即将上线，敬请期待！');
                     } else {
-                        // 如果已经配置了真实链接，直接跳转
                         window.open(pkg.buyLink, '_blank');
                     }
                 });
@@ -326,7 +519,7 @@
         }
 
         // ============================================================
-        // 兑换逻辑（含一次有效）
+        // 兑换逻辑
         // ============================================================
         function redeemCode() {
             const input = document.getElementById('codeInput');
@@ -352,7 +545,6 @@
             const pkg = PACKAGES.find(p => p.id === matchedPkgId);
             if (!pkg) { showMsg('❌ 套餐不存在', 'error'); return; }
 
-            // 初始化
             if (!user.fastCount) user.fastCount = 0;
             if (!user.fullCount) user.fullCount = 0;
             if (!user.energy) user.energy = 0;
@@ -393,6 +585,340 @@
             showMsg(`✅ 兑换成功！+${pkg.count} 次（${pkg.label}）`, 'success');
             renderRecords();
         }
+
+        // ============================================================
+        // 升级套餐逻辑
+        // ============================================================
+        // 判断套餐类型：快速(K开头)、完整(W开头)、能量包(E)
+        function getPkgType(id) {
+            if (id.startsWith('K')) return 'fast';
+            if (id.startsWith('W')) return 'full';
+            return 'energy';
+        }
+
+        // 获取用户当前拥有的套餐列表（从用户数据中推断）
+        function getUserPackages(user) {
+            const list = [];
+            // 快速包：如果有 fastCount > 0，认为拥有快速包
+            // 但具体是哪个快速包？我们用 fastCount 来推断用户可能购买过快速包
+            // 为了简化，我们假设用户当前拥有的是"最近购买"的套餐，这里用 PACKAGES 中匹配的
+            // 更准确：遍历所有 K 开头的，看用户有没有对应的购买记录
+            // 由于我们没存购买记录，用次数判断：如果 fastCount > 0 且 fastCount 是某个套餐次数的倍数？
+            // 暂时简化：如果 fastCount > 0，列出所有快速包供用户选择当前套餐
+            if (user.fastCount > 0) {
+                PACKAGES.filter(p => p.id.startsWith('K')).forEach(p => {
+                    list.push({ pkg: p, remain: user.fastCount, type: 'fast' });
+                });
+            }
+            if (user.fullCount > 0) {
+                PACKAGES.filter(p => p.id.startsWith('W')).forEach(p => {
+                    list.push({ pkg: p, remain: user.fullCount, type: 'full' });
+                });
+            }
+            // 能量包单独处理
+            if (user.energy > 0) {
+                const ep = PACKAGES.find(p => p.id === 'E');
+                if (ep) list.push({ pkg: ep, remain: user.energy, type: 'energy' });
+            }
+            return list;
+        }
+
+        // 计算补差价
+        function calcUpgradePrice(currentPkg, targetPkg, usedCount) {
+            const totalPrice = currentPkg.price;
+            const unitPrice = totalPrice / currentPkg.count;
+            const usedValue = usedCount * unitPrice;
+            const remainValue = Math.max(0, totalPrice - usedValue);
+            const diff = Math.max(0, targetPkg.price - remainValue);
+            return { remainValue, usedValue, diff, unitPrice };
+        }
+
+        // 渲染升级弹窗
+        function renderUpgradeModal() {
+            const container = document.getElementById('modalContent');
+            const username = getRememberUser();
+            if (!username) {
+                container.innerHTML = `<div class="empty-tip">⚠️ 请先登录，再升级套餐。</div>`;
+                return;
+            }
+            const users = getUsers();
+            const user = users[username];
+            if (!user) {
+                container.innerHTML = `<div class="empty-tip">⚠️ 用户数据不存在，请重新登录。</div>`;
+                return;
+            }
+
+            // 获取用户拥有的套餐
+            const packages = getUserPackages(user);
+            if (packages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-tip">
+                        <p>您还没有任何套餐，请先购买套餐后再升级。</p>
+                        <button class="btn-go-buy" id="goBuyBtn">去购买套餐</button>
+                    </div>
+                `;
+                const goBtn = document.getElementById('goBuyBtn');
+                if (goBtn) {
+                    goBtn.addEventListener('click', function() {
+                        document.getElementById('upgradeModal').classList.remove('active');
+                        document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+                    });
+                }
+                return;
+            }
+
+            // 如果用户有多个套餐，让用户选择当前要升级的套餐
+            // 这里简化：默认选择第一个，或者让用户选择
+            // 更完善：显示所有套餐让用户选
+            let html = `<div style="margin-bottom:12px;font-size:14px;color:#555;">当前拥有的套餐：</div>`;
+            html += `<div class="current-pkg">`;
+            packages.forEach((item, idx) => {
+                html += `<div style="margin-bottom:4px;">
+                    <strong>${item.pkg.label}</strong>（剩余 ${item.remain} 次）
+                    ${packages.length > 1 ? `<button class="btn-upgrade" style="padding:2px 12px;font-size:12px;margin-left:8px;" data-select="${idx}">选择</button>` : ''}
+                </div>`;
+            });
+            html += `</div>`;
+
+            // 显示目标套餐选择
+            html += `<div style="font-size:14px;font-weight:600;margin:12px 0 8px;">选择目标套餐：</div>`;
+            html += `<div class="pkg-list" id="targetPkgList">`;
+            // 列出所有比当前套餐更高配置的套餐
+            // 这里简化：列出所有非能量包的套餐，且价格高于当前选中的套餐
+            // 由于用户可能有多个套餐，我们让用户先选当前套餐再列目标
+            // 这里用简单方式：假设用户想要升级快速或完整包
+            // 更合理：让用户点击选择当前套餐后，再显示可升级的目标
+            // 我们用按钮形式让用户选择当前套餐，然后动态更新目标列表
+
+            // 先默认选第一个非能量包套餐作为当前套餐
+            let selectedIdx = 0;
+            // 找第一个非能量包
+            for (let i = 0; i < packages.length; i++) {
+                if (packages[i].type !== 'energy') {
+                    selectedIdx = i;
+                    break;
+                }
+            }
+            // 如果全是能量包，则只能升级能量包？
+            // 能量包升级逻辑：可升级到更大的能量包？目前只有一种能量包，暂不支持升级
+            // 所以如果只有能量包，提示无法升级
+            const hasNonEnergy = packages.some(p => p.type !== 'energy');
+            if (!hasNonEnergy) {
+                container.innerHTML = `<div class="empty-tip">能量包暂不支持升级，您可以购买其他套餐。</div>`;
+                return;
+            }
+
+            // 保存当前选中的套餐索引
+            let currentSelectedIdx = selectedIdx;
+            // 渲染目标列表
+            function renderTargetList(selectedIdx) {
+                const currentItem = packages[selectedIdx];
+                if (!currentItem) return;
+                const currentPkg = currentItem.pkg;
+                const currentRemain = currentItem.remain;
+                const usedCount = currentPkg.count - currentRemain;
+
+                // 找出可升级的目标套餐：同类型（快速→快速，完整→完整），且配置更高（价格更高）
+                let targets = [];
+                if (currentItem.type === 'fast') {
+                    targets = PACKAGES.filter(p => p.id.startsWith('K') && p.price > currentPkg.price);
+                } else if (currentItem.type === 'full') {
+                    targets = PACKAGES.filter(p => p.id.startsWith('W') && p.price > currentPkg.price);
+                } else {
+                    // 能量包暂不支持升级
+                    targets = [];
+                }
+
+                const listContainer = document.getElementById('targetPkgList');
+                if (!listContainer) return;
+                if (targets.length === 0) {
+                    listContainer.innerHTML = `<div style="color:#888;padding:8px 0;">当前套餐已是最高配置，无需升级。</div>`;
+                    return;
+                }
+
+                let listHtml = '';
+                targets.forEach((target, idx) => {
+                    const result = calcUpgradePrice(currentPkg, target, usedCount);
+                    listHtml += `
+                        <div class="pkg-option" data-target="${idx}" style="cursor:pointer;">
+                            <span class="name">${target.label}</span>
+                            <span>
+                                <span class="price">${target.price}元/${target.count}次</span>
+                                <span class="diff"> → 补差价 ${result.diff.toFixed(2)}元</span>
+                            </span>
+                        </div>
+                    `;
+                });
+                listHtml += `<div style="font-size:13px;color:#888;margin-top:6px;">* 已用次数：${usedCount} 次，当前剩余价值：${calcUpgradePrice(currentPkg, targets[0] || currentPkg, usedCount).remainValue.toFixed(2)} 元</div>`;
+                listContainer.innerHTML = listHtml;
+
+                // 绑定点击事件
+                listContainer.querySelectorAll('.pkg-option').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.target);
+                        const target = targets[idx];
+                        if (!target) return;
+                        // 高亮选中
+                        listContainer.querySelectorAll('.pkg-option').forEach(e => e.classList.remove('selected'));
+                        this.classList.add('selected');
+                        // 启用确认按钮
+                        const confirmBtn = document.getElementById('confirmUpgradeBtn');
+                        if (confirmBtn) {
+                            confirmBtn.disabled = false;
+                            confirmBtn.dataset.targetId = target.id;
+                            confirmBtn.dataset.currentIdx = selectedIdx;
+                        }
+                    });
+                });
+            }
+
+            // 生成带当前套餐选择的界面
+            let finalHtml = html;
+            // 添加当前套餐选择（如果有多个非能量包）
+            const nonEnergyPackages = packages.filter(p => p.type !== 'energy');
+            if (nonEnergyPackages.length > 1) {
+                finalHtml += `<div style="margin:8px 0;font-size:14px;color:#555;">点击选择您要升级的当前套餐：</div>`;
+                finalHtml += `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">`;
+                nonEnergyPackages.forEach((item, idx) => {
+                    finalHtml += `
+                        <button class="btn-upgrade" style="padding:4px 16px;font-size:13px;background:${idx === currentSelectedIdx ? '#4a6cf7' : '#e8edf5'};color:${idx === currentSelectedIdx ? 'white' : '#333'};" data-pick="${idx}">
+                            ${item.pkg.label}（剩${item.remain}次）
+                        </button>
+                    `;
+                });
+                finalHtml += `</div>`;
+            }
+
+            finalHtml += `<div id="targetPkgList"></div>`;
+            finalHtml += `
+                <div class="btn-group">
+                    <button class="btn-confirm" id="confirmUpgradeBtn" disabled>确认升级</button>
+                    <button class="btn-cancel" id="cancelUpgradeBtn">取消</button>
+                </div>
+            `;
+            container.innerHTML = finalHtml;
+
+            // 绑定事件
+            // 切换当前套餐
+            container.querySelectorAll('[data-pick]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.pick);
+                    currentSelectedIdx = idx;
+                    // 更新按钮样式
+                    container.querySelectorAll('[data-pick]').forEach(b => {
+                        b.style.background = '#e8edf5';
+                        b.style.color = '#333';
+                    });
+                    this.style.background = '#4a6cf7';
+                    this.style.color = 'white';
+                    // 重新渲染目标列表
+                    renderTargetList(idx);
+                    // 重置确认按钮
+                    const confirmBtn = document.getElementById('confirmUpgradeBtn');
+                    if (confirmBtn) {
+                        confirmBtn.disabled = true;
+                        confirmBtn.dataset.currentIdx = idx;
+                    }
+                });
+            });
+
+            // 渲染目标列表
+            renderTargetList(currentSelectedIdx);
+
+            // 确认升级
+            const confirmBtn = document.getElementById('confirmUpgradeBtn');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function() {
+                    const targetId = this.dataset.targetId;
+                    const currentIdx = parseInt(this.dataset.currentIdx);
+                    if (!targetId) {
+                        alert('请先选择目标套餐');
+                        return;
+                    }
+                    const currentItem = packages[currentIdx];
+                    if (!currentItem) {
+                        alert('当前套餐数据异常');
+                        return;
+                    }
+                    const targetPkg = PACKAGES.find(p => p.id === targetId);
+                    if (!targetPkg) {
+                        alert('目标套餐不存在');
+                        return;
+                    }
+                    const usedCount = currentItem.pkg.count - currentItem.remain;
+                    const result = calcUpgradePrice(currentItem.pkg, targetPkg, usedCount);
+                    const confirmMsg = `确认升级？
+当前套餐：${currentItem.pkg.label}（剩余 ${currentItem.remain} 次）
+目标套餐：${targetPkg.label}（${targetPkg.count} 次）
+补差价：${result.diff.toFixed(2)} 元
+
+升级后，当前套餐剩余次数将清零，替换为目标套餐。`;
+                    if (!confirm(confirmMsg)) return;
+
+                    // 执行升级
+                    const usersData = getUsers();
+                    const userData = usersData[username];
+                    if (!userData) {
+                        alert('用户数据异常');
+                        return;
+                    }
+                    // 更新次数
+                    if (currentItem.type === 'fast') {
+                        userData.fastCount = targetPkg.count;
+                    } else if (currentItem.type === 'full') {
+                        userData.fullCount = targetPkg.count;
+                    } else {
+                        alert('能量包暂不支持升级');
+                        return;
+                    }
+                    // 记录消费记录
+                    if (!userData.records) userData.records = [];
+                    const now = new Date();
+                    const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                    userData.records.push({
+                        time: timeStr,
+                        fastChange: currentItem.type === 'fast' ? `升级→${targetPkg.label}` : '-',
+                        fastRemain: userData.fastCount || 0,
+                        fullChange: currentItem.type === 'full' ? `升级→${targetPkg.label}` : '-',
+                        fullRemain: userData.fullCount || 0,
+                        energyChange: '-',
+                        energyRemain: userData.energy || 0
+                    });
+                    saveUsers(usersData);
+                    alert(`✅ 升级成功！已升级为 ${targetPkg.label}，剩余 ${targetPkg.count} 次。`);
+                    document.getElementById('upgradeModal').classList.remove('active');
+                    renderRecords();
+                    updateStatusBar();
+                });
+            }
+
+            // 取消
+            const cancelBtn = document.getElementById('cancelUpgradeBtn');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function() {
+                    document.getElementById('upgradeModal').classList.remove('active');
+                });
+            }
+        }
+
+        // ============================================================
+        // 升级弹窗开关
+        // ============================================================
+        document.getElementById('openUpgradeBtn').addEventListener('click', function() {
+            const modal = document.getElementById('upgradeModal');
+            modal.classList.add('active');
+            renderUpgradeModal();
+        });
+
+        document.getElementById('closeModalBtn').addEventListener('click', function() {
+            document.getElementById('upgradeModal').classList.remove('active');
+        });
+
+        document.getElementById('upgradeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
 
         // ============================================================
         // 初始化
