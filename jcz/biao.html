@@ -433,9 +433,6 @@
                 flex-wrap: wrap;
                 gap: 4px;
             }
-            #splash .title {
-                font-size: 2rem;
-            }
         }
         /* 安全区域适配 */
         @supports (padding: max(0px)) {
@@ -499,7 +496,7 @@
         <div id="recordContainer"></div>
     </div>
 
-    <!-- ===== 返回链接：已加 refresh=true ===== -->
+    <!-- ===== 返回链接 ===== -->
     <div style="text-align:center; margin-top:10px;">
         <a href="index.html?refresh=true" class="back-link">← 返回 裁决者 主程序</a>
     </div>
@@ -567,7 +564,7 @@
         // 状态栏
         // ============================================================
         function updateStatusBar() {
-            const name = getRememberUser();
+            var name = getRememberUser();
             document.getElementById('displayUser').textContent = name || '未登录';
         }
 
@@ -576,7 +573,6 @@
             updateStatusBar();
             renderRecords();
             showMsg('已退出登录', 'info');
-            // 退出后跳转到主程序登录页（带刷新）
             setTimeout(function() {
                 window.location.href = 'index.html?refresh=true';
             }, 300);
@@ -586,7 +582,7 @@
         // 渲染价格表
         // ============================================================
         function renderPriceTable() {
-            const tbody = document.getElementById('priceBody');
+            var tbody = document.getElementById('priceBody');
             tbody.innerHTML = PACKAGES.map(function(p, index) {
                 return '<tr>' +
                     '<td><strong>' + p.label + '</strong></td>' +
@@ -658,7 +654,7 @@
         }
 
         // ============================================================
-        // 兑换逻辑（含一次有效）
+        // 兑换逻辑（一次有效 + BroadcastChannel 广播）
         // ============================================================
         function redeemCode() {
             var input = document.getElementById('codeInput');
@@ -694,11 +690,9 @@
 
             // 匹配前缀
             var matchedPkgId = null;
-            var matchedPrefix = null;
             for (var prefix in CODE_PREFIX_MAP) {
                 if (code.startsWith(prefix)) {
                     matchedPkgId = CODE_PREFIX_MAP[prefix];
-                    matchedPrefix = prefix;
                     break;
                 }
             }
@@ -723,13 +717,13 @@
             // 初始化字段
             if (!user.fastCount) user.fastCount = 0;
             if (!user.fullCount) user.fullCount = 0;
-            if (!user.energy) user.energy = 0;
+            if (!user.points) user.points = 0;   // 统一使用 points
             if (!user.usedCodes) user.usedCodes = [];
             if (!user.records) user.records = [];
 
             var fastChange = 0,
                 fullChange = 0,
-                energyChange = 0;
+                pointsChange = 0;
             var id = pkg.id;
             var changeDesc = '';
             if (id.startsWith('K')) {
@@ -741,8 +735,8 @@
                 fullChange = pkg.count;
                 changeDesc = '+' + pkg.count + ' 完整次数';
             } else if (id === 'E') {
-                user.energy += pkg.count;
-                energyChange = pkg.count;
+                user.points += pkg.count;
+                pointsChange = pkg.count;
                 changeDesc = '+' + pkg.count + ' 能量点';
             } else {
                 showMsg('❌ 未知套餐类型', 'error');
@@ -763,14 +757,28 @@
                 fastRemain: user.fastCount,
                 fullChange: fullChange || 0,
                 fullRemain: user.fullCount,
-                energyChange: energyChange || 0,
-                energyRemain: user.energy
+                energyChange: pointsChange || 0,
+                energyRemain: user.points
             });
 
             saveUsers(users);
             input.value = '';
             showMsg('✅ 兑换成功！' + changeDesc + '（' + pkg.label + '）', 'success');
             renderRecords();
+            updateStatusBar();
+
+            // ===== BroadcastChannel 广播：通知主程序数据已更新 =====
+            try {
+                var channel = new BroadcastChannel('judge_channel');
+                channel.postMessage('redeem_success');
+                channel.close();
+                console.log('📢 广播已发送: redeem_success');
+            } catch (e) {
+                console.log('⚠️ BroadcastChannel 发送失败:', e);
+            }
+
+            // 如果主程序也打开了，同时触发 storage 事件（兜底）
+            // localStorage 修改后，其他标签页的 storage 事件会自动触发
         }
 
         // ============================================================
@@ -794,9 +802,9 @@
                     list.push({ pkg: p, remain: user.fullCount, type: 'full' });
                 });
             }
-            if (user.energy > 0) {
+            if (user.points > 0) {
                 var ep = PACKAGES.find(function(p) { return p.id === 'E'; });
-                if (ep) list.push({ pkg: ep, remain: user.energy, type: 'energy' });
+                if (ep) list.push({ pkg: ep, remain: user.points, type: 'energy' });
             }
             return list;
         }
@@ -1026,7 +1034,7 @@
                         fullChange: currentItem.type === 'full' ? '升级→' + targetPkg.label : '-',
                         fullRemain: userData.fullCount || 0,
                         energyChange: '-',
-                        energyRemain: userData.energy || 0
+                        energyRemain: userData.points || 0
                     });
                     saveUsers(usersData);
                     alert('✅ 升级成功！已升级为 ' + targetPkg.label + '，剩余 ' + targetPkg.count + ' 次。');
@@ -1072,11 +1080,12 @@
                 if (e.key === 'Enter') redeemCode();
             });
             window.addEventListener('storage', function(e) {
-                if (e.key === 'aiJudge_users' || e.key === 'aiJudge_remember') {
+                if (e.key === 'aiJudge_users') {
                     updateStatusBar();
                     renderRecords();
                 }
             });
+            console.log('✅ 商城已加载，支持 BroadcastChannel 广播');
         });
     </script>
 </body>
