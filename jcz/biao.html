@@ -350,7 +350,7 @@
                     <th>套餐</th>
                     <th>价格</th>
                     <th>次数</th>
-                    <th>等级</th>
+                    <th>等级</th>   <!-- 已彻底移除“模型”，改为“等级” -->
                     <th>购买</th>
                 </tr>
             </thead>
@@ -392,7 +392,7 @@
 
     <script>
         // ============================================================
-        // 套餐数据
+        // 套餐数据 —— 已移除所有模型字段，仅保留等级（普通/进阶/专业）
         // ============================================================
         const PACKAGES = [
             { id: 'K2', label: '快速2AI', price: 3, count: 20, level: '普通', buyLink: '#' },
@@ -456,7 +456,7 @@
                     <td><strong>${p.label}</strong></td>
                     <td>${p.price} 元</td>
                     <td>${p.count} 次</td>
-                    <td>${p.level}</td>
+                    <td>${p.level}</td>   <!-- 这里显示等级，不再显示模型 -->
                     <td>
                         <button class="btn-buy" data-index="${index}">购买</button>
                     </td>
@@ -589,22 +589,14 @@
         // ============================================================
         // 升级套餐逻辑
         // ============================================================
-        // 判断套餐类型：快速(K开头)、完整(W开头)、能量包(E)
         function getPkgType(id) {
             if (id.startsWith('K')) return 'fast';
             if (id.startsWith('W')) return 'full';
             return 'energy';
         }
 
-        // 获取用户当前拥有的套餐列表（从用户数据中推断）
         function getUserPackages(user) {
             const list = [];
-            // 快速包：如果有 fastCount > 0，认为拥有快速包
-            // 但具体是哪个快速包？我们用 fastCount 来推断用户可能购买过快速包
-            // 为了简化，我们假设用户当前拥有的是"最近购买"的套餐，这里用 PACKAGES 中匹配的
-            // 更准确：遍历所有 K 开头的，看用户有没有对应的购买记录
-            // 由于我们没存购买记录，用次数判断：如果 fastCount > 0 且 fastCount 是某个套餐次数的倍数？
-            // 暂时简化：如果 fastCount > 0，列出所有快速包供用户选择当前套餐
             if (user.fastCount > 0) {
                 PACKAGES.filter(p => p.id.startsWith('K')).forEach(p => {
                     list.push({ pkg: p, remain: user.fastCount, type: 'fast' });
@@ -615,7 +607,6 @@
                     list.push({ pkg: p, remain: user.fullCount, type: 'full' });
                 });
             }
-            // 能量包单独处理
             if (user.energy > 0) {
                 const ep = PACKAGES.find(p => p.id === 'E');
                 if (ep) list.push({ pkg: ep, remain: user.energy, type: 'energy' });
@@ -623,7 +614,6 @@
             return list;
         }
 
-        // 计算补差价
         function calcUpgradePrice(currentPkg, targetPkg, usedCount) {
             const totalPrice = currentPkg.price;
             const unitPrice = totalPrice / currentPkg.count;
@@ -633,7 +623,6 @@
             return { remainValue, usedValue, diff, unitPrice };
         }
 
-        // 渲染升级弹窗
         function renderUpgradeModal() {
             const container = document.getElementById('modalContent');
             const username = getRememberUser();
@@ -648,7 +637,6 @@
                 return;
             }
 
-            // 获取用户拥有的套餐
             const packages = getUserPackages(user);
             if (packages.length === 0) {
                 container.innerHTML = `
@@ -667,9 +655,6 @@
                 return;
             }
 
-            // 如果用户有多个套餐，让用户选择当前要升级的套餐
-            // 这里简化：默认选择第一个，或者让用户选择
-            // 更完善：显示所有套餐让用户选
             let html = `<div style="margin-bottom:12px;font-size:14px;color:#555;">当前拥有的套餐：</div>`;
             html += `<div class="current-pkg">`;
             packages.forEach((item, idx) => {
@@ -680,37 +665,33 @@
             });
             html += `</div>`;
 
-            // 显示目标套餐选择
             html += `<div style="font-size:14px;font-weight:600;margin:12px 0 8px;">选择目标套餐：</div>`;
             html += `<div class="pkg-list" id="targetPkgList">`;
-            // 列出所有比当前套餐更高配置的套餐
-            // 这里简化：列出所有非能量包的套餐，且价格高于当前选中的套餐
-            // 由于用户可能有多个套餐，我们让用户先选当前套餐再列目标
-            // 这里用简单方式：假设用户想要升级快速或完整包
-            // 更合理：让用户点击选择当前套餐后，再显示可升级的目标
-            // 我们用按钮形式让用户选择当前套餐，然后动态更新目标列表
+            html += `</div>`;
 
-            // 先默认选第一个非能量包套餐作为当前套餐
-            let selectedIdx = 0;
-            // 找第一个非能量包
+            html += `
+                <div class="btn-group">
+                    <button class="btn-confirm" id="confirmUpgradeBtn" disabled>确认升级</button>
+                    <button class="btn-cancel" id="cancelUpgradeBtn">取消</button>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            // 处理当前套餐选择
+            let currentSelectedIdx = 0;
+            // 默认选第一个非能量包
             for (let i = 0; i < packages.length; i++) {
                 if (packages[i].type !== 'energy') {
-                    selectedIdx = i;
+                    currentSelectedIdx = i;
                     break;
                 }
             }
-            // 如果全是能量包，则只能升级能量包？
-            // 能量包升级逻辑：可升级到更大的能量包？目前只有一种能量包，暂不支持升级
-            // 所以如果只有能量包，提示无法升级
             const hasNonEnergy = packages.some(p => p.type !== 'energy');
             if (!hasNonEnergy) {
                 container.innerHTML = `<div class="empty-tip">能量包暂不支持升级，您可以购买其他套餐。</div>`;
                 return;
             }
 
-            // 保存当前选中的套餐索引
-            let currentSelectedIdx = selectedIdx;
-            // 渲染目标列表
             function renderTargetList(selectedIdx) {
                 const currentItem = packages[selectedIdx];
                 if (!currentItem) return;
@@ -718,14 +699,12 @@
                 const currentRemain = currentItem.remain;
                 const usedCount = currentPkg.count - currentRemain;
 
-                // 找出可升级的目标套餐：同类型（快速→快速，完整→完整），且配置更高（价格更高）
                 let targets = [];
                 if (currentItem.type === 'fast') {
                     targets = PACKAGES.filter(p => p.id.startsWith('K') && p.price > currentPkg.price);
                 } else if (currentItem.type === 'full') {
                     targets = PACKAGES.filter(p => p.id.startsWith('W') && p.price > currentPkg.price);
                 } else {
-                    // 能量包暂不支持升级
                     targets = [];
                 }
 
@@ -752,16 +731,13 @@
                 listHtml += `<div style="font-size:13px;color:#888;margin-top:6px;">* 已用次数：${usedCount} 次，当前剩余价值：${calcUpgradePrice(currentPkg, targets[0] || currentPkg, usedCount).remainValue.toFixed(2)} 元</div>`;
                 listContainer.innerHTML = listHtml;
 
-                // 绑定点击事件
                 listContainer.querySelectorAll('.pkg-option').forEach(el => {
                     el.addEventListener('click', function() {
                         const idx = parseInt(this.dataset.target);
                         const target = targets[idx];
                         if (!target) return;
-                        // 高亮选中
                         listContainer.querySelectorAll('.pkg-option').forEach(e => e.classList.remove('selected'));
                         this.classList.add('selected');
-                        // 启用确认按钮
                         const confirmBtn = document.getElementById('confirmUpgradeBtn');
                         if (confirmBtn) {
                             confirmBtn.disabled = false;
@@ -772,60 +748,45 @@
                 });
             }
 
-            // 生成带当前套餐选择的界面
-            let finalHtml = html;
-            // 添加当前套餐选择（如果有多个非能量包）
+            // 如果有多个非能量包，让用户选择当前套餐
             const nonEnergyPackages = packages.filter(p => p.type !== 'energy');
             if (nonEnergyPackages.length > 1) {
-                finalHtml += `<div style="margin:8px 0;font-size:14px;color:#555;">点击选择您要升级的当前套餐：</div>`;
-                finalHtml += `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">`;
+                const pickContainer = document.createElement('div');
+                pickContainer.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;';
                 nonEnergyPackages.forEach((item, idx) => {
-                    finalHtml += `
-                        <button class="btn-upgrade" style="padding:4px 16px;font-size:13px;background:${idx === currentSelectedIdx ? '#4a6cf7' : '#e8edf5'};color:${idx === currentSelectedIdx ? 'white' : '#333'};" data-pick="${idx}">
-                            ${item.pkg.label}（剩${item.remain}次）
-                        </button>
-                    `;
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-upgrade';
+                    btn.style.cssText = `padding:4px 16px;font-size:13px;background:${idx === currentSelectedIdx ? '#4a6cf7' : '#e8edf5'};color:${idx === currentSelectedIdx ? 'white' : '#333'};`;
+                    btn.textContent = `${item.pkg.label}（剩${item.remain}次）`;
+                    btn.dataset.pick = idx;
+                    pickContainer.appendChild(btn);
                 });
-                finalHtml += `</div>`;
+                // 插入到目标列表之前
+                const targetList = document.getElementById('targetPkgList');
+                targetList.parentNode.insertBefore(pickContainer, targetList);
+                // 绑定事件
+                pickContainer.querySelectorAll('[data-pick]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.pick);
+                        currentSelectedIdx = idx;
+                        pickContainer.querySelectorAll('[data-pick]').forEach(b => {
+                            b.style.background = '#e8edf5';
+                            b.style.color = '#333';
+                        });
+                        this.style.background = '#4a6cf7';
+                        this.style.color = 'white';
+                        renderTargetList(idx);
+                        const confirmBtn = document.getElementById('confirmUpgradeBtn');
+                        if (confirmBtn) {
+                            confirmBtn.disabled = true;
+                            confirmBtn.dataset.currentIdx = idx;
+                        }
+                    });
+                });
             }
 
-            finalHtml += `<div id="targetPkgList"></div>`;
-            finalHtml += `
-                <div class="btn-group">
-                    <button class="btn-confirm" id="confirmUpgradeBtn" disabled>确认升级</button>
-                    <button class="btn-cancel" id="cancelUpgradeBtn">取消</button>
-                </div>
-            `;
-            container.innerHTML = finalHtml;
-
-            // 绑定事件
-            // 切换当前套餐
-            container.querySelectorAll('[data-pick]').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const idx = parseInt(this.dataset.pick);
-                    currentSelectedIdx = idx;
-                    // 更新按钮样式
-                    container.querySelectorAll('[data-pick]').forEach(b => {
-                        b.style.background = '#e8edf5';
-                        b.style.color = '#333';
-                    });
-                    this.style.background = '#4a6cf7';
-                    this.style.color = 'white';
-                    // 重新渲染目标列表
-                    renderTargetList(idx);
-                    // 重置确认按钮
-                    const confirmBtn = document.getElementById('confirmUpgradeBtn');
-                    if (confirmBtn) {
-                        confirmBtn.disabled = true;
-                        confirmBtn.dataset.currentIdx = idx;
-                    }
-                });
-            });
-
-            // 渲染目标列表
             renderTargetList(currentSelectedIdx);
 
-            // 确认升级
             const confirmBtn = document.getElementById('confirmUpgradeBtn');
             if (confirmBtn) {
                 confirmBtn.addEventListener('click', function() {
@@ -855,14 +816,12 @@
 升级后，当前套餐剩余次数将清零，替换为目标套餐。`;
                     if (!confirm(confirmMsg)) return;
 
-                    // 执行升级
                     const usersData = getUsers();
                     const userData = usersData[username];
                     if (!userData) {
                         alert('用户数据异常');
                         return;
                     }
-                    // 更新次数
                     if (currentItem.type === 'fast') {
                         userData.fastCount = targetPkg.count;
                     } else if (currentItem.type === 'full') {
@@ -871,7 +830,6 @@
                         alert('能量包暂不支持升级');
                         return;
                     }
-                    // 记录消费记录
                     if (!userData.records) userData.records = [];
                     const now = new Date();
                     const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -892,7 +850,6 @@
                 });
             }
 
-            // 取消
             const cancelBtn = document.getElementById('cancelUpgradeBtn');
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', function() {
