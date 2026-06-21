@@ -239,6 +239,59 @@
 (function(){
     'use strict';
 
+    // ============================================================
+    // 1. 返回键拦截（APP模式）
+    // ============================================================
+    // 只在主界面生效，不干扰分享弹窗
+    window.addEventListener('popstate', function (e) {
+        var mainScreen = document.getElementById('mainScreen');
+        var shareModal = document.getElementById('shareModal');
+        var rechargeModal = document.getElementById('rechargeModal');
+        var feedbackModal = document.getElementById('feedbackModal');
+
+        // 如果有任何弹窗打开，不触发退出
+        if (shareModal && shareModal.classList.contains('show')) {
+            shareModal.classList.remove('show');
+            return;
+        }
+        if (rechargeModal && rechargeModal.classList.contains('show')) {
+            rechargeModal.classList.remove('show');
+            return;
+        }
+        if (feedbackModal && feedbackModal.classList.contains('show')) {
+            feedbackModal.classList.remove('show');
+            return;
+        }
+
+        // 只有主界面显示时才触发退出
+        if (mainScreen && mainScreen.style.display === 'block') {
+            showToast('再按一次返回键退出裁决者');
+            // 第二次按才真正退出（通过记录状态）
+            if (window._exitPending) {
+                window.close();
+                // 兜底：如果 window.close 不支持，跳转到空白页
+                if (window.location.href !== 'about:blank') {
+                    window.location.href = 'about:blank';
+                }
+            }
+            window._exitPending = true;
+            setTimeout(function () {
+                window._exitPending = false;
+            }, 2000);
+            return;
+        }
+
+        // 如果在登录界面，按返回键不做任何事
+        var authScreen = document.getElementById('authScreen');
+        if (authScreen && authScreen.style.display !== 'none') {
+            return;
+        }
+    });
+    history.pushState({ page: 'main' }, '');
+
+    // ============================================================
+    // 2. 核心配置
+    // ============================================================
     var CONFIG = {
         API_KEY: 'sk-605f750868464de5968b710df853ae11',
         API_URL: 'https://api.deepseek.com/v1/chat/completions',
@@ -870,11 +923,9 @@
     }
 
     function extractFinalAnswer() {
-        var nameMap = {};
         var proposalMap = {};
         var agreedCount = {};
 
-        // 第一步：收集每个AI真正提出的方案（不含“同意XX”类内容）
         for (var i = 0; i < discussionMessages.length; i++) {
             var msg = discussionMessages[i];
             if (!msg.content || msg.content === '无响应') continue;
@@ -884,16 +935,13 @@
 
             var isAgree = /同意\s*([^，,。\s]+)\s*的方案/.test(rawSolution);
             if (!isAgree) {
-                // 这是AI自己提出的方案
                 var key = rawSolution.trim();
                 proposalMap[msg.name] = key;
                 if (!agreedCount[key]) agreedCount[key] = 0;
-                // 自己提的也算一票
                 agreedCount[key] = (agreedCount[key] || 0) + 1;
             }
         }
 
-        // 第二步：统计“同意XX的方案”中的引用，找到真正的方案
         for (var j = 0; j < discussionMessages.length; j++) {
             var msg2 = discussionMessages[j];
             if (!msg2.content || msg2.content === '无响应') continue;
@@ -911,7 +959,6 @@
             }
         }
 
-        // 第三步：找到被引用/同意最多的方案作为最终答案
         var bestProposal = '';
         var bestCount = 0;
         for (var key2 in agreedCount) {
@@ -922,7 +969,6 @@
         }
 
         if (!bestProposal) {
-            // 兜底：取第一条发言的方案
             for (var k = 0; k < discussionMessages.length; k++) {
                 var msg3 = discussionMessages[k];
                 if (!msg3.content || msg3.content === '无响应') continue;
@@ -939,7 +985,6 @@
             return;
         }
 
-        // 第四步：为最终答案找理由
         var finalReason = '';
         for (var m = 0; m < discussionMessages.length; m++) {
             var msg4 = discussionMessages[m];
@@ -951,7 +996,6 @@
             }
         }
 
-        // 如果没找到理由，尝试从其他发言中找理由
         if (!finalReason) {
             for (var n = 0; n < discussionMessages.length; n++) {
                 var msg5 = discussionMessages[n];
@@ -1066,6 +1110,9 @@
         }
     }
 
+    // ============================================================
+    // 分享功能
+    // ============================================================
     var shareTimer = null;
     function showShareModal() { document.getElementById('shareModal').classList.add('show'); }
     function closeShareModal() {
@@ -1126,6 +1173,9 @@
         }, 5000);
     }
 
+    // ============================================================
+    // 跳转
+    // ============================================================
     function goToShop() {
         window.location.href = 'biao.html';
     }
@@ -1138,6 +1188,9 @@
         window.location.href = '注册.html?mode=forgot';
     }
 
+    // ============================================================
+    // 反馈
+    // ============================================================
     function showFeedbackModal() { document.getElementById('feedbackModal').classList.add('show'); }
     function closeFeedbackModal() { document.getElementById('feedbackModal').classList.remove('show'); }
     function sendFeedback() {
@@ -1149,6 +1202,9 @@
         showToast('已打开邮件客户端，请发送即可。');
     }
 
+    // ============================================================
+    // 绑定事件
+    // ============================================================
     function bindMainEvents() {
         document.getElementById('modeFast').onclick = function() { setMode('fast'); };
         document.getElementById('modeFull').onclick = function() { setMode('full'); };
