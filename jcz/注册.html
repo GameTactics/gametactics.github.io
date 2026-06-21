@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="账号管理" />
+    <title>账号管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1a1a2e;
+            line-height: 1.5;
+            -webkit-user-select: none;
+            user-select: none;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 40px;
+            position: relative;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .auth-card h2 {
+            font-size: 1.4rem;
+            color: #1e293b;
+        }
+        .auth-card .sub-title {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: -4px;
+        }
+        .auth-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            font-size: 1rem;
+            background: #f8fafc;
+            -webkit-appearance: none;
+            outline: none;
+            transition: 0.2s;
+        }
+        .auth-input:focus {
+            border-color: #4f46e5;
+            background: white;
+        }
+        .auth-select {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            font-size: 1rem;
+            background: #f8fafc;
+            -webkit-appearance: none;
+            outline: none;
+            transition: 0.2s;
+            color: #1a1a2e;
+        }
+        .auth-select:focus {
+            border-color: #4f46e5;
+            background: white;
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 40px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: 0.2s;
+        }
+        .auth-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 2px solid #667eea;
+        }
+        .auth-btn-primary:active {
+            transform: scale(0.97);
+        }
+        .auth-btn-secondary {
+            background: white;
+            color: #4f46e5;
+            border: 2px solid #e2e8f0;
+        }
+        .auth-btn-secondary:active {
+            background: #f8fafc;
+            transform: scale(0.97);
+        }
+        .auth-error {
+            color: #dc2626;
+            font-size: 0.85rem;
+            min-height: 20px;
+            text-align: left;
+        }
+        .auth-success {
+            color: #15803d;
+            font-size: 0.85rem;
+            min-height: 20px;
+            text-align: left;
+        }
+        .auth-divider {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 4px 0;
+        }
+        .auth-links {
+            display: flex;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+        .auth-links a {
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 4px 0;
+        }
+        .auth-links a:active {
+            opacity: 0.6;
+        }
+        .auth-view {
+            display: none;
+        }
+        .auth-view.active {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        #authScreen .auth-view {
+            display: none;
+        }
+        #authScreen .auth-view.active {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .back-link:active {
+            opacity: 0.6;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            z-index: 1100;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
+        }
+        * {
+            scrollbar-width: none;
+        }
+        a,
+        button {
+            -webkit-touch-callout: none;
+        }
+        @supports (padding: max(0px)) {
+            .container {
+                padding-bottom: max(40px, env(safe-area-inset-bottom));
+            }
+            .toast {
+                bottom: max(30px, env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <div id="authScreen" class="auth-card">
+
+            <!-- ===== 注册视图 ===== -->
+            <div id="registerView" class="auth-view active">
+                <h2>注册新账号</h2>
+                <div class="sub-title">请填写以下信息完成注册</div>
+                <input type="text" id="regUsername" placeholder="用户名 (8-20字符)" class="auth-input" autocomplete="username">
+                <input type="password" id="regPassword" placeholder="密码 (至少6位)" class="auth-input" autocomplete="new-password">
+                <input type="password" id="regPasswordConfirm" placeholder="确认密码" class="auth-input" autocomplete="new-password">
+                <select id="regQuestion" class="auth-select">
+                    <option value="">请选择安全问题</option>
+                    <option value="你的宠物名字是什么？">你的宠物名字是什么？</option>
+                    <option value="你的出生城市是哪里？">你的出生城市是哪里？</option>
+                    <option value="你的小学名称是什么？">你的小学名称是什么？</option>
+                    <option value="你最喜欢的电影是什么？">你最喜欢的电影是什么？</option>
+                    <option value="你母亲的名字是什么？">你母亲的名字是什么？</option>
+                </select>
+                <input type="text" id="regAnswer" placeholder="安全答案" class="auth-input" autocomplete="off">
+                <div id="regError" class="auth-error"></div>
+                <div id="regSuccess" class="auth-success"></div>
+                <button id="registerBtn" class="auth-btn auth-btn-primary">注册</button>
+                <hr class="auth-divider">
+                <div class="auth-links">
+                    <a id="gotoLoginFromRegister">返回登录</a>
+                </div>
+            </div>
+
+            <!-- ===== 找回密码视图 ===== -->
+            <div id="forgotView" class="auth-view">
+                <h2>找回密码</h2>
+                <div class="sub-title">验证安全问题后重置密码</div>
+                <input type="text" id="forgotUsername" placeholder="用户名" class="auth-input" autocomplete="username">
+                <select id="forgotQuestion" class="auth-select">
+                    <option value="">请选择安全问题</option>
+                    <option value="你的宠物名字是什么？">你的宠物名字是什么？</option>
+                    <option value="你的出生城市是哪里？">你的出生城市是哪里？</option>
+                    <option value="你的小学名称是什么？">你的小学名称是什么？</option>
+                    <option value="你最喜欢的电影是什么？">你最喜欢的电影是什么？</option>
+                    <option value="你母亲的名字是什么？">你母亲的名字是什么？</option>
+                </select>
+                <input type="text" id="forgotAnswer" placeholder="安全答案" class="auth-input" autocomplete="off">
+                <div id="forgotError" class="auth-error"></div>
+                <div id="forgotSuccess" class="auth-success"></div>
+                <button id="forgotVerifyBtn" class="auth-btn auth-btn-primary">验证并重置</button>
+                <div id="resetArea" style="display:none; margin-top:8px;">
+                    <input type="password" id="resetNewPassword" placeholder="新密码 (至少6位)" class="auth-input" autocomplete="new-password">
+                    <input type="password" id="resetConfirmPassword" placeholder="确认新密码" class="auth-input" autocomplete="new-password">
+                    <button id="resetConfirmBtn" class="auth-btn auth-btn-primary">确认重置</button>
+                </div>
+                <hr class="auth-divider">
+                <div class="auth-links">
+                    <a id="gotoLoginFromForgot">返回登录</a>
+                </div>
+            </div>
+
+        </div>
+
+        <a href="javascript:void(0)" class="back-link" id="backToLogin">返回登录</a>
+
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            function showToast(msg) {
+                var t = document.getElementById('toast');
+                t.textContent = msg;
+                t.classList.add('show');
+                clearTimeout(t._timer);
+                t._timer = setTimeout(function() { t.classList.remove('show'); }, 2800);
+            }
+
+            function validateUsername(name) { return name && name.length >= 8 && name.length <= 20; }
+            function validatePassword(pwd) { return pwd && pwd.length >= 6; }
+
+            function loadUsers() {
+                try {
+                    var stored = localStorage.getItem('aiJudge_users');
+                    return stored ? JSON.parse(stored) : {};
+                } catch (e) {
+                    return {};
+                }
+            }
+
+            function saveUsers(users) {
+                try {
+                    localStorage.setItem('aiJudge_users', JSON.stringify(users));
+                    try {
+                        var channel = new BroadcastChannel('judge_channel');
+                        channel.postMessage('data_updated');
+                        channel.close();
+                    } catch (e) {}
+                } catch (e) {}
+            }
+
+            function showView(viewId) {
+                var views = document.querySelectorAll('#authScreen .auth-view');
+                views.forEach(function(v) { v.classList.remove('active'); });
+                var target = document.getElementById(viewId);
+                if (target) target.classList.add('active');
+                document.getElementById('regError').textContent = '';
+                document.getElementById('regSuccess').textContent = '';
+                document.getElementById('forgotError').textContent = '';
+                document.getElementById('forgotSuccess').textContent = '';
+                document.getElementById('resetArea').style.display = 'none';
+            }
+
+            function doRegister() {
+                var username = document.getElementById('regUsername').value.trim();
+                var password = document.getElementById('regPassword').value;
+                var confirm = document.getElementById('regPasswordConfirm').value;
+                var question = document.getElementById('regQuestion').value;
+                var answer = document.getElementById('regAnswer').value.trim();
+                var errEl = document.getElementById('regError');
+                var successEl = document.getElementById('regSuccess');
+                errEl.textContent = '';
+                successEl.textContent = '';
+
+                if (!validateUsername(username)) {
+                    errEl.textContent = '用户名需8-20字符';
+                    return;
+                }
+                if (!validatePassword(password)) {
+                    errEl.textContent = '密码至少6位';
+                    return;
+                }
+                if (password !== confirm) {
+                    errEl.textContent = '两次密码不一致';
+                    return;
+                }
+                if (!question) {
+                    errEl.textContent = '请选择安全问题';
+                    return;
+                }
+                if (!answer || answer.length < 2) {
+                    errEl.textContent = '安全答案至少2个字符';
+                    return;
+                }
+
+                var users = loadUsers();
+                if (users[username]) {
+                    errEl.textContent = '用户名已存在';
+                    return;
+                }
+
+                users[username] = {
+                    password: password,
+                    fastCount: 0,
+                    fullCount: 0,
+                    points: 0,
+                    shareCount: 0,
+                    shareDate: new Date().toDateString(),
+                    shareLastTime: 0,
+                    usedCodes: [],
+                    aiLimit: 4,
+                    records: [],
+                    securityQuestion: question,
+                    securityAnswer: answer
+                };
+                saveUsers(users);
+                successEl.textContent = '注册成功，请返回登录';
+                document.getElementById('regUsername').value = '';
+                document.getElementById('regPassword').value = '';
+                document.getElementById('regPasswordConfirm').value = '';
+                document.getElementById('regQuestion').value = '';
+                document.getElementById('regAnswer').value = '';
+
+                try {
+                    var channel2 = new BroadcastChannel('judge_channel');
+                    channel2.postMessage('register_success');
+                    channel2.close();
+                } catch (e) {}
+
+                setTimeout(function() {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }
+
+            var forgotVerifiedUser = null;
+
+            function doForgotVerify() {
+                var username = document.getElementById('forgotUsername').value.trim();
+                var question = document.getElementById('forgotQuestion').value;
+                var answer = document.getElementById('forgotAnswer').value.trim();
+                var errEl = document.getElementById('forgotError');
+                var successEl = document.getElementById('forgotSuccess');
+                errEl.textContent = '';
+                successEl.textContent = '';
+                document.getElementById('resetArea').style.display = 'none';
+                forgotVerifiedUser = null;
+
+                if (!username) {
+                    errEl.textContent = '请输入用户名';
+                    return;
+                }
+                if (!question) {
+                    errEl.textContent = '请选择安全问题';
+                    return;
+                }
+                if (!answer || answer.length < 2) {
+                    errEl.textContent = '请输入安全答案';
+                    return;
+                }
+
+                var users = loadUsers();
+                var user = users[username];
+                if (!user) {
+                    errEl.textContent = '用户名不存在';
+                    return;
+                }
+                if (!user.securityQuestion || !user.securityAnswer) {
+                    errEl.textContent = '该用户未设置安全问题';
+                    return;
+                }
+                if (user.securityQuestion !== question) {
+                    errEl.textContent = '安全问题不匹配';
+                    return;
+                }
+                if (user.securityAnswer !== answer) {
+                    errEl.textContent = '安全答案错误';
+                    return;
+                }
+
+                forgotVerifiedUser = username;
+                successEl.textContent = '验证通过，请设置新密码';
+                document.getElementById('resetArea').style.display = 'block';
+                document.getElementById('resetNewPassword').value = '';
+                document.getElementById('resetConfirmPassword').value = '';
+            }
+
+            function doResetPassword() {
+                var newPwd = document.getElementById('resetNewPassword').value;
+                var confirmPwd = document.getElementById('resetConfirmPassword').value;
+                var errEl = document.getElementById('forgotError');
+                var successEl = document.getElementById('forgotSuccess');
+                errEl.textContent = '';
+                successEl.textContent = '';
+
+                if (!forgotVerifiedUser) {
+                    errEl.textContent = '请先验证安全问题';
+                    return;
+                }
+                if (!validatePassword(newPwd)) {
+                    errEl.textContent = '新密码至少6位';
+                    return;
+                }
+                if (newPwd !== confirmPwd) {
+                    errEl.textContent = '两次密码不一致';
+                    return;
+                }
+
+                var users = loadUsers();
+                var user = users[forgotVerifiedUser];
+                if (!user) {
+                    errEl.textContent = '用户数据异常';
+                    return;
+                }
+                user.password = newPwd;
+                saveUsers(users);
+                successEl.textContent = '密码重置成功，请返回登录';
+                document.getElementById('resetArea').style.display = 'none';
+                forgotVerifiedUser = null;
+
+                try {
+                    var channel3 = new BroadcastChannel('judge_channel');
+                    channel3.postMessage('reset_success');
+                    channel3.close();
+                } catch (e) {}
+
+                setTimeout(function() {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }
+
+            function goBack() {
+                window.location.href = 'index.html';
+            }
+
+            function init() {
+                var params = new URLSearchParams(window.location.search);
+                var mode = params.get('mode');
+                if (mode === 'register') {
+                    showView('registerView');
+                } else if (mode === 'forgot') {
+                    showView('forgotView');
+                } else {
+                    showView('registerView');
+                }
+
+                document.getElementById('registerBtn').onclick = doRegister;
+                document.getElementById('forgotVerifyBtn').onclick = doForgotVerify;
+                document.getElementById('resetConfirmBtn').onclick = doResetPassword;
+
+                document.getElementById('gotoLoginFromRegister').onclick = function() { goBack(); };
+                document.getElementById('gotoLoginFromForgot').onclick = function() { goBack(); };
+                document.getElementById('backToLogin').onclick = function() { goBack(); };
+
+                document.getElementById('regPasswordConfirm').addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') doRegister();
+                });
+                document.getElementById('forgotAnswer').addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') doForgotVerify();
+                });
+                document.getElementById('resetConfirmPassword').addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') doResetPassword();
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
+    </script>
+</body>
+</html>
