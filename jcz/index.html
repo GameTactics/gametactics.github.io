@@ -242,14 +242,12 @@
     // ============================================================
     // 1. 返回键拦截（APP模式）
     // ============================================================
-    // 只在主界面生效，不干扰分享弹窗
     window.addEventListener('popstate', function (e) {
         var mainScreen = document.getElementById('mainScreen');
         var shareModal = document.getElementById('shareModal');
         var rechargeModal = document.getElementById('rechargeModal');
         var feedbackModal = document.getElementById('feedbackModal');
 
-        // 如果有任何弹窗打开，不触发退出
         if (shareModal && shareModal.classList.contains('show')) {
             shareModal.classList.remove('show');
             return;
@@ -263,13 +261,10 @@
             return;
         }
 
-        // 只有主界面显示时才触发退出
         if (mainScreen && mainScreen.style.display === 'block') {
             showToast('再按一次返回键退出裁决者');
-            // 第二次按才真正退出（通过记录状态）
             if (window._exitPending) {
                 window.close();
-                // 兜底：如果 window.close 不支持，跳转到空白页
                 if (window.location.href !== 'about:blank') {
                     window.location.href = 'about:blank';
                 }
@@ -281,7 +276,6 @@
             return;
         }
 
-        // 如果在登录界面，按返回键不做任何事
         var authScreen = document.getElementById('authScreen');
         if (authScreen && authScreen.style.display !== 'none') {
             return;
@@ -849,8 +843,9 @@
         currentQuestion = q;
         discussionMessages = [];
         finalAnswer = null;
-        currentRound = 1;
+
         var targetRounds = maxRounds;
+        var totalAIs = selectedAIs.length;
 
         document.getElementById('finalAnswerArea').innerHTML = '';
         document.getElementById('discussionArea').innerHTML = '';
@@ -860,39 +855,60 @@
         if (floatBtn) floatBtn.style.display = 'none';
 
         try {
-            for (var i = 0; i < selectedAIs.length; i++) {
+            for (var round = 1; round <= targetRounds; round++) {
                 if (isStopped || !isDiscussing) break;
-                var ai = selectedAIs[i];
-                document.getElementById('progressText').innerText = ai.name + ' 思考中...';
-                var response = await callAI(ai, false);
-                if (isStopped || !isDiscussing) break;
-                discussionMessages.push({ name: ai.name, role: ai.role, content: response || '无响应' });
-                displayStructuredMessage(ai, response || '无响应');
-                await new Promise(function(r){ setTimeout(r, 200); });
-            }
-            for (var round = 2; round <= targetRounds; round++) {
-                if (isStopped || !isDiscussing) break;
-                document.getElementById('progressText').innerText = '第 ' + round + ' 轮辩论中...';
-                for (var j = 0; j < selectedAIs.length; j++) {
+
+                // 状态文字（不显示轮数数字）
+                var statusText = '';
+                if (targetRounds === 3) {
+                    statusText = 'AI 讨论中…';
+                } else if (targetRounds === 6) {
+                    if (round <= 2) statusText = '讨论中…';
+                    else if (round <= 4) statusText = '观点交锋中…';
+                    else statusText = '提炼最优方案…';
+                } else if (targetRounds === 7) {
+                    if (round <= 2) statusText = '讨论中…';
+                    else if (round <= 5) statusText = '观点交锋中…';
+                    else statusText = '提炼最优方案…';
+                }
+
+                // 显示状态文字（每轮只显示一次）
+                var statusDiv = document.createElement('div');
+                statusDiv.className = 'message-card';
+                statusDiv.style.background = '#e8edf5';
+                statusDiv.style.textAlign = 'center';
+                statusDiv.style.fontWeight = '600';
+                statusDiv.style.color = '#1a1a2e';
+                statusDiv.textContent = statusText;
+                document.getElementById('discussionArea').appendChild(statusDiv);
+
+                // 本轮每个AI依次发言
+                for (var i = 0; i < totalAIs; i++) {
                     if (isStopped || !isDiscussing) break;
-                    var ai2 = selectedAIs[j];
-                    document.getElementById('progressText').innerText = ai2.name + ' 思考中...';
-                    var opName = '', opSol = '';
-                    for (var k = discussionMessages.length - 1; k >= 0; k--) {
-                        var m = discussionMessages[k];
-                        if (m.name !== ai2.name && m.content && m.content !== '无响应') {
-                            opName = m.name;
-                            opSol = m.content.slice(0, 150);
-                            break;
+                    var ai = selectedAIs[i];
+                    document.getElementById('progressText').innerText = ai.name + ' 思考中...';
+
+                    var isFirstRound = (round === 1);
+                    var opponentName = '';
+                    var opponentSolution = '';
+                    if (!isFirstRound) {
+                        for (var k = discussionMessages.length - 1; k >= 0; k--) {
+                            var m = discussionMessages[k];
+                            if (m.name !== ai.name && m.content && m.content !== '无响应') {
+                                opponentName = m.name;
+                                opponentSolution = m.content.slice(0, 150);
+                                break;
+                            }
                         }
                     }
-                    var response2 = await callAI(ai2, true, opName, opSol);
+                    var response = await callAI(ai, !isFirstRound, opponentName, opponentSolution);
                     if (isStopped || !isDiscussing) break;
-                    discussionMessages.push({ name: ai2.name, role: ai2.role, content: response2 || '无响应' });
-                    displayStructuredMessage(ai2, response2 || '无响应');
+                    discussionMessages.push({ name: ai.name, role: ai.role, content: response || '无响应' });
+                    displayStructuredMessage(ai, response || '无响应');
                     await new Promise(function(r){ setTimeout(r, 200); });
                 }
             }
+
             if (isStopped) {
                 document.getElementById('progress').classList.remove('show');
                 document.getElementById('submitBtn').disabled = false;
@@ -900,6 +916,7 @@
                 isDiscussing = false;
                 return;
             }
+
             await extractFinalAnswer();
             if (finalAnswer) {
                 displayFinalAnswer();
@@ -1041,7 +1058,6 @@
         document.getElementById('progress').classList.add('show');
         document.getElementById('progressText').innerText = '重新分析中...';
         document.getElementById('interruptPanel').classList.remove('show');
-        currentRound = 1;
         discussionMessages = [];
         finalAnswer = null;
         document.getElementById('discussionArea').innerHTML = '';
@@ -1049,37 +1065,52 @@
         currentQuestion = currentQuestion + '\n补充条件：' + extra;
         if (floatBtn) floatBtn.style.display = 'none';
         var targetRounds = maxRounds;
+        var totalAIs = selectedAIs.length;
         try {
-            for (var i = 0; i < selectedAIs.length; i++) {
+            for (var round = 1; round <= targetRounds; round++) {
                 if (isStopped || !isDiscussing) break;
-                var ai = selectedAIs[i];
-                document.getElementById('progressText').innerText = ai.name + ' 思考中...';
-                var response = await callAI(ai, false);
-                if (isStopped || !isDiscussing) break;
-                discussionMessages.push({ name: ai.name, role: ai.role, content: response || '无响应' });
-                displayStructuredMessage(ai, response || '无响应');
-                await new Promise(function(r){ setTimeout(r, 200); });
-            }
-            for (var round = 2; round <= targetRounds; round++) {
-                if (isStopped || !isDiscussing) break;
-                document.getElementById('progressText').innerText = '第 ' + round + ' 轮辩论中...';
-                for (var j = 0; j < selectedAIs.length; j++) {
+                var statusText = '';
+                if (targetRounds === 3) {
+                    statusText = 'AI 讨论中…';
+                } else if (targetRounds === 6) {
+                    if (round <= 2) statusText = '讨论中…';
+                    else if (round <= 4) statusText = '观点交锋中…';
+                    else statusText = '提炼最优方案…';
+                } else if (targetRounds === 7) {
+                    if (round <= 2) statusText = '讨论中…';
+                    else if (round <= 5) statusText = '观点交锋中…';
+                    else statusText = '提炼最优方案…';
+                }
+                var statusDiv = document.createElement('div');
+                statusDiv.className = 'message-card';
+                statusDiv.style.background = '#e8edf5';
+                statusDiv.style.textAlign = 'center';
+                statusDiv.style.fontWeight = '600';
+                statusDiv.style.color = '#1a1a2e';
+                statusDiv.textContent = statusText;
+                document.getElementById('discussionArea').appendChild(statusDiv);
+
+                for (var i = 0; i < totalAIs; i++) {
                     if (isStopped || !isDiscussing) break;
-                    var ai2 = selectedAIs[j];
-                    document.getElementById('progressText').innerText = ai2.name + ' 思考中...';
-                    var opName = '', opSol = '';
-                    for (var k = discussionMessages.length - 1; k >= 0; k--) {
-                        var m = discussionMessages[k];
-                        if (m.name !== ai2.name && m.content && m.content !== '无响应') {
-                            opName = m.name;
-                            opSol = m.content.slice(0, 150);
-                            break;
+                    var ai = selectedAIs[i];
+                    document.getElementById('progressText').innerText = ai.name + ' 思考中...';
+                    var isFirstRound = (round === 1);
+                    var opponentName = '';
+                    var opponentSolution = '';
+                    if (!isFirstRound) {
+                        for (var k = discussionMessages.length - 1; k >= 0; k--) {
+                            var m = discussionMessages[k];
+                            if (m.name !== ai.name && m.content && m.content !== '无响应') {
+                                opponentName = m.name;
+                                opponentSolution = m.content.slice(0, 150);
+                                break;
+                            }
                         }
                     }
-                    var response2 = await callAI(ai2, true, opName, opSol);
+                    var response = await callAI(ai, !isFirstRound, opponentName, opponentSolution);
                     if (isStopped || !isDiscussing) break;
-                    discussionMessages.push({ name: ai2.name, role: ai2.role, content: response2 || '无响应' });
-                    displayStructuredMessage(ai2, response2 || '无响应');
+                    discussionMessages.push({ name: ai.name, role: ai.role, content: response || '无响应' });
+                    displayStructuredMessage(ai, response || '无响应');
                     await new Promise(function(r){ setTimeout(r, 200); });
                 }
             }
