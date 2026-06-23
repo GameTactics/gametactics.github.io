@@ -418,6 +418,51 @@
             color: #333;
         }
 
+        /* ===== 升级弹窗专用样式 ===== */
+        .upgrade-content {
+            background: #f0f4ff;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            text-align: left;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        .upgrade-content .qq-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .upgrade-content .qq-row strong {
+            font-size: 15px;
+        }
+        .upgrade-content .btn-copy-qq {
+            background: #e8edf5;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a6cf7;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .upgrade-content .btn-copy-qq:active {
+            background: #d5dce6;
+            transform: scale(0.95);
+        }
+        .upgrade-content hr {
+            margin: 12px 0;
+            border: none;
+            border-top: 1px solid #dce1ec;
+        }
+        .upgrade-content .time-note {
+            color: #666;
+            font-size: 13px;
+        }
+
         .toast {
             position: fixed;
             bottom: 30px;
@@ -507,15 +552,16 @@
         <button class="logout-btn" id="logoutBtn">退出登录</button>
     </div>
 
+    <!-- ===== 升级套餐卡片 ===== -->
     <div class="upgrade-card" id="upgradeCard">
         <div class="info">
             <span class="icon">🔄</span>
             <div class="text">
                 <h3>升级套餐</h3>
-                <p>从低配套餐升级到高配，只需补差价即可</p>
+                <p>补差价升级到更高配置</p>
             </div>
         </div>
-        <button class="btn-upgrade" id="openUpgradeBtn">点击查看可升级套餐 →</button>
+        <button class="btn-upgrade" id="openUpgradeBtn">点击查看升级说明 →</button>
     </div>
 
     <div class="card">
@@ -537,7 +583,7 @@
     <div class="card">
         <h2>🎫 兑换码</h2>
         <div class="code-area">
-            <input type="text" id="codeInput" placeholder="请输入兑换码，如 K2-TEST" />
+            <input type="text" id="codeInput" placeholder="请输入兑换码，如 K2-XXXXXX" />
             <button class="btn" id="redeemBtn">兑换</button>
         </div>
         <div id="msgBox" class="msg"></div>
@@ -552,12 +598,32 @@
         <a href="index.html" class="back-link">← 返回 裁决者 主程序</a>
     </div>
 
+    <!-- ===== 升级弹窗（含复制QQ号） ===== -->
     <div class="modal-overlay" id="upgradeModal">
         <div class="modal-box">
             <button class="close-icon" id="closeModalBtn">✕</button>
             <h2>🔄 升级套餐</h2>
-            <div class="sub">选择目标套餐，系统自动计算补差价</div>
-            <div id="modalContent"></div>
+            <div class="sub">补差价升级到更高配置</div>
+            <div class="upgrade-content">
+                <p>📌 升级需要联系客服人工处理</p>
+                <div class="qq-row">
+                    <strong>客服 QQ：451134850</strong>
+                    <button class="btn-copy-qq" id="copyQQBtn">复制QQ号</button>
+                </div>
+                <hr />
+                <p><strong>操作步骤：</strong></p>
+                <p>1️⃣ 截图当前账户余额（显示剩余次数）</p>
+                <p>2️⃣ 将截图发送到客服 QQ</p>
+                <p>3️⃣ 告诉我你想升级到哪个套餐</p>
+                <p>4️⃣ 客服会计算补差价金额</p>
+                <p>5️⃣ 付款后，兑换码会发到你的 QQ</p>
+                <p>6️⃣ 在商城输入兑换码，立即激活</p>
+                <hr />
+                <p class="time-note">⏰ 客服在线时间：每天 9:00 - 22:00</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn-cancel" id="cancelUpgradeBtn">我知道了</button>
+            </div>
         </div>
     </div>
 
@@ -565,7 +631,7 @@
 
     <script>
         // ============================================================
-        // 裁决者 · 商城 最终版（含面包多链接）
+        // 裁决者 · 商城 最终版（含面包多链接 + 升级弹窗）
         // ============================================================
 
         var PACKAGES = [{
@@ -660,6 +726,35 @@
             t.classList.add('show');
             clearTimeout(t._timer);
             t._timer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+        }
+
+        function copyText(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    showToast('✅ 已复制：' + text);
+                }).catch(function() {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            ta.style.top = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast('✅ 已复制：' + text);
+            } catch (e) {
+                showToast('⚠️ 复制失败，请手动复制');
+            }
+            document.body.removeChild(ta);
         }
 
         // ===== localStorage 工具 =====
@@ -887,290 +982,29 @@
         }
 
         // ============================================================
-        // 升级套餐逻辑
+        // 升级弹窗控制
         // ============================================================
-        function getPkgType(id) {
-            if (id.startsWith('K')) return 'fast';
-            if (id.startsWith('W')) return 'full';
-            return 'energy';
-        }
-
-        function getUserPackages(user) {
-            var list = [];
-            if (user.fastCount > 0) {
-                PACKAGES.filter(function(p) { return p.id.startsWith('K'); }).forEach(function(p) {
-                    list.push({ pkg: p, remain: user.fastCount, type: 'fast' });
-                });
-            }
-            if (user.fullCount > 0) {
-                PACKAGES.filter(function(p) { return p.id.startsWith('W'); }).forEach(function(p) {
-                    list.push({ pkg: p, remain: user.fullCount, type: 'full' });
-                });
-            }
-            if (user.points > 0) {
-                var ep = PACKAGES.find(function(p) { return p.id === 'E'; });
-                if (ep) list.push({ pkg: ep, remain: user.points, type: 'energy' });
-            }
-            return list;
-        }
-
-        function calcUpgradePrice(currentPkg, targetPkg, usedCount) {
-            var totalPrice = currentPkg.price;
-            var unitPrice = totalPrice / currentPkg.count;
-            var usedValue = usedCount * unitPrice;
-            var remainValue = Math.max(0, totalPrice - usedValue);
-            var diff = Math.max(0, targetPkg.price - remainValue);
-            return { remainValue: remainValue, usedValue: usedValue, diff: diff, unitPrice: unitPrice };
-        }
-
-        function renderUpgradeModal() {
-            var container = document.getElementById('modalContent');
-            var username = getRememberUser();
-            if (!username) {
-                container.innerHTML = '<div class="empty-tip">⚠️ 请先登录，再升级套餐。</div>';
-                return;
-            }
-            var users = getUsers();
-            var user = users[username];
-            if (!user) {
-                container.innerHTML = '<div class="empty-tip">⚠️ 用户数据不存在，请重新登录。</div>';
-                return;
-            }
-
-            var packages = getUserPackages(user);
-            if (packages.length === 0) {
-                container.innerHTML =
-                    '<div class="empty-tip"><p>您还没有任何套餐，请先购买套餐后再升级。</p><button class="btn-go-buy" id="goBuyBtn">去购买套餐</button></div>';
-                var goBtn = document.getElementById('goBuyBtn');
-                if (goBtn) {
-                    goBtn.addEventListener('click', function() {
-                        document.getElementById('upgradeModal').classList.remove('active');
-                        document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
-                    });
-                }
-                return;
-            }
-
-            var html = '<div style="margin-bottom:12px;font-size:14px;color:#555;">当前拥有的套餐：</div>';
-            html += '<div class="current-pkg">';
-            packages.forEach(function(item, idx) {
-                html += '<div style="margin-bottom:4px;"><strong>' + item.pkg.label + '</strong>（剩余 ' + item
-                    .remain + ' 次）' +
-                    (packages.length > 1 ?
-                        '<button class="btn-upgrade" style="padding:2px 12px;font-size:12px;margin-left:8px;" data-select="' +
-                        idx + '">选择</button>' : '') +
-                    '</div>';
-            });
-            html += '</div>';
-
-            html += '<div style="font-size:14px;font-weight:600;margin:12px 0 8px;">选择目标套餐：</div>';
-            html += '<div class="pkg-list" id="targetPkgList"></div>';
-
-            html +=
-                '<div class="btn-group"><button class="btn-confirm" id="confirmUpgradeBtn" disabled>确认升级</button><button class="btn-cancel" id="cancelUpgradeBtn">取消</button></div>';
-            container.innerHTML = html;
-
-            var currentSelectedIdx = 0;
-            for (var i = 0; i < packages.length; i++) {
-                if (packages[i].type !== 'energy') {
-                    currentSelectedIdx = i;
-                    break;
-                }
-            }
-            var hasNonEnergy = packages.some(function(p) { return p.type !== 'energy'; });
-            if (!hasNonEnergy) {
-                container.innerHTML = '<div class="empty-tip">能量包暂不支持升级，您可以购买其他套餐。</div>';
-                return;
-            }
-
-            function renderTargetList(selectedIdx) {
-                var currentItem = packages[selectedIdx];
-                if (!currentItem) return;
-                var currentPkg = currentItem.pkg;
-                var currentRemain = currentItem.remain;
-                var usedCount = currentPkg.count - currentRemain;
-
-                var targets = [];
-                if (currentItem.type === 'fast') {
-                    targets = PACKAGES.filter(function(p) { return p.id.startsWith('K') && p.price > currentPkg
-                        .price; });
-                } else if (currentItem.type === 'full') {
-                    targets = PACKAGES.filter(function(p) { return p.id.startsWith('W') && p.price > currentPkg
-                        .price; });
-                } else {
-                    targets = [];
-                }
-
-                var listContainer = document.getElementById('targetPkgList');
-                if (!listContainer) return;
-                if (targets.length === 0) {
-                    listContainer.innerHTML = '<div style="color:#888;padding:8px 0;">当前套餐已是最高配置，无需升级。</div>';
-                    return;
-                }
-
-                var listHtml = '';
-                targets.forEach(function(target, idx) {
-                    var result = calcUpgradePrice(currentPkg, target, usedCount);
-                    listHtml +=
-                        '<div class="pkg-option" data-target="' + idx +
-                        '" style="cursor:pointer;"><span class="name">' + target.label +
-                        '</span><span><span class="price">' + target.price + '元/' + target.count +
-                        '次</span><span class="diff"> → 补差价 ' + result.diff.toFixed(2) +
-                        '元</span></span></div>';
-                });
-                listHtml += '<div style="font-size:13px;color:#888;margin-top:6px;">* 已用次数：' + usedCount +
-                    ' 次，当前剩余价值：' + calcUpgradePrice(currentPkg, targets[0] || currentPkg, usedCount).remainValue
-                    .toFixed(2) + ' 元</div>';
-                listContainer.innerHTML = listHtml;
-
-                listContainer.querySelectorAll('.pkg-option').forEach(function(el) {
-                    el.addEventListener('click', function() {
-                        var idx = parseInt(this.dataset.target);
-                        var target = targets[idx];
-                        if (!target) return;
-                        listContainer.querySelectorAll('.pkg-option').forEach(function(e) { e.classList
-                                .remove('selected'); });
-                        this.classList.add('selected');
-                        var confirmBtn = document.getElementById('confirmUpgradeBtn');
-                        if (confirmBtn) {
-                            confirmBtn.disabled = false;
-                            confirmBtn.dataset.targetId = target.id;
-                            confirmBtn.dataset.currentIdx = selectedIdx;
-                        }
-                    });
-                });
-            }
-
-            var nonEnergyPackages = packages.filter(function(p) { return p.type !== 'energy'; });
-            if (nonEnergyPackages.length > 1) {
-                var pickContainer = document.createElement('div');
-                pickContainer.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;';
-                nonEnergyPackages.forEach(function(item, idx) {
-                    var btn = document.createElement('button');
-                    btn.className = 'btn-upgrade';
-                    btn.style.cssText =
-                        'padding:4px 16px;font-size:13px;background:' + (idx === currentSelectedIdx ?
-                            '#4a6cf7' : '#e8edf5') + ';color:' + (idx === currentSelectedIdx ? 'white' :
-                            '#333') + ';';
-                    btn.textContent = item.pkg.label + '（剩' + item.remain + '次）';
-                    btn.dataset.pick = idx;
-                    pickContainer.appendChild(btn);
-                });
-                var targetList = document.getElementById('targetPkgList');
-                targetList.parentNode.insertBefore(pickContainer, targetList);
-                pickContainer.querySelectorAll('[data-pick]').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        var idx = parseInt(this.dataset.pick);
-                        currentSelectedIdx = idx;
-                        pickContainer.querySelectorAll('[data-pick]').forEach(function(b) {
-                            b.style.background = '#e8edf5';
-                            b.style.color = '#333';
-                        });
-                        this.style.background = '#4a6cf7';
-                        this.style.color = 'white';
-                        renderTargetList(idx);
-                        var confirmBtn = document.getElementById('confirmUpgradeBtn');
-                        if (confirmBtn) {
-                            confirmBtn.disabled = true;
-                            confirmBtn.dataset.currentIdx = idx;
-                        }
-                    });
-                });
-            }
-
-            renderTargetList(currentSelectedIdx);
-
-            var confirmBtn = document.getElementById('confirmUpgradeBtn');
-            if (confirmBtn) {
-                confirmBtn.addEventListener('click', function() {
-                    var targetId = this.dataset.targetId;
-                    var currentIdx = parseInt(this.dataset.currentIdx);
-                    if (!targetId) {
-                        showToast('请先选择目标套餐');
-                        return;
-                    }
-                    var currentItem = packages[currentIdx];
-                    if (!currentItem) {
-                        showToast('当前套餐数据异常');
-                        return;
-                    }
-                    var targetPkg = null;
-                    for (var k = 0; k < PACKAGES.length; k++) {
-                        if (PACKAGES[k].id === targetId) {
-                            targetPkg = PACKAGES[k];
-                            break;
-                        }
-                    }
-                    if (!targetPkg) {
-                        showToast('目标套餐不存在');
-                        return;
-                    }
-                    var usedCount = currentItem.pkg.count - currentItem.remain;
-                    var result = calcUpgradePrice(currentItem.pkg, targetPkg, usedCount);
-                    var confirmMsg = '确认升级？\n当前套餐：' + currentItem.pkg.label + '（剩余 ' + currentItem.remain +
-                        ' 次）\n目标套餐：' + targetPkg.label + '（' + targetPkg.count + ' 次）\n补差价：' + result
-                        .diff.toFixed(2) + ' 元\n\n升级后，当前套餐剩余次数将清零，替换为目标套餐。';
-                    if (!confirm(confirmMsg)) return;
-
-                    var usersData = getUsers();
-                    var userData = usersData[username];
-                    if (!userData) {
-                        showToast('用户数据异常');
-                        return;
-                    }
-                    if (currentItem.type === 'fast') {
-                        userData.fastCount = targetPkg.count;
-                    } else if (currentItem.type === 'full') {
-                        userData.fullCount = targetPkg.count;
-                    } else {
-                        showToast('能量包暂不支持升级');
-                        return;
-                    }
-                    if (!userData.records) userData.records = [];
-                    var now = new Date();
-                    var timeStr =
-                        now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now
-                            .getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') +
-                        ':' + String(now.getMinutes()).padStart(2, '0');
-                    userData.records.push({
-                        time: timeStr,
-                        fastChange: currentItem.type === 'fast' ? '升级→' + targetPkg.label : '-',
-                        fastRemain: userData.fastCount || 0,
-                        fullChange: currentItem.type === 'full' ? '升级→' + targetPkg.label : '-',
-                        fullRemain: userData.fullCount || 0,
-                        energyChange: '-',
-                        energyRemain: userData.points || 0
-                    });
-                    saveUsers(usersData);
-                    showToast('✅ 升级成功！已升级为 ' + targetPkg.label + '，剩余 ' + targetPkg.count + ' 次。');
-                    document.getElementById('upgradeModal').classList.remove('active');
-                    renderRecords();
-                    updateStatusBar();
-                });
-            }
-
-            var cancelBtn = document.getElementById('cancelUpgradeBtn');
-            if (cancelBtn) {
-                cancelBtn.addEventListener('click', function() {
-                    document.getElementById('upgradeModal').classList.remove('active');
-                });
-            }
-        }
-
         document.getElementById('openUpgradeBtn').addEventListener('click', function() {
-            var modal = document.getElementById('upgradeModal');
-            modal.classList.add('active');
-            renderUpgradeModal();
+            document.getElementById('upgradeModal').classList.add('show');
         });
 
         document.getElementById('closeModalBtn').addEventListener('click', function() {
-            document.getElementById('upgradeModal').classList.remove('active');
+            document.getElementById('upgradeModal').classList.remove('show');
+        });
+
+        document.getElementById('cancelUpgradeBtn').addEventListener('click', function() {
+            document.getElementById('upgradeModal').classList.remove('show');
         });
 
         document.getElementById('upgradeModal').addEventListener('click', function(e) {
             if (e.target === this) {
-                this.classList.remove('active');
+                this.classList.remove('show');
             }
+        });
+
+        // ===== 复制QQ号 =====
+        document.getElementById('copyQQBtn').addEventListener('click', function() {
+            copyText('451134850');
         });
 
         // ============================================================
@@ -1204,7 +1038,7 @@
             document.getElementById('codeInput').addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') redeemCode();
             });
-            console.log('✅ 商城已加载（含面包多链接）');
+            console.log('✅ 商城已加载（含面包多链接 + 升级弹窗）');
         });
     </script>
 </body>
