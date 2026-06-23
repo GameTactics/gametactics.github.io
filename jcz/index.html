@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="裁决者" />
-    <title>裁决者 · 198号</title>
+    <title>裁决者 · 最终版</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f5f7fb;color:#1a1a2e;line-height:1.5;-webkit-user-select:none;user-select:none;overflow-x:hidden}
@@ -334,7 +334,8 @@
     var floatBtn = document.getElementById('answerFloatBtn');
     var stopBtn = document.getElementById('stopBtn');
 
-    var DOWNLOAD_URL = 'https://wwarf.lanzouu.com/b01d70m86j';
+    // ===== 下载链接已更新 =====
+    var DOWNLOAD_URL = 'https://wwbnn.lanzoup.com/i5cPx3sql7wd';
     var QQ_NUMBER = '451134850';
 
     function showToast(msg) {
@@ -669,7 +670,7 @@
     }
 
     // ============================================================
-    // 统一 API 通道
+    // 统一 API 通道（唯一出口 + 硬性封顶 + 可中断）
     // ============================================================
     function buildStructuredPrompt(ai, isDebate, opponentName, opponentSolution) {
         var today = new Date().toISOString().slice(0,10);
@@ -890,12 +891,11 @@
             return;
         }
 
-        // 重置所有状态
         isStopped = false;
         isDiscussing = true;
         apiCallCounter = 0;
         activeAbortController = null;
-        var stoppedByUser = false;  // 标记是否用户主动停止
+        var stoppedByUser = false;
 
         var q = document.getElementById('question').value.trim();
         if (!q) { showToast('请输入问题'); return; }
@@ -997,9 +997,7 @@
                 }
             }
 
-            // 判断退出原因
             if (stoppedByUser || isStopped) {
-                // 用户主动按了停止
                 document.getElementById('progress').classList.remove('show');
                 document.getElementById('submitBtn').disabled = false;
                 if (stopBtn) stopBtn.classList.remove('visible');
@@ -1015,13 +1013,11 @@
             }
 
             if (!isDiscussing) {
-                // 其他非停止退出（如封顶触发的退出）
                 document.getElementById('progress').classList.remove('show');
                 document.getElementById('submitBtn').disabled = false;
                 if (stopBtn) stopBtn.classList.remove('visible');
                 isDiscussing = false;
                 if (apiCallCounter >= MAX_API_CALLS) {
-                    // 封顶退出，但已经产生了一些讨论，尝试提取答案
                     await extractFinalAnswer();
                     if (!finalAnswer || !finalAnswer.answer) {
                         finalAnswer = {
@@ -1037,10 +1033,8 @@
                 return;
             }
 
-            // 正常结束（跑完全部轮次）
             await extractFinalAnswer();
             if (!finalAnswer || !finalAnswer.answer) {
-                // 提取失败，使用最后一条发言作为兜底
                 var fallbackMsg = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '讨论未产生有效答案';
                 finalAnswer = {
                     answer: fallbackMsg || '讨论未产生有效答案，请重新尝试。',
@@ -1070,7 +1064,6 @@
         }
     }
 
-    // 核心修复：extractFinalAnswer 函数 — 隐形AI负责提取最终答案
     function extractFinalAnswer() {
         if (discussionMessages.length === 0) {
             finalAnswer = null;
