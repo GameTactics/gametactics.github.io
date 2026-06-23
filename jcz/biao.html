@@ -565,21 +565,80 @@
 
     <script>
         // ============================================================
-        // 裁决者 · 商城 最终版
+        // 裁决者 · 商城 最终版（含面包多链接）
         // ============================================================
 
-        var PACKAGES = [
-            { id: 'K2', label: '快速2AI', price: 3, count: 20, level: '普通', buyLink: '#' },
-            { id: 'K3', label: '快速3AI', price: 5.5, count: 20, level: '普通', buyLink: '#' },
-            { id: 'K4', label: '快速4AI', price: 8, count: 20, level: '普通', buyLink: '#' },
-            { id: 'W2F', label: '完整2AI-极速', price: 10, count: 15, level: '进阶', buyLink: '#' },
-            { id: 'W2D', label: '完整2AI-深度', price: 15, count: 15, level: '专业', buyLink: '#' },
-            { id: 'W3F', label: '完整3AI-极速', price: 15, count: 15, level: '进阶', buyLink: '#' },
-            { id: 'W3D', label: '完整3AI-深度', price: 22, count: 15, level: '专业', buyLink: '#' },
-            { id: 'W4F', label: '完整4AI-极速', price: 20, count: 20, level: '进阶', buyLink: '#' },
-            { id: 'W4D', label: '完整4AI-深度', price: 30, count: 20, level: '专业', buyLink: '#' },
-            { id: 'E', label: '能量包', price: 8, count: 10, level: '灵活', buyLink: '#' }
-        ];
+        var PACKAGES = [{
+            id: 'K2',
+            label: '快速2AI',
+            price: 3,
+            count: 20,
+            level: '普通',
+            buyLink: 'https://mbd.pub/o/bread/YZaTmpdqZQ=='
+        }, {
+            id: 'K3',
+            label: '快速3AI',
+            price: 5.5,
+            count: 20,
+            level: '普通',
+            buyLink: 'https://mbd.pub/o/bread/YZaTmpdpbQ=='
+        }, {
+            id: 'K4',
+            label: '快速4AI',
+            price: 8,
+            count: 20,
+            level: '普通',
+            buyLink: 'https://mbd.pub/o/bread/YZaTmpdpbA=='
+        }, {
+            id: 'W2F',
+            label: '完整2AI-极速',
+            price: 10,
+            count: 15,
+            level: '进阶',
+            buyLink: 'https://mbd.pub/o/bread/YZaTmpdpag=='
+        }, {
+            id: 'W2D',
+            label: '完整2AI-深度',
+            price: 15,
+            count: 15,
+            level: '专业',
+            buyLink: 'https://mbd.pub/o/bread/YZaTmpdpZQ=='
+        }, {
+            id: 'W3F',
+            label: '完整3AI-极速',
+            price: 15,
+            count: 15,
+            level: '进阶',
+            buyLink: 'https://mbd.pub/o/bread/YZaTmpdpZw=='
+        }, {
+            id: 'W3D',
+            label: '完整3AI-深度',
+            price: 22,
+            count: 15,
+            level: '专业',
+            buyLink: 'https://mbd.pub/o/bread/YZaTmpdpZA=='
+        }, {
+            id: 'W4F',
+            label: '完整4AI-极速',
+            price: 20,
+            count: 20,
+            level: '进阶',
+            buyLink: 'https://mbd.pub/o/bread/YZaTmpdpZg=='
+        }, {
+            id: 'W4D',
+            label: '完整4AI-深度',
+            price: 30,
+            count: 20,
+            level: '专业',
+            buyLink: 'https://mbd.pub/o/bread/YZaTmpZybA=='
+        }, {
+            id: 'E',
+            label: '能量包',
+            price: 8,
+            count: 10,
+            level: '灵活',
+            buyLink: 'https://mbd.pub/o/bread/YZaTmpdqZg=='
+        }];
 
         var CODE_PREFIX_MAP = {
             'K2-': 'K2',
@@ -642,7 +701,7 @@
             }, 300);
         });
 
-        // ===== 渲染价格表 =====
+        // ===== 渲染价格表（含面包多链接） =====
         function renderPriceTable() {
             var tbody = document.getElementById('priceBody');
             tbody.innerHTML = PACKAGES.map(function(p, index) {
@@ -660,10 +719,10 @@
                     e.stopPropagation();
                     var idx = parseInt(this.dataset.index);
                     var pkg = PACKAGES[idx];
-                    if (pkg.buyLink === '#') {
-                        showToast('该套餐即将上线，敬请期待！');
-                    } else {
+                    if (pkg.buyLink && pkg.buyLink !== '#') {
                         window.open(pkg.buyLink, '_blank');
+                    } else {
+                        showToast('该套餐即将上线，敬请期待！');
                     }
                 });
             });
@@ -712,7 +771,7 @@
             }, 5000);
         }
 
-        // ===== 兑换码逻辑（一次有效 + BroadcastChannel 广播） =====
+        // ===== 兑换码逻辑 =====
         function redeemCode() {
             var input = document.getElementById('codeInput');
             var code = input.value.trim().toUpperCase();
@@ -1145,7 +1204,7 @@
             document.getElementById('codeInput').addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') redeemCode();
             });
-            console.log('✅ 商城已加载');
+            console.log('✅ 商城已加载（含面包多链接）');
         });
     </script>
 </body>
