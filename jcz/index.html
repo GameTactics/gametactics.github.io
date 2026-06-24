@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="裁决者" />
-    <title>裁决者 · 豆包版</title>
+    <title>裁决者</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f5f7fb;color:#1a1a2e;line-height:1.5;-webkit-user-select:none;user-select:none;overflow-x:hidden}
@@ -317,7 +317,7 @@
     };
 
     var currentUser = null;
-    var currentUserData = null; // 从localStorage获取用户数据（暂不接服务器）
+    var users = {};
     var selectedAIs = [];
     var currentMode = 'fast';
     var currentSubMode = 'speed';
@@ -364,24 +364,23 @@
     function validatePassword(pwd) { return pwd && pwd.length >= 6; }
 
     // ============================================================
-    // 用户管理（仍使用localStorage，保持轻量）
+    // 用户管理（使用localStorage）
     // ============================================================
     function loadUsers() {
         try {
             var stored = localStorage.getItem('aiJudge_users');
-            return stored ? JSON.parse(stored) : {};
-        } catch(e) { return {}; }
+            users = stored ? JSON.parse(stored) : {};
+            if (users['123456789']) {
+                delete users['123456789'];
+                saveUsers();
+            }
+        } catch(e) { users = {}; }
     }
 
-    function saveUsers(users) {
+    function saveUsers() {
         try {
             localStorage.setItem('aiJudge_users', JSON.stringify(users));
         } catch(e) {}
-    }
-
-    var users = {};
-    function loadUserData() {
-        users = loadUsers();
     }
 
     function updateUI() {
@@ -407,7 +406,7 @@
         if (selectedAIs.length === 0) {
             selectedAIs.push(allAIs[0], allAIs[1]);
         }
-        maxAIAllowed = 4;
+        loadAILimitFromUser();
         renderAIGrid();
         setMode('fast');
         updateUI();
@@ -422,6 +421,17 @@
         document.getElementById('authScreen').style.display = 'flex';
         document.getElementById('mainScreen').style.display = 'none';
         if (floatBtn) floatBtn.style.display = 'none';
+    }
+
+    function loadAILimitFromUser() {
+        if (!currentUser) return;
+        var u = users[currentUser];
+        if (!u) return;
+        maxAIAllowed = u.aiLimit || 4;
+        while (selectedAIs.length > maxAIAllowed) {
+            selectedAIs.pop();
+        }
+        updateUI();
     }
 
     // ============================================================
@@ -456,7 +466,7 @@
                     aiLimit: 4,
                     records: []
                 };
-                saveUsers(users);
+                saveUsers();
             }
             currentUser = username;
             localStorage.setItem('aiJudge_remember', username);
@@ -600,7 +610,7 @@
     }
 
     // ============================================================
-    // 扣费逻辑（使用localStorage）
+    // 扣费逻辑
     // ============================================================
     function canUse() {
         if (currentUser === 'luoyangqq') return true;
@@ -663,7 +673,7 @@
                 energyChange: '-',
                 energyRemain: u.points || 0
             });
-            saveUsers(users);
+            saveUsers();
             updateUI();
             chargeLock = false;
             return true;
@@ -720,7 +730,6 @@
         var signal = controller.signal;
 
         try {
-            // 豆包API请求（OpenAI兼容模式）
             var res = await fetch(CONFIG.API_URL, {
                 method: 'POST',
                 headers: {
@@ -762,7 +771,7 @@
         }
     }
 
-    // 隐形AI补充理由（也走豆包）
+    // 隐形AI补充理由
     async function generateReasonForAnswer(answer) {
         if (apiCallCounter >= MAX_API_CALLS) {
             return '';
@@ -809,7 +818,7 @@
     }
 
     // ============================================================
-    // 解析和显示（保持不变）
+    // 解析和显示
     // ============================================================
     function parseStructuredContent(text) {
         if (!text) return { solution: '', reason: '', supplement: '', supplementTarget: '' };
@@ -874,7 +883,7 @@
     }
 
     // ============================================================
-    // 停止（增强版）
+    // 停止
     // ============================================================
     function stopDiscussion() {
         if (!isDiscussing) {
@@ -1293,7 +1302,7 @@
     }
 
     // ============================================================
-    // 分享功能（保持不变）
+    // 分享功能
     // ============================================================
     var shareTimer = null;
     function showShareModal() { document.getElementById('shareModal').classList.add('show'); }
@@ -1323,7 +1332,7 @@
         u.shareCount = (u.shareCount || 0) + 1;
         u.shareLastTime = now;
         u.fastCount = (u.fastCount || 0) + 1;
-        saveUsers(users);
+        saveUsers();
         updateUI();
         showToast('✅ 分享成功！获得1次快速分析');
         return true;
@@ -1476,7 +1485,7 @@
     function enableDataSync() {
         window.addEventListener('storage', function(e) {
             if (e.key === 'aiJudge_users') {
-                loadUserData();
+                loadUsers();
                 if (currentUser) {
                     updateUI();
                     showToast('🔄 数据已更新');
@@ -1487,7 +1496,7 @@
             var channel = new BroadcastChannel('judge_channel');
             channel.onmessage = function(event) {
                 if (event.data === 'data_updated' || event.data === 'redeem_success') {
-                    loadUserData();
+                    loadUsers();
                     if (currentUser) {
                         updateUI();
                         showToast('🔄 数据已同步');
@@ -1498,7 +1507,7 @@
     }
 
     function init() {
-        loadUserData();
+        loadUsers();
         bindLoginEvents();
         var savedUser = localStorage.getItem('aiJudge_remember');
         if (savedUser && users[savedUser]) {
