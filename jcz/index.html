@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="裁决者" />
-    <title>裁决者 · 最终修复版</title>
+    <title>裁决者 · 豆包版</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f5f7fb;color:#1a1a2e;line-height:1.5;-webkit-user-select:none;user-select:none;overflow-x:hidden}
@@ -240,9 +240,13 @@
     'use strict';
 
     // ============================================================
-    // 0. 服务器配置
+    // 0. 豆包 API 配置（火山引擎）
     // ============================================================
-    var SERVER_URL = 'http://8.156.93.214:3000';
+    var CONFIG = {
+        API_KEY: 'ark-c79ff687-973c-43a4-9b65-ab15d8ba6e2a-c13b3',
+        API_URL: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
+        MODEL: 'doubao-seed-2-0-mini-260428'
+    };
 
     // ============================================================
     // 1. 返回键拦截（APP模式）
@@ -291,12 +295,6 @@
     // ============================================================
     // 2. 核心配置
     // ============================================================
-    var CONFIG = {
-        API_KEY: 'sk-a4ce10a564884b918795bb8207bde14e',
-        API_URL: 'https://api.deepseek.com/v1/chat/completions',
-        MODEL: 'deepseek-v4-flash'
-    };
-
     var GM_ACCOUNT = {
         username: 'luoyangqq',
         password: 'luoyangqq'
@@ -319,7 +317,7 @@
     };
 
     var currentUser = null;
-    var currentUserData = null;
+    var currentUserData = null; // 从localStorage获取用户数据（暂不接服务器）
     var selectedAIs = [];
     var currentMode = 'fast';
     var currentSubMode = 'speed';
@@ -366,126 +364,34 @@
     function validatePassword(pwd) { return pwd && pwd.length >= 6; }
 
     // ============================================================
-    // 服务器接口调用（超时控制 + 错误捕获）
+    // 用户管理（仍使用localStorage，保持轻量）
     // ============================================================
-    function serverLogin(username, password) {
-        var url = SERVER_URL + '/api/user/login';
-        var data = { username: username, password: password };
-        return new Promise(function(resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.timeout = 10000;
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try {
-                        var json = JSON.parse(xhr.responseText);
-                        resolve(json);
-                    } catch(e) {
-                        reject(new Error('解析响应失败'));
-                    }
-                } else {
-                    reject(new Error('服务器返回错误：' + xhr.status));
-                }
-            };
-            xhr.onerror = function() {
-                reject(new Error('网络错误，无法连接到服务器'));
-            };
-            xhr.ontimeout = function() {
-                reject(new Error('请求超时，服务器无响应'));
-            };
-            xhr.send(JSON.stringify(data));
-        });
+    function loadUsers() {
+        try {
+            var stored = localStorage.getItem('aiJudge_users');
+            return stored ? JSON.parse(stored) : {};
+        } catch(e) { return {}; }
     }
 
-    function serverConsume(username, mode, aiCount) {
-        var url = SERVER_URL + '/api/consume';
-        var data = { username: username, mode: mode, aiCount: aiCount };
-        return new Promise(function(resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.timeout = 10000;
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try {
-                        var json = JSON.parse(xhr.responseText);
-                        resolve(json);
-                    } catch(e) {
-                        reject(new Error('解析响应失败'));
-                    }
-                } else {
-                    reject(new Error('服务器返回错误：' + xhr.status));
-                }
-            };
-            xhr.onerror = function() {
-                reject(new Error('网络错误，无法连接到服务器'));
-            };
-            xhr.ontimeout = function() {
-                reject(new Error('请求超时，服务器无响应'));
-            };
-            xhr.send(JSON.stringify(data));
-        });
+    function saveUsers(users) {
+        try {
+            localStorage.setItem('aiJudge_users', JSON.stringify(users));
+        } catch(e) {}
     }
 
-    function serverLogUsage(username, mode, aiCount, rounds, tokensUsed, cost) {
-        var url = SERVER_URL + '/api/log/usage';
-        var data = { username: username, mode: mode, ai_count: aiCount, rounds: rounds, tokens_used: tokensUsed || 0, cost: cost || 0 };
-        return new Promise(function(resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.timeout = 5000;
-            xhr.onload = function() {
-                try { resolve(JSON.parse(xhr.responseText)); } catch(e) { resolve({ success: true }); }
-            };
-            xhr.onerror = function() { resolve({ success: false }); };
-            xhr.ontimeout = function() { resolve({ success: false }); };
-            xhr.send(JSON.stringify(data));
-        });
+    var users = {};
+    function loadUserData() {
+        users = loadUsers();
     }
 
-    function serverStop(username, sessionId) {
-        var url = SERVER_URL + '/api/stop';
-        var data = { username: username, sessionId: sessionId };
-        return new Promise(function(resolve) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.timeout = 5000;
-            xhr.onload = function() {
-                try { resolve(JSON.parse(xhr.responseText)); } catch(e) { resolve({ success: true }); }
-            };
-            xhr.onerror = function() { resolve({ success: true }); };
-            xhr.ontimeout = function() { resolve({ success: true }); };
-            xhr.send(JSON.stringify(data));
-        });
-    }
-
-    function serverLogAction(username, action, detail) {
-        var url = SERVER_URL + '/api/log/action';
-        var data = { username: username, action: action, detail: detail || '' };
-        return new Promise(function(resolve) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.timeout = 5000;
-            xhr.onload = function() { resolve({ success: true }); };
-            xhr.onerror = function() { resolve({ success: true }); };
-            xhr.ontimeout = function() { resolve({ success: true }); };
-            xhr.send(JSON.stringify(data));
-        });
-    }
-
-    // ============================================================
-    // 用户管理
-    // ============================================================
     function updateUI() {
-        if (!currentUser || !currentUserData) return;
+        if (!currentUser) return;
+        var u = users[currentUser];
+        if (!u) return;
         document.getElementById('accountDisplay').innerText = currentUser;
-        document.getElementById('fastCountDisplay').innerText = currentUserData.fast_count || 0;
-        document.getElementById('fullCountDisplay').innerText = currentUserData.full_count || 0;
-        document.getElementById('pointsDisplay').innerText = currentUserData.points || 0;
+        document.getElementById('fastCountDisplay').innerText = u.fastCount || 0;
+        document.getElementById('fullCountDisplay').innerText = u.fullCount || 0;
+        document.getElementById('pointsDisplay').innerText = u.points || 0;
         document.getElementById('selectedCount').innerText = selectedAIs.length;
         document.getElementById('aiLimitDisplay').innerText = '🤖 限' + maxAIAllowed + 'AI';
         var hint = document.getElementById('aiLimitHint');
@@ -536,28 +442,40 @@
             return;
         }
 
-        errEl.textContent = '登录中...';
+        if (username === 'luoyangqq' && password === 'luoyangqq') {
+            if (!users[username]) {
+                users[username] = {
+                    password: 'luoyangqq',
+                    fastCount: 0,
+                    fullCount: 0,
+                    points: 0,
+                    shareCount: 0,
+                    shareDate: new Date().toDateString(),
+                    shareLastTime: 0,
+                    usedCodes: [],
+                    aiLimit: 4,
+                    records: []
+                };
+                saveUsers(users);
+            }
+            currentUser = username;
+            localStorage.setItem('aiJudge_remember', username);
+            showMainScreen();
+            return;
+        }
 
-        serverLogin(username, password)
-            .then(function(res) {
-                if (res.success) {
-                    currentUser = username;
-                    currentUserData = res.user || {};
-                    localStorage.setItem('aiJudge_remember', username);
-                    showMainScreen();
-                    showToast('✅ 登录成功');
-                } else {
-                    errEl.textContent = res.message || '登录失败';
-                }
-            })
-            .catch(function(err) {
-                errEl.textContent = '❌ ' + err.message;
-            });
+        var user = users[username];
+        if (!user || user.password !== password) {
+            errEl.textContent = '用户名或密码错误';
+            return;
+        }
+        currentUser = username;
+        localStorage.setItem('aiJudge_remember', username);
+        showMainScreen();
     }
 
     function logout() {
         currentUser = null;
-        currentUserData = null;
         localStorage.removeItem('aiJudge_remember');
         document.getElementById('mainScreen').style.display = 'none';
         document.getElementById('authScreen').style.display = 'flex';
@@ -682,50 +600,82 @@
     }
 
     // ============================================================
-    // 预扣积分
+    // 扣费逻辑（使用localStorage）
     // ============================================================
     function canUse() {
         if (currentUser === 'luoyangqq') return true;
-        if (!currentUserData) return false;
-        var cost = getEnergyCost();
-        var points = currentUserData.points || 0;
+        var u = users[currentUser];
+        if (!u) return false;
         if (currentMode === 'fast') {
-            if ((currentUserData.fast_count || 0) > 0) return true;
-            if (points >= cost) return true;
+            if (u.fastCount > 0) return true;
+            var cost = getEnergyCost();
+            if ((u.points || 0) >= cost) return true;
             showToast('快速分析次数或能量点不足（需要 ' + cost + ' 点）');
             return false;
         } else {
-            if ((currentUserData.full_count || 0) > 0) return true;
-            if (points >= cost) return true;
+            if (u.fullCount > 0) return true;
+            var cost = getEnergyCost();
+            if ((u.points || 0) >= cost) return true;
             showToast('完整讨论次数或能量点不足（需要 ' + cost + ' 点）');
             return false;
         }
     }
 
+    var chargeLock = false;
+
     function deductUsage() {
-        var mode = (currentMode === 'fast') ? 'fast' : (currentSubMode === 'speed' ? 'speed' : 'deep');
-        var aiCount = selectedAIs.length;
-        return serverConsume(currentUser, mode, aiCount)
-            .then(function(res) {
-                if (res.success) {
-                    if (res.user) {
-                        currentUserData = res.user;
-                        updateUI();
-                    }
-                    return true;
-                } else {
-                    showToast(res.message || '扣费失败');
-                    return false;
-                }
-            })
-            .catch(function(err) {
-                showToast('扣费请求失败：' + err.message);
+        if (currentUser === 'luoyangqq') return true;
+        if (chargeLock) {
+            showToast('⏳ 扣费中，请稍后...');
+            return false;
+        }
+        chargeLock = true;
+        try {
+            var u = users[currentUser];
+            if (!u) {
+                chargeLock = false;
                 return false;
+            }
+            if (currentMode === 'fast') {
+                if (u.fastCount > 0) {
+                    u.fastCount--;
+                } else {
+                    var cost = getEnergyCost();
+                    u.points = (u.points || 0) - cost;
+                }
+            } else {
+                if (u.fullCount > 0) {
+                    u.fullCount--;
+                } else {
+                    var cost = getEnergyCost();
+                    u.points = (u.points || 0) - cost;
+                }
+            }
+            if (!u.records) u.records = [];
+            var now = new Date();
+            var timeStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+            u.records.push({
+                time: timeStr,
+                fastChange: currentMode === 'fast' ? '-1' : '-',
+                fastRemain: u.fastCount || 0,
+                fullChange: currentMode === 'full' ? '-1' : '-',
+                fullRemain: u.fullCount || 0,
+                energyChange: '-',
+                energyRemain: u.points || 0
             });
+            saveUsers(users);
+            updateUI();
+            chargeLock = false;
+            return true;
+        } catch(e) {
+            chargeLock = false;
+            showToast('❌ 扣费失败：' + e.message);
+            return false;
+        }
     }
 
     // ============================================================
-    // API调用
+    // API调用（豆包）
     // ============================================================
     function buildStructuredPrompt(ai, isDebate, opponentName, opponentSolution) {
         var today = new Date().toISOString().slice(0,10);
@@ -738,6 +688,7 @@
         } else {
             var opName = opponentName || '对方';
             var opSol = opponentSolution || '对方的方案';
+            // 上下文截断：只保留最近3轮
             var historySummary = '';
             var total = discussionMessages.length;
             var startIdx = Math.max(0, total - 3);
@@ -769,6 +720,7 @@
         var signal = controller.signal;
 
         try {
+            // 豆包API请求（OpenAI兼容模式）
             var res = await fetch(CONFIG.API_URL, {
                 method: 'POST',
                 headers: {
@@ -781,7 +733,8 @@
                         { role: 'system', content: prompt.sys },
                         { role: 'user', content: prompt.user }
                     ],
-                    temperature: 0.7
+                    temperature: 0.7,
+                    max_tokens: 300
                 }),
                 signal: signal
             });
@@ -809,6 +762,55 @@
         }
     }
 
+    // 隐形AI补充理由（也走豆包）
+    async function generateReasonForAnswer(answer) {
+        if (apiCallCounter >= MAX_API_CALLS) {
+            return '';
+        }
+        try {
+            var prompt = '问题：' + currentQuestion + '\n\n给出的方案是：' + answer + '\n\n请为这个方案生成一条简洁有力的理由（不超过80字），说明为什么这个方案是合理的。直接输出理由内容，不要加任何前缀。';
+            var controller = new AbortController();
+            activeAbortController = controller;
+            var signal = controller.signal;
+            var res = await fetch(CONFIG.API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + CONFIG.API_KEY
+                },
+                body: JSON.stringify({
+                    model: CONFIG.MODEL,
+                    messages: [
+                        { role: 'system', content: '你是一个理性的分析者，请为给出的方案生成合理的理由。' },
+                        { role: 'user', content: prompt }
+                    ],
+                    temperature: 0.5,
+                    max_tokens: 150
+                }),
+                signal: signal
+            });
+            if (isStopped) {
+                controller.abort();
+                return '';
+            }
+            var data = await res.json();
+            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                return '';
+            }
+            apiCallCounter++;
+            return data.choices[0].message.content.trim();
+        } catch(e) {
+            return '';
+        } finally {
+            if (activeAbortController) {
+                activeAbortController = null;
+            }
+        }
+    }
+
+    // ============================================================
+    // 解析和显示（保持不变）
+    // ============================================================
     function parseStructuredContent(text) {
         if (!text) return { solution: '', reason: '', supplement: '', supplementTarget: '' };
         var result = { solution: '', reason: '', supplement: '', supplementTarget: '' };
@@ -871,51 +873,9 @@
         area.appendChild(div);
     }
 
-    async function generateReasonForAnswer(answer) {
-        if (apiCallCounter >= MAX_API_CALLS) {
-            return '';
-        }
-        try {
-            var prompt = '问题：' + currentQuestion + '\n\n给出的方案是：' + answer + '\n\n请为这个方案生成一条简洁有力的理由（不超过80字），说明为什么这个方案是合理的。直接输出理由内容，不要加任何前缀。';
-            var controller = new AbortController();
-            activeAbortController = controller;
-            var signal = controller.signal;
-            var res = await fetch(CONFIG.API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + CONFIG.API_KEY
-                },
-                body: JSON.stringify({
-                    model: CONFIG.MODEL,
-                    messages: [
-                        { role: 'system', content: '你是一个理性的分析者，请为给出的方案生成合理的理由。' },
-                        { role: 'user', content: prompt }
-                    ],
-                    temperature: 0.5,
-                    max_tokens: 150
-                }),
-                signal: signal
-            });
-            if (isStopped) {
-                controller.abort();
-                return '';
-            }
-            var data = await res.json();
-            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                return '';
-            }
-            apiCallCounter++;
-            return data.choices[0].message.content.trim();
-        } catch(e) {
-            return '';
-        } finally {
-            if (activeAbortController) {
-                activeAbortController = null;
-            }
-        }
-    }
-
+    // ============================================================
+    // 停止（增强版）
+    // ============================================================
     function stopDiscussion() {
         if (!isDiscussing) {
             showToast('当前没有正在进行的分析');
@@ -928,16 +888,6 @@
 
         isStopped = true;
         isDiscussing = false;
-
-        serverStop(currentUser, currentSessionId)
-            .then(function(res) {
-                if (res.success) {
-                    console.log('服务器已停止会话');
-                }
-            })
-            .catch(function(err) {
-                console.warn('服务器停止请求失败:', err);
-            });
 
         if (activeAbortController) {
             try {
@@ -952,6 +902,9 @@
         showToast('⏹ 分析已停止（费用已扣除）');
     }
 
+    // ============================================================
+    // 主分析流程
+    // ============================================================
     async function startDiscussion() {
         if (isDiscussing) {
             showToast('⏳ 分析正在进行中，请等待完成');
@@ -962,9 +915,7 @@
         if (!q) { showToast('请输入问题'); return; }
         if (selectedAIs.length < 2) { showToast('请至少选择2个AI'); return; }
 
-        if (!canUse()) return;
-
-        var charged = await deductUsage();
+        var charged = deductUsage();
         if (!charged) return;
 
         isStopped = false;
@@ -989,12 +940,6 @@
         document.getElementById('progressText').innerText = 'AI分析中...';
         document.getElementById('interruptPanel').classList.remove('show');
         if (floatBtn) floatBtn.style.display = 'none';
-
-        serverLogAction(currentUser, 'start_analysis', {
-            mode: currentMode + '_' + currentSubMode,
-            ai_count: totalAIs,
-            rounds: targetRounds
-        });
 
         try {
             for (var round = 1; round <= targetRounds; round++) {
@@ -1076,14 +1021,6 @@
             } else {
                 showToast('⚠️ 未能提取明确答案');
             }
-
-            serverLogAction(currentUser, 'finish_analysis', {
-                mode: currentMode + '_' + currentSubMode,
-                ai_count: totalAIs,
-                rounds: targetRounds,
-                api_calls: apiCallCounter
-            });
-
         } catch(err) {
             if (!isStopped) {
                 showToast('❌ 分析出错：' + err.message);
@@ -1098,6 +1035,9 @@
         }
     }
 
+    // ============================================================
+    // 提取最终答案
+    // ============================================================
     function extractFinalAnswer() {
         if (discussionMessages.length === 0) {
             finalAnswer = null;
@@ -1233,11 +1173,14 @@
         area.innerHTML = html;
     }
 
+    // ============================================================
+    // 打断/补充
+    // ============================================================
     async function sendInterrupt() {
         var extra = document.getElementById('interruptInput').value.trim();
         if (!extra) { showToast('请输入补充条件'); return; }
         if (!canUse()) return;
-        var charged = await deductUsage();
+        var charged = deductUsage();
         if (!charged) return;
 
         isStopped = false;
@@ -1259,13 +1202,6 @@
         if (floatBtn) floatBtn.style.display = 'none';
         var targetRounds = maxRounds;
         var totalAIs = selectedAIs.length;
-
-        serverLogAction(currentUser, 'interrupt_analysis', {
-            mode: currentMode + '_' + currentSubMode,
-            ai_count: totalAIs,
-            rounds: targetRounds,
-            extra: extra
-        });
 
         try {
             for (var round = 1; round <= targetRounds; round++) {
@@ -1357,7 +1293,7 @@
     }
 
     // ============================================================
-    // 分享功能
+    // 分享功能（保持不变）
     // ============================================================
     var shareTimer = null;
     function showShareModal() { document.getElementById('shareModal').classList.add('show'); }
@@ -1367,6 +1303,28 @@
     }
     function grantShareRewardDelayed() {
         if (!currentUser) return false;
+        var u = users[currentUser];
+        if (!u) return false;
+        var now = Date.now();
+        var today = new Date().toDateString();
+        if (u.shareDate !== today) {
+            u.shareCount = 0;
+            u.shareDate = today;
+            u.shareLastTime = 0;
+        }
+        if ((u.shareCount || 0) >= 3) {
+            showToast('今日分享已达上限（3次）');
+            return false;
+        }
+        if (now - (u.shareLastTime || 0) < 5 * 60 * 1000) {
+            showToast('两次分享至少间隔5分钟');
+            return false;
+        }
+        u.shareCount = (u.shareCount || 0) + 1;
+        u.shareLastTime = now;
+        u.fastCount = (u.fastCount || 0) + 1;
+        saveUsers(users);
+        updateUI();
         showToast('✅ 分享成功！获得1次快速分析');
         return true;
     }
@@ -1515,17 +1473,45 @@
         }
     }
 
-    function enableDataSync() {}
+    function enableDataSync() {
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'aiJudge_users') {
+                loadUserData();
+                if (currentUser) {
+                    updateUI();
+                    showToast('🔄 数据已更新');
+                }
+            }
+        });
+        try {
+            var channel = new BroadcastChannel('judge_channel');
+            channel.onmessage = function(event) {
+                if (event.data === 'data_updated' || event.data === 'redeem_success') {
+                    loadUserData();
+                    if (currentUser) {
+                        updateUI();
+                        showToast('🔄 数据已同步');
+                    }
+                }
+            };
+        } catch(e) {}
+    }
 
     function init() {
+        loadUserData();
         bindLoginEvents();
         var savedUser = localStorage.getItem('aiJudge_remember');
-        if (savedUser) {
-            document.getElementById('loginUsername').value = savedUser;
+        if (savedUser && users[savedUser]) {
+            currentUser = savedUser;
+            showMainScreen();
+            showToast('👋 欢迎回来，' + savedUser);
+        } else {
+            showAuthScreen();
         }
-        showAuthScreen();
         enableDataSync();
-        console.log('裁决者服务器版已加载，服务器地址:', SERVER_URL);
+        console.log('✅ 裁决者豆包版已加载');
+        console.log('📡 API:', CONFIG.API_URL);
+        console.log('🤖 模型:', CONFIG.MODEL);
     }
 
     if (document.readyState === 'loading') {
