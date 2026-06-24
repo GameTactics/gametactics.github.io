@@ -240,7 +240,7 @@
     'use strict';
 
     // ============================================================
-    // 0. API 配置（火山引擎）
+    // 01 配置仓
     // ============================================================
     var CONFIG = {
         API_KEY: 'ark-c79ff687-973c-43a4-9b65-ab15d8ba6e2a-c13b3',
@@ -248,53 +248,6 @@
         MODEL: 'doubao-seed-2-0-mini-260428'
     };
 
-    // ============================================================
-    // 1. 返回键拦截
-    // ============================================================
-    window.addEventListener('popstate', function (e) {
-        var mainScreen = document.getElementById('mainScreen');
-        var shareModal = document.getElementById('shareModal');
-        var rechargeModal = document.getElementById('rechargeModal');
-        var feedbackModal = document.getElementById('feedbackModal');
-
-        if (shareModal && shareModal.classList.contains('show')) {
-            shareModal.classList.remove('show');
-            return;
-        }
-        if (rechargeModal && rechargeModal.classList.contains('show')) {
-            rechargeModal.classList.remove('show');
-            return;
-        }
-        if (feedbackModal && feedbackModal.classList.contains('show')) {
-            feedbackModal.classList.remove('show');
-            return;
-        }
-
-        if (mainScreen && mainScreen.style.display === 'block') {
-            showToast('再按一次返回键退出裁决者');
-            if (window._exitPending) {
-                window.close();
-                if (window.location.href !== 'about:blank') {
-                    window.location.href = 'about:blank';
-                }
-            }
-            window._exitPending = true;
-            setTimeout(function () {
-                window._exitPending = false;
-            }, 2000);
-            return;
-        }
-
-        var authScreen = document.getElementById('authScreen');
-        if (authScreen && authScreen.style.display !== 'none') {
-            return;
-        }
-    });
-    history.pushState({ page: 'main' }, '');
-
-    // ============================================================
-    // 2. 核心配置
-    // ============================================================
     var GM_ACCOUNT = {
         username: 'luoyangqq',
         password: 'luoyangqq'
@@ -316,56 +269,13 @@
         deep: { 2: 1.4, 3: 2.0, 4: 2.2 }
     };
 
-    var currentUser = null;
-    var users = {};
-    var selectedAIs = [];
-    var currentMode = 'fast';
-    var currentSubMode = 'speed';
-    var isDiscussing = false;
-    var currentQuestion = '';
-    var discussionMessages = [];
-    var currentRound = 0;
-    var maxRounds = 3;
-    var finalAnswer = null;
-    var maxAIAllowed = 4;
-    var mainEventsBound = false;
-    var isStopped = false;
-    var activeAbortController = null;
-    var apiCallCounter = 0;
-    var MAX_API_CALLS = 28;
-    var currentSessionId = 0;
-
-    var floatBtn = document.getElementById('answerFloatBtn');
-    var stopBtn = document.getElementById('stopBtn');
-
     var DOWNLOAD_URL = 'https://wwbnn.lanzoup.com/i5cPx3sql7wd';
     var QQ_NUMBER = '451134850';
 
-    function showToast(msg) {
-        var t = document.getElementById('toast');
-        if (!t) return;
-        t.textContent = msg;
-        t.classList.add('show');
-        clearTimeout(t._timer);
-        t._timer = setTimeout(function(){ t.classList.remove('show'); }, 3000);
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    function validateUsername(name) { return name && name.length >= 8 && name.length <= 20; }
-    function validatePassword(pwd) { return pwd && pwd.length >= 6; }
-
     // ============================================================
-    // 用户管理
+    // 02 数据仓
     // ============================================================
+    var users = {};
     function loadUsers() {
         try {
             var stored = localStorage.getItem('aiJudge_users');
@@ -383,60 +293,11 @@
         } catch(e) {}
     }
 
-    function updateUI() {
-        if (!currentUser) return;
-        var u = users[currentUser];
-        if (!u) return;
-        document.getElementById('accountDisplay').innerText = currentUser;
-        document.getElementById('fastCountDisplay').innerText = u.fastCount || 0;
-        document.getElementById('fullCountDisplay').innerText = u.fullCount || 0;
-        document.getElementById('pointsDisplay').innerText = u.points || 0;
-        document.getElementById('selectedCount').innerText = selectedAIs.length;
-        document.getElementById('aiLimitDisplay').innerText = '🤖 限' + maxAIAllowed + 'AI';
-        var hint = document.getElementById('aiLimitHint');
-        if (hint) {
-            hint.textContent = '当前套餐最多选择 ' + maxAIAllowed + ' 个AI，选择越多分析越全面';
-        }
-        renderAIGrid();
-    }
-
-    function showMainScreen() {
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('mainScreen').style.display = 'block';
-        if (selectedAIs.length === 0) {
-            selectedAIs.push(allAIs[0], allAIs[1]);
-        }
-        loadAILimitFromUser();
-        renderAIGrid();
-        setMode('fast');
-        updateUI();
-        if (!mainEventsBound) {
-            bindMainEvents();
-            mainEventsBound = true;
-        }
-        showToast('✅ 裁决者已就绪');
-    }
-
-    function showAuthScreen() {
-        document.getElementById('authScreen').style.display = 'flex';
-        document.getElementById('mainScreen').style.display = 'none';
-        if (floatBtn) floatBtn.style.display = 'none';
-    }
-
-    function loadAILimitFromUser() {
-        if (!currentUser) return;
-        var u = users[currentUser];
-        if (!u) return;
-        maxAIAllowed = u.aiLimit || 4;
-        while (selectedAIs.length > maxAIAllowed) {
-            selectedAIs.pop();
-        }
-        updateUI();
-    }
-
     // ============================================================
-    // 登录
+    // 03 认证仓
     // ============================================================
+    var currentUser = null;
+
     function doLogin() {
         var username = document.getElementById('loginUsername').value.trim();
         var password = document.getElementById('loginPassword').value;
@@ -452,10 +313,10 @@
             return;
         }
 
-        if (username === 'luoyangqq' && password === 'luoyangqq') {
+        if (username === GM_ACCOUNT.username && password === GM_ACCOUNT.password) {
             if (!users[username]) {
                 users[username] = {
-                    password: 'luoyangqq',
+                    password: GM_ACCOUNT.password,
                     fastCount: 0,
                     fullCount: 0,
                     points: 0,
@@ -493,200 +354,37 @@
         showToast('已退出');
     }
 
-    // ============================================================
-    // AI选择、模式切换
-    // ============================================================
-    function renderAIGrid() {
-        var grid = document.getElementById('aiGrid');
-        if (!grid) return;
-        grid.innerHTML = '';
-        for (var i = 0; i < allAIs.length; i++) {
-            var ai = allAIs[i];
-            var sel = false;
-            for (var j = 0; j < selectedAIs.length; j++) {
-                if (selectedAIs[j].id === ai.id) { sel = true; break; }
-            }
-            var chip = document.createElement('div');
-            chip.className = 'ai-chip' + (sel ? ' selected' : '');
-            var isDisabled = !sel && selectedAIs.length >= maxAIAllowed;
-            if (isDisabled) chip.classList.add('disabled');
-            chip.innerText = ai.name;
-            chip.onclick = function(a) {
-                return function() { toggleAI(a); };
-            }(ai);
-            grid.appendChild(chip);
-        }
-        document.getElementById('selectedCount').innerText = selectedAIs.length;
+    function goToRegister() {
+        window.location.href = '注册.html?mode=register';
     }
 
-    function toggleAI(ai) {
-        var idx = -1;
-        for (var i = 0; i < selectedAIs.length; i++) {
-            if (selectedAIs[i].id === ai.id) { idx = i; break; }
-        }
-        if (idx >= 0) {
-            if (selectedAIs.length <= 2) { showToast('至少选择2个AI'); return; }
-            selectedAIs.splice(idx, 1);
-        } else {
-            if (selectedAIs.length >= maxAIAllowed) {
-                showToast('当前套餐最多选择 ' + maxAIAllowed + ' 个AI');
-                return;
-            }
-            selectedAIs.push(ai);
-        }
-        renderAIGrid();
-        updateUI();
+    function goToForgot() {
+        window.location.href = '注册.html?mode=forgot';
     }
 
-    function setMode(mode) {
-        if (isDiscussing) {
-            currentMode = mode;
-            document.getElementById('modeFast').classList.toggle('active', mode === 'fast');
-            document.getElementById('modeFull').classList.toggle('active', mode === 'full');
-            document.getElementById('infoFast').classList.toggle('show', mode === 'fast');
-            document.getElementById('infoFull').classList.toggle('show', mode === 'full');
-            var subSwitch = document.getElementById('subModeSwitch');
-            if (mode === 'full') {
-                subSwitch.classList.add('show');
-                setSubMode('speed');
-            } else {
-                subSwitch.classList.remove('show');
-            }
-            showToast('⏳ 分析中，切换将在下次分析生效');
-            return;
-        }
-        currentMode = mode;
-        document.getElementById('modeFast').classList.toggle('active', mode === 'fast');
-        document.getElementById('modeFull').classList.toggle('active', mode === 'full');
-        document.getElementById('infoFast').classList.toggle('show', mode === 'fast');
-        document.getElementById('infoFull').classList.toggle('show', mode === 'full');
-        var subSwitch = document.getElementById('subModeSwitch');
-        if (mode === 'full') {
-            subSwitch.classList.add('show');
-            setSubMode('speed');
-        } else {
-            subSwitch.classList.remove('show');
-        }
-        updateMaxRounds();
-    }
-
-    function setSubMode(sub) {
-        if (isDiscussing) {
-            currentSubMode = sub;
-            var items = document.querySelectorAll('.sub-mode-item');
-            for (var i = 0; i < items.length; i++) {
-                items[i].classList.toggle('active', items[i].dataset.sub === sub);
-            }
-            showToast('⏳ 分析中，切换将在下次分析生效');
-            return;
-        }
-        currentSubMode = sub;
-        var items = document.querySelectorAll('.sub-mode-item');
-        for (var i = 0; i < items.length; i++) {
-            items[i].classList.toggle('active', items[i].dataset.sub === sub);
-        }
-        updateMaxRounds();
-    }
-
-    function updateMaxRounds() {
-        if (currentMode === 'fast') {
-            maxRounds = MAX_ROUNDS.fast;
-        } else if (currentSubMode === 'speed') {
-            maxRounds = MAX_ROUNDS.speed;
-        } else {
-            maxRounds = MAX_ROUNDS.deep;
-        }
-    }
-
-    function getEnergyCost() {
-        var aiCount = selectedAIs.length;
-        if (currentMode === 'fast') {
-            return ENERGY_COST.fast[aiCount] || 0.7;
-        } else if (currentSubMode === 'speed') {
-            return ENERGY_COST.speed[aiCount] || 1.6;
-        } else {
-            return ENERGY_COST.deep[aiCount] || 2.2;
-        }
+    function goToShop() {
+        window.location.href = 'biao.html';
     }
 
     // ============================================================
-    // 扣费逻辑
+    // 04 辩论仓
     // ============================================================
-    function canUse() {
-        if (currentUser === 'luoyangqq') return true;
-        var u = users[currentUser];
-        if (!u) return false;
-        if (currentMode === 'fast') {
-            if (u.fastCount > 0) return true;
-            var cost = getEnergyCost();
-            if ((u.points || 0) >= cost) return true;
-            showToast('快速分析次数或能量点不足（需要 ' + cost + ' 点）');
-            return false;
-        } else {
-            if (u.fullCount > 0) return true;
-            var cost = getEnergyCost();
-            if ((u.points || 0) >= cost) return true;
-            showToast('完整讨论次数或能量点不足（需要 ' + cost + ' 点）');
-            return false;
-        }
-    }
+    var selectedAIs = [];
+    var currentMode = 'fast';
+    var currentSubMode = 'speed';
+    var isDiscussing = false;
+    var currentQuestion = '';
+    var discussionMessages = [];
+    var maxRounds = 3;
+    var isStopped = false;
+    var activeAbortController = null;
+    var apiCallCounter = 0;
+    var MAX_API_CALLS = 28;
+    var currentSessionId = 0;
 
-    var chargeLock = false;
+    var floatBtn = document.getElementById('answerFloatBtn');
+    var stopBtn = document.getElementById('stopBtn');
 
-    function deductUsage() {
-        if (currentUser === 'luoyangqq') return true;
-        if (chargeLock) {
-            showToast('⏳ 扣费中，请稍后...');
-            return false;
-        }
-        chargeLock = true;
-        try {
-            var u = users[currentUser];
-            if (!u) {
-                chargeLock = false;
-                return false;
-            }
-            if (currentMode === 'fast') {
-                if (u.fastCount > 0) {
-                    u.fastCount--;
-                } else {
-                    var cost = getEnergyCost();
-                    u.points = (u.points || 0) - cost;
-                }
-            } else {
-                if (u.fullCount > 0) {
-                    u.fullCount--;
-                } else {
-                    var cost = getEnergyCost();
-                    u.points = (u.points || 0) - cost;
-                }
-            }
-            if (!u.records) u.records = [];
-            var now = new Date();
-            var timeStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-            u.records.push({
-                time: timeStr,
-                fastChange: currentMode === 'fast' ? '-1' : '-',
-                fastRemain: u.fastCount || 0,
-                fullChange: currentMode === 'full' ? '-1' : '-',
-                fullRemain: u.fullCount || 0,
-                energyChange: '-',
-                energyRemain: u.points || 0
-            });
-            saveUsers();
-            updateUI();
-            chargeLock = false;
-            return true;
-        } catch(e) {
-            chargeLock = false;
-            showToast('❌ 扣费失败：' + e.message);
-            return false;
-        }
-    }
-
-    // ============================================================
-    // API调用（火山引擎）
-    // ============================================================
     function buildStructuredPrompt(ai, isDebate, opponentName, opponentSolution) {
         var today = new Date().toISOString().slice(0,10);
         var roleLabel = ai.role === 'pro' ? '正方' : '反方';
@@ -698,7 +396,6 @@
         } else {
             var opName = opponentName || '对方';
             var opSol = opponentSolution || '对方的方案';
-            // 上下文截断：只保留最近3轮
             var historySummary = '';
             var total = discussionMessages.length;
             var startIdx = Math.max(0, total - 3);
@@ -724,7 +421,6 @@
         apiCallCounter++;
 
         var prompt = buildStructuredPrompt(ai, isDebate, opponentName, opponentSolution);
-
         var controller = new AbortController();
         activeAbortController = controller;
         var signal = controller.signal;
@@ -816,9 +512,111 @@
         }
     }
 
+    function stopDiscussion() {
+        if (!isDiscussing) {
+            showToast('当前没有正在进行的分析');
+            return;
+        }
+        var confirmMsg = '确定停止当前分析吗？\n\n本次费用（次数/能量点）已扣除，不会退还。\n\n停止后您可以切换模式重新分析。';
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        isStopped = true;
+        isDiscussing = false;
+
+        if (activeAbortController) {
+            try {
+                activeAbortController.abort();
+                activeAbortController = null;
+            } catch(e) {}
+        }
+
+        document.getElementById('submitBtn').disabled = false;
+        if (stopBtn) stopBtn.classList.remove('visible');
+        document.getElementById('progress').classList.remove('show');
+        showToast('⏹ 分析已停止（费用已扣除）');
+    }
+
     // ============================================================
-    // 解析和显示
+    // 05 答案仓
     // ============================================================
+    var finalAnswer = null;
+
+    function extractFinalAnswer() {
+        if (discussionMessages.length === 0) {
+            finalAnswer = null;
+            return;
+        }
+
+        var lastMsg = discussionMessages[discussionMessages.length - 1];
+        var rawText = lastMsg.content || '';
+
+        var solMatch = rawText.match(/【方案】\s*([\s\S]*?)(?=【理由】|【补充】|$)/);
+        var reaMatch = rawText.match(/【理由】\s*([\s\S]*?)(?=【方案】|【补充】|$)/);
+
+        if (solMatch) {
+            var bestProposal = solMatch[1].trim();
+            var agreeMatch = bestProposal.match(/同意\s*([^，,。\s]+)\s*的方案/);
+            if (agreeMatch) {
+                for (var i = discussionMessages.length - 2; i >= 0; i--) {
+                    var prevMsg = discussionMessages[i];
+                    if (!prevMsg.content || prevMsg.content === '无响应') continue;
+                    var parsed = parseStructuredContent(prevMsg.content);
+                    if (parsed.solution && !/同意/.test(parsed.solution)) {
+                        bestProposal = parsed.solution.trim();
+                        break;
+                    }
+                }
+            }
+            var finalReason = reaMatch ? reaMatch[1].trim() : '';
+            finalAnswer = {
+                answer: bestProposal || '（无答案）',
+                reason: finalReason || '经过多轮讨论，该方案被选为最终答案。'
+            };
+            return;
+        }
+
+        if (rawText && rawText.length > 0) {
+            var cleanText = rawText
+                .replace(/小明（正方）[：:]\s*/, '')
+                .replace(/小智（反方）[：:]\s*/, '')
+                .replace(/小慧（正方）[：:]\s*/, '')
+                .replace(/小能（反方）[：:]\s*/, '')
+                .replace(/小明[：:]\s*/, '')
+                .replace(/小智[：:]\s*/, '')
+                .replace(/小慧[：:]\s*/, '')
+                .replace(/小能[：:]\s*/, '')
+                .replace(/正方[：:]\s*/, '')
+                .replace(/反方[：:]\s*/, '')
+                .slice(0, 100);
+            finalAnswer = {
+                answer: cleanText || '讨论未产生明确答案',
+                reason: '隐形AI从讨论中提取了以上内容。'
+            };
+            return;
+        }
+
+        finalAnswer = {
+            answer: '讨论未产生明确答案，请重新尝试。',
+            reason: '隐形AI未能从讨论中提取出有效方案。'
+        };
+    }
+
+    function displayFinalAnswer() {
+        var area = document.getElementById('finalAnswerArea');
+        if (!area) return;
+        var answerText = finalAnswer.answer || '（无答案）';
+        var reasonText = finalAnswer.reason || '';
+        answerText = answerText.replace(/^方案[：:]\s*/, '');
+        var html = '<div class="final-answer"><div class="fa-answer">' + escapeHtml(answerText) + '</div>';
+        if (reasonText && reasonText.trim().length > 0) {
+            html += '<hr class="fa-divider"><div class="fa-reason-label">理由</div><div class="fa-reason">' + escapeHtml(reasonText) + '</div>';
+        }
+        html += '</div>';
+        area.innerHTML = html;
+    }
+
     function parseStructuredContent(text) {
         if (!text) return { solution: '', reason: '', supplement: '', supplementTarget: '' };
         var result = { solution: '', reason: '', supplement: '', supplementTarget: '' };
@@ -882,37 +680,471 @@
     }
 
     // ============================================================
-    // 停止
+    // 06 扣费仓
     // ============================================================
-    function stopDiscussion() {
-        if (!isDiscussing) {
-            showToast('当前没有正在进行的分析');
-            return;
-        }
-        var confirmMsg = '确定停止当前分析吗？\n\n本次费用（次数/能量点）已扣除，不会退还。\n\n停止后您可以切换模式重新分析。';
-        if (!confirm(confirmMsg)) {
-            return;
-        }
+    function validateUsername(name) { return name && name.length >= 8 && name.length <= 20; }
+    function validatePassword(pwd) { return pwd && pwd.length >= 6; }
 
-        isStopped = true;
-        isDiscussing = false;
-
-        if (activeAbortController) {
-            try {
-                activeAbortController.abort();
-                activeAbortController = null;
-            } catch(e) {}
+    function getEnergyCost() {
+        var aiCount = selectedAIs.length;
+        if (currentMode === 'fast') {
+            return ENERGY_COST.fast[aiCount] || 0.7;
+        } else if (currentSubMode === 'speed') {
+            return ENERGY_COST.speed[aiCount] || 1.6;
+        } else {
+            return ENERGY_COST.deep[aiCount] || 2.2;
         }
+    }
 
-        document.getElementById('submitBtn').disabled = false;
-        if (stopBtn) stopBtn.classList.remove('visible');
-        document.getElementById('progress').classList.remove('show');
-        showToast('⏹ 分析已停止（费用已扣除）');
+    function canUse() {
+        if (currentUser === 'luoyangqq') return true;
+        var u = users[currentUser];
+        if (!u) return false;
+        if (currentMode === 'fast') {
+            if (u.fastCount > 0) return true;
+            var cost = getEnergyCost();
+            if ((u.points || 0) >= cost) return true;
+            showToast('快速分析次数或能量点不足（需要 ' + cost + ' 点）');
+            return false;
+        } else {
+            if (u.fullCount > 0) return true;
+            var cost = getEnergyCost();
+            if ((u.points || 0) >= cost) return true;
+            showToast('完整讨论次数或能量点不足（需要 ' + cost + ' 点）');
+            return false;
+        }
+    }
+
+    var chargeLock = false;
+
+    function deductUsage() {
+        if (currentUser === 'luoyangqq') return true;
+        if (chargeLock) {
+            showToast('⏳ 扣费中，请稍后...');
+            return false;
+        }
+        chargeLock = true;
+        try {
+            var u = users[currentUser];
+            if (!u) {
+                chargeLock = false;
+                return false;
+            }
+            if (currentMode === 'fast') {
+                if (u.fastCount > 0) {
+                    u.fastCount--;
+                } else {
+                    var cost = getEnergyCost();
+                    u.points = (u.points || 0) - cost;
+                }
+            } else {
+                if (u.fullCount > 0) {
+                    u.fullCount--;
+                } else {
+                    var cost = getEnergyCost();
+                    u.points = (u.points || 0) - cost;
+                }
+            }
+            if (!u.records) u.records = [];
+            var now = new Date();
+            var timeStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+            u.records.push({
+                time: timeStr,
+                fastChange: currentMode === 'fast' ? '-1' : '-',
+                fastRemain: u.fastCount || 0,
+                fullChange: currentMode === 'full' ? '-1' : '-',
+                fullRemain: u.fullCount || 0,
+                energyChange: '-',
+                energyRemain: u.points || 0
+            });
+            saveUsers();
+            updateUI();
+            chargeLock = false;
+            return true;
+        } catch(e) {
+            chargeLock = false;
+            showToast('❌ 扣费失败：' + e.message);
+            return false;
+        }
     }
 
     // ============================================================
-    // 主分析流程（最终答案强制提取）
+    // 07 UI仓
     // ============================================================
+    var maxAIAllowed = 4;
+
+    function updateUI() {
+        if (!currentUser) return;
+        var u = users[currentUser];
+        if (!u) return;
+        document.getElementById('accountDisplay').innerText = currentUser;
+        document.getElementById('fastCountDisplay').innerText = u.fastCount || 0;
+        document.getElementById('fullCountDisplay').innerText = u.fullCount || 0;
+        document.getElementById('pointsDisplay').innerText = u.points || 0;
+        document.getElementById('selectedCount').innerText = selectedAIs.length;
+        document.getElementById('aiLimitDisplay').innerText = '🤖 限' + maxAIAllowed + 'AI';
+        var hint = document.getElementById('aiLimitHint');
+        if (hint) {
+            hint.textContent = '当前套餐最多选择 ' + maxAIAllowed + ' 个AI，选择越多分析越全面';
+        }
+        renderAIGrid();
+    }
+
+    function renderAIGrid() {
+        var grid = document.getElementById('aiGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        for (var i = 0; i < allAIs.length; i++) {
+            var ai = allAIs[i];
+            var sel = false;
+            for (var j = 0; j < selectedAIs.length; j++) {
+                if (selectedAIs[j].id === ai.id) { sel = true; break; }
+            }
+            var chip = document.createElement('div');
+            chip.className = 'ai-chip' + (sel ? ' selected' : '');
+            var isDisabled = !sel && selectedAIs.length >= maxAIAllowed;
+            if (isDisabled) chip.classList.add('disabled');
+            chip.innerText = ai.name;
+            chip.onclick = function(a) {
+                return function() { toggleAI(a); };
+            }(ai);
+            grid.appendChild(chip);
+        }
+        document.getElementById('selectedCount').innerText = selectedAIs.length;
+    }
+
+    function toggleAI(ai) {
+        var idx = -1;
+        for (var i = 0; i < selectedAIs.length; i++) {
+            if (selectedAIs[i].id === ai.id) { idx = i; break; }
+        }
+        if (idx >= 0) {
+            if (selectedAIs.length <= 2) { showToast('至少选择2个AI'); return; }
+            selectedAIs.splice(idx, 1);
+        } else {
+            if (selectedAIs.length >= maxAIAllowed) {
+                showToast('当前套餐最多选择 ' + maxAIAllowed + ' 个AI');
+                return;
+            }
+            selectedAIs.push(ai);
+        }
+        renderAIGrid();
+        updateUI();
+    }
+
+    function loadAILimitFromUser() {
+        if (!currentUser) return;
+        var u = users[currentUser];
+        if (!u) return;
+        maxAIAllowed = u.aiLimit || 4;
+        while (selectedAIs.length > maxAIAllowed) {
+            selectedAIs.pop();
+        }
+        updateUI();
+    }
+
+    function setMode(mode) {
+        if (isDiscussing) {
+            currentMode = mode;
+            document.getElementById('modeFast').classList.toggle('active', mode === 'fast');
+            document.getElementById('modeFull').classList.toggle('active', mode === 'full');
+            document.getElementById('infoFast').classList.toggle('show', mode === 'fast');
+            document.getElementById('infoFull').classList.toggle('show', mode === 'full');
+            var subSwitch = document.getElementById('subModeSwitch');
+            if (mode === 'full') {
+                subSwitch.classList.add('show');
+                setSubMode('speed');
+            } else {
+                subSwitch.classList.remove('show');
+            }
+            showToast('⏳ 分析中，切换将在下次分析生效');
+            return;
+        }
+        currentMode = mode;
+        document.getElementById('modeFast').classList.toggle('active', mode === 'fast');
+        document.getElementById('modeFull').classList.toggle('active', mode === 'full');
+        document.getElementById('infoFast').classList.toggle('show', mode === 'fast');
+        document.getElementById('infoFull').classList.toggle('show', mode === 'full');
+        var subSwitch = document.getElementById('subModeSwitch');
+        if (mode === 'full') {
+            subSwitch.classList.add('show');
+            setSubMode('speed');
+        } else {
+            subSwitch.classList.remove('show');
+        }
+        updateMaxRounds();
+    }
+
+    function setSubMode(sub) {
+        if (isDiscussing) {
+            currentSubMode = sub;
+            var items = document.querySelectorAll('.sub-mode-item');
+            for (var i = 0; i < items.length; i++) {
+                items[i].classList.toggle('active', items[i].dataset.sub === sub);
+            }
+            showToast('⏳ 分析中，切换将在下次分析生效');
+            return;
+        }
+        currentSubMode = sub;
+        var items = document.querySelectorAll('.sub-mode-item');
+        for (var i = 0; i < items.length; i++) {
+            items[i].classList.toggle('active', items[i].dataset.sub === sub);
+        }
+        updateMaxRounds();
+    }
+
+    function updateMaxRounds() {
+        if (currentMode === 'fast') {
+            maxRounds = MAX_ROUNDS.fast;
+        } else if (currentSubMode === 'speed') {
+            maxRounds = MAX_ROUNDS.speed;
+        } else {
+            maxRounds = MAX_ROUNDS.deep;
+        }
+    }
+
+    function showMainScreen() {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('mainScreen').style.display = 'block';
+        if (selectedAIs.length === 0) {
+            selectedAIs.push(allAIs[0], allAIs[1]);
+        }
+        loadAILimitFromUser();
+        renderAIGrid();
+        setMode('fast');
+        updateUI();
+        if (!mainEventsBound) {
+            bindMainEvents();
+            mainEventsBound = true;
+        }
+        showToast('✅ 裁决者已就绪');
+    }
+
+    function showAuthScreen() {
+        document.getElementById('authScreen').style.display = 'flex';
+        document.getElementById('mainScreen').style.display = 'none';
+        if (floatBtn) floatBtn.style.display = 'none';
+    }
+
+    // ============================================================
+    // 08 交互仓
+    // ============================================================
+    var shareTimer = null;
+
+    function showToast(msg) {
+        var t = document.getElementById('toast');
+        if (!t) return;
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function(){ t.classList.remove('show'); }, 3000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function showShareModal() { document.getElementById('shareModal').classList.add('show'); }
+    function closeShareModal() {
+        document.getElementById('shareModal').classList.remove('show');
+        if (shareTimer) { clearTimeout(shareTimer); shareTimer = null; }
+    }
+
+    function grantShareRewardDelayed() {
+        if (!currentUser) return false;
+        var u = users[currentUser];
+        if (!u) return false;
+        var now = Date.now();
+        var today = new Date().toDateString();
+        if (u.shareDate !== today) {
+            u.shareCount = 0;
+            u.shareDate = today;
+            u.shareLastTime = 0;
+        }
+        if ((u.shareCount || 0) >= 3) {
+            showToast('今日分享已达上限（3次）');
+            return false;
+        }
+        if (now - (u.shareLastTime || 0) < 5 * 60 * 1000) {
+            showToast('两次分享至少间隔5分钟');
+            return false;
+        }
+        u.shareCount = (u.shareCount || 0) + 1;
+        u.shareLastTime = now;
+        u.fastCount = (u.fastCount || 0) + 1;
+        saveUsers();
+        updateUI();
+        showToast('✅ 分享成功！获得1次快速分析');
+        return true;
+    }
+
+    function copyDownloadLink() {
+        var msg = '请长按下方链接选择"复制"，发送给好友或粘贴到浏览器下载：\n\n' + DOWNLOAD_URL;
+        prompt(msg, DOWNLOAD_URL);
+        showToast('📋 链接已显示，请长按复制');
+    }
+
+    function copyQQNumber() {
+        var msg = '请长按下方QQ号选择"复制"，可添加好友联系：\n\n' + QQ_NUMBER;
+        prompt(msg, QQ_NUMBER);
+        showToast('📋 QQ号已显示，请长按复制');
+    }
+
+    function doShare(target) {
+        if (target === 'copy') {
+            copyDownloadLink();
+        } else if (target === 'wechat') {
+            window.location.href = 'weixin://';
+            showToast('📤 请分享到微信');
+        } else if (target === 'qq') {
+            window.location.href = 'mqq://';
+            showToast('📤 请分享到QQ');
+        }
+        if (shareTimer) { clearTimeout(shareTimer); }
+        shareTimer = setTimeout(function() {
+            grantShareRewardDelayed();
+            shareTimer = null;
+        }, 5000);
+    }
+
+    function showFeedbackModal() { document.getElementById('feedbackModal').classList.add('show'); }
+    function closeFeedbackModal() { document.getElementById('feedbackModal').classList.remove('show'); }
+
+    function sendFeedback() {
+        var content = document.getElementById('feedbackContent').value.trim();
+        if (!content) { showToast('请输入反馈内容'); return; }
+        window.location.href = 'mailto:luoyang451134850@gmail.com?subject=AI裁决者用户反馈&body=' + encodeURIComponent(content);
+        document.getElementById('feedbackContent').value = '';
+        closeFeedbackModal();
+        showToast('已打开邮件客户端，请发送即可。');
+    }
+
+    // ============================================================
+    // 09 事件仓
+    // ============================================================
+    var mainEventsBound = false;
+
+    function bindMainEvents() {
+        document.getElementById('modeFast').onclick = function() { setMode('fast'); };
+        document.getElementById('modeFull').onclick = function() { setMode('full'); };
+        var subItems = document.querySelectorAll('.sub-mode-item');
+        for (var i = 0; i < subItems.length; i++) {
+            subItems[i].onclick = function() { setSubMode(this.dataset.sub); };
+        }
+        document.getElementById('submitBtn').onclick = startDiscussion;
+        document.getElementById('stopBtn').onclick = stopDiscussion;
+        document.getElementById('interruptBtn').onclick = sendInterrupt;
+        document.getElementById('shareRewardBtn').onclick = showShareModal;
+        document.getElementById('closeShareModal').onclick = closeShareModal;
+        document.getElementById('shareWechatBtn').onclick = function() { doShare('wechat'); };
+        document.getElementById('shareQQBtn').onclick = function() { doShare('qq'); };
+        document.getElementById('shareCopyBtn').onclick = function() { doShare('copy'); };
+        if (floatBtn) {
+            floatBtn.onclick = function() {
+                document.getElementById('finalAnswerArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                floatBtn.style.display = 'none';
+            };
+        }
+        document.getElementById('rechargeBtn').onclick = goToShop;
+        document.getElementById('feedbackBtn').onclick = showFeedbackModal;
+        document.getElementById('closeFeedbackModal').onclick = closeFeedbackModal;
+        document.getElementById('sendFeedbackBtn').onclick = sendFeedback;
+        document.getElementById('copyQQBtn').onclick = copyQQNumber;
+        document.getElementById('logoutBtn').onclick = logout;
+        var redeemBtn = document.getElementById('redeemBtn');
+        if (redeemBtn) {
+            redeemBtn.onclick = goToShop;
+        }
+        var closeRechargeBtn = document.getElementById('closeRechargeModal');
+        if (closeRechargeBtn) {
+            closeRechargeBtn.onclick = function() {
+                document.getElementById('rechargeModal').classList.remove('show');
+            };
+        }
+        var packageList = document.getElementById('packageList');
+        if (packageList) {
+            packageList.innerHTML = '';
+            var pkgItems = [
+                { label: '⚡ 快速包', desc: '3-8元 / 20次' },
+                { label: '完整包', desc: '10-30元 / 15-20次' },
+                { label: '✨ 能量晶', desc: '8元 / 10能量点' }
+            ];
+            pkgItems.forEach(function(item) {
+                var div = document.createElement('div');
+                div.className = 'package-item';
+                div.innerHTML = '<strong>' + item.label + '</strong> ' + item.desc;
+                div.onclick = goToShop;
+                packageList.appendChild(div);
+            });
+        }
+        document.getElementById('redeemCode').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') goToShop();
+        });
+    }
+
+    function bindLoginEvents() {
+        var loginBtn = document.getElementById('loginBtn');
+        var regBtn = document.getElementById('registerBtn');
+        var forgotBtn = document.getElementById('forgotBtn');
+        if (loginBtn) {
+            loginBtn.onclick = doLogin;
+        }
+        if (regBtn) {
+            regBtn.onclick = goToRegister;
+        }
+        if (forgotBtn) {
+            forgotBtn.onclick = goToForgot;
+        }
+        var passInput = document.getElementById('loginPassword');
+        if (passInput) {
+            passInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') doLogin();
+            });
+        }
+        var userInput = document.getElementById('loginUsername');
+        if (userInput) {
+            userInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    var next = document.getElementById('loginPassword');
+                    if (next) next.focus();
+                }
+            });
+        }
+    }
+
+    // ============================================================
+    // 10 启动仓
+    // ============================================================
+    function enableDataSync() {
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'aiJudge_users') {
+                loadUsers();
+                if (currentUser) {
+                    updateUI();
+                    showToast('🔄 数据已更新');
+                }
+            }
+        });
+        try {
+            var channel = new BroadcastChannel('judge_channel');
+            channel.onmessage = function(event) {
+                if (event.data === 'data_updated' || event.data === 'redeem_success') {
+                    loadUsers();
+                    if (currentUser) {
+                        updateUI();
+                        showToast('🔄 数据已同步');
+                    }
+                }
+            };
+        } catch(e) {}
+    }
+
     async function startDiscussion() {
         if (isDiscussing) {
             showToast('⏳ 分析正在进行中，请等待完成');
@@ -1021,13 +1253,10 @@
                 return;
             }
 
-            // ===== 提取最终答案 =====
             extractFinalAnswer();
 
-            // ===== 强制确保显示 =====
             if (!finalAnswer || !finalAnswer.answer) {
                 var fallback = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '讨论未产生有效答案';
-                // 强制清理，只取前100字
                 var clean = fallback.replace(/【方案】\s*/, '').replace(/【理由】\s*/, '').slice(0, 100);
                 finalAnswer = {
                     answer: clean || '讨论未产生明确答案',
@@ -1059,108 +1288,6 @@
         }
     }
 
-    // ============================================================
-    // 提取最终答案（强制清理，只显示方案内容）
-    // ============================================================
-    function extractFinalAnswer() {
-        if (discussionMessages.length === 0) {
-            finalAnswer = null;
-            return;
-        }
-
-        var lastMsg = discussionMessages[discussionMessages.length - 1];
-        var rawText = lastMsg.content || '';
-
-        // 尝试解析【方案】和【理由】
-        var solMatch = rawText.match(/【方案】\s*([\s\S]*?)(?=【理由】|【补充】|【补充意见】|$)/);
-        var reaMatch = rawText.match(/【理由】\s*([\s\S]*?)(?=【方案】|【补充】|【补充意见】|$)/);
-
-        if (solMatch) {
-            var bestProposal = solMatch[1].trim();
-            // 如果方案内容是以"同意"开头，尝试提取真正的内容
-            var agreeMatch = bestProposal.match(/同意\s*([^，,。\s]+)\s*的方案/);
-            if (agreeMatch) {
-                // 尝试从其他发言中找真正的方案
-                for (var i = discussionMessages.length - 2; i >= 0; i--) {
-                    var prevMsg = discussionMessages[i];
-                    if (!prevMsg.content || prevMsg.content === '无响应') continue;
-                    var prevParsed = parseStructuredContent(prevMsg.content);
-                    if (prevParsed.solution && !/同意/.test(prevParsed.solution)) {
-                        bestProposal = prevParsed.solution.trim();
-                        break;
-                    }
-                }
-            }
-            var finalReason = reaMatch ? reaMatch[1].trim() : '';
-            // 如果理由以"建议"开头且过长，截断
-            if (finalReason.length > 100) {
-                finalReason = finalReason.slice(0, 100) + '...';
-            }
-            finalAnswer = {
-                answer: bestProposal || '（无答案）',
-                reason: finalReason || '经过多轮讨论，该方案被选为最终答案。'
-            };
-            return;
-        }
-
-        // 如果解析失败，直接取原始内容的前100字，并去除AI名字和角色标签
-        if (rawText && rawText.length > 0) {
-            var cleanText = rawText
-                .replace(/小明（正方）[：:]\s*/, '')
-                .replace(/小智（反方）[：:]\s*/, '')
-                .replace(/小慧（正方）[：:]\s*/, '')
-                .replace(/小能（反方）[：:]\s*/, '')
-                .replace(/小明[：:]\s*/, '')
-                .replace(/小智[：:]\s*/, '')
-                .replace(/小慧[：:]\s*/, '')
-                .replace(/小能[：:]\s*/, '')
-                .replace(/正方[：:]\s*/, '')
-                .replace(/反方[：:]\s*/, '')
-                .slice(0, 100);
-            finalAnswer = {
-                answer: cleanText || '讨论未产生明确答案',
-                reason: '隐形AI从讨论中提取了以上内容。'
-            };
-            return;
-        }
-
-        finalAnswer = {
-            answer: '讨论未产生明确答案，请重新尝试。',
-            reason: '隐形AI未能从讨论中提取出有效方案。'
-        };
-    }
-
-    function displayFinalAnswer() {
-        var area = document.getElementById('finalAnswerArea');
-        if (!area) return;
-        var answerText = finalAnswer.answer || '（无答案）';
-        var reasonText = finalAnswer.reason || '';
-        answerText = answerText.replace(/^方案[：:]\s*/, '');
-        // 最终清洗：如果答案还包含“同意XX”，尝试提取真正内容
-        var agreeMatch = answerText.match(/同意\s*([^，,。\s]+)/);
-        if (agreeMatch && answerText.length < 20) {
-            // 如果答案太短且是“同意XX”，尝试从讨论中找真正方案
-            for (var i = discussionMessages.length - 2; i >= 0; i--) {
-                var msg = discussionMessages[i];
-                if (!msg.content || msg.content === '无响应') continue;
-                var parsed = parseStructuredContent(msg.content);
-                if (parsed.solution && !/同意/.test(parsed.solution)) {
-                    answerText = parsed.solution.trim();
-                    break;
-                }
-            }
-        }
-        var html = '<div class="final-answer"><div class="fa-answer">' + escapeHtml(answerText) + '</div>';
-        if (reasonText && reasonText.trim().length > 0) {
-            html += '<hr class="fa-divider"><div class="fa-reason-label">理由</div><div class="fa-reason">' + escapeHtml(reasonText) + '</div>';
-        }
-        html += '</div>';
-        area.innerHTML = html;
-    }
-
-    // ============================================================
-    // 打断/补充
-    // ============================================================
     async function sendInterrupt() {
         var extra = document.getElementById('interruptInput').value.trim();
         if (!extra) { showToast('请输入补充条件'); return; }
@@ -1288,211 +1415,6 @@
         }
     }
 
-    // ============================================================
-    // 分享功能
-    // ============================================================
-    var shareTimer = null;
-    function showShareModal() { document.getElementById('shareModal').classList.add('show'); }
-    function closeShareModal() {
-        document.getElementById('shareModal').classList.remove('show');
-        if (shareTimer) { clearTimeout(shareTimer); shareTimer = null; }
-    }
-    function grantShareRewardDelayed() {
-        if (!currentUser) return false;
-        var u = users[currentUser];
-        if (!u) return false;
-        var now = Date.now();
-        var today = new Date().toDateString();
-        if (u.shareDate !== today) {
-            u.shareCount = 0;
-            u.shareDate = today;
-            u.shareLastTime = 0;
-        }
-        if ((u.shareCount || 0) >= 3) {
-            showToast('今日分享已达上限（3次）');
-            return false;
-        }
-        if (now - (u.shareLastTime || 0) < 5 * 60 * 1000) {
-            showToast('两次分享至少间隔5分钟');
-            return false;
-        }
-        u.shareCount = (u.shareCount || 0) + 1;
-        u.shareLastTime = now;
-        u.fastCount = (u.fastCount || 0) + 1;
-        saveUsers();
-        updateUI();
-        showToast('✅ 分享成功！获得1次快速分析');
-        return true;
-    }
-    function copyDownloadLink() {
-        var msg = '请长按下方链接选择"复制"，发送给好友或粘贴到浏览器下载：\n\n' + DOWNLOAD_URL;
-        prompt(msg, DOWNLOAD_URL);
-        showToast('📋 链接已显示，请长按复制');
-    }
-    function copyQQNumber() {
-        var msg = '请长按下方QQ号选择"复制"，可添加好友联系：\n\n' + QQ_NUMBER;
-        prompt(msg, QQ_NUMBER);
-        showToast('📋 QQ号已显示，请长按复制');
-    }
-    function doShare(target) {
-        if (target === 'copy') {
-            copyDownloadLink();
-        } else if (target === 'wechat') {
-            window.location.href = 'weixin://';
-            showToast('📤 请分享到微信');
-        } else if (target === 'qq') {
-            window.location.href = 'mqq://';
-            showToast('📤 请分享到QQ');
-        }
-        if (shareTimer) { clearTimeout(shareTimer); }
-        shareTimer = setTimeout(function() {
-            grantShareRewardDelayed();
-            shareTimer = null;
-        }, 5000);
-    }
-
-    // ============================================================
-    // 跳转
-    // ============================================================
-    function goToShop() {
-        window.location.href = 'biao.html';
-    }
-    function goToRegister() {
-        window.location.href = '注册.html?mode=register';
-    }
-    function goToForgot() {
-        window.location.href = '注册.html?mode=forgot';
-    }
-
-    // ============================================================
-    // 反馈
-    // ============================================================
-    function showFeedbackModal() { document.getElementById('feedbackModal').classList.add('show'); }
-    function closeFeedbackModal() { document.getElementById('feedbackModal').classList.remove('show'); }
-    function sendFeedback() {
-        var content = document.getElementById('feedbackContent').value.trim();
-        if (!content) { showToast('请输入反馈内容'); return; }
-        window.location.href = 'mailto:luoyang451134850@gmail.com?subject=AI裁决者用户反馈&body=' + encodeURIComponent(content);
-        document.getElementById('feedbackContent').value = '';
-        closeFeedbackModal();
-        showToast('已打开邮件客户端，请发送即可。');
-    }
-
-    // ============================================================
-    // 绑定事件
-    // ============================================================
-    function bindMainEvents() {
-        document.getElementById('modeFast').onclick = function() { setMode('fast'); };
-        document.getElementById('modeFull').onclick = function() { setMode('full'); };
-        var subItems = document.querySelectorAll('.sub-mode-item');
-        for (var i = 0; i < subItems.length; i++) {
-            subItems[i].onclick = function() { setSubMode(this.dataset.sub); };
-        }
-        document.getElementById('submitBtn').onclick = startDiscussion;
-        document.getElementById('stopBtn').onclick = stopDiscussion;
-        document.getElementById('interruptBtn').onclick = sendInterrupt;
-        document.getElementById('shareRewardBtn').onclick = showShareModal;
-        document.getElementById('closeShareModal').onclick = closeShareModal;
-        document.getElementById('shareWechatBtn').onclick = function() { doShare('wechat'); };
-        document.getElementById('shareQQBtn').onclick = function() { doShare('qq'); };
-        document.getElementById('shareCopyBtn').onclick = function() { doShare('copy'); };
-        if (floatBtn) {
-            floatBtn.onclick = function() {
-                document.getElementById('finalAnswerArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                floatBtn.style.display = 'none';
-            };
-        }
-        document.getElementById('rechargeBtn').onclick = goToShop;
-        document.getElementById('feedbackBtn').onclick = showFeedbackModal;
-        document.getElementById('closeFeedbackModal').onclick = closeFeedbackModal;
-        document.getElementById('sendFeedbackBtn').onclick = sendFeedback;
-        document.getElementById('copyQQBtn').onclick = copyQQNumber;
-        document.getElementById('logoutBtn').onclick = logout;
-        var redeemBtn = document.getElementById('redeemBtn');
-        if (redeemBtn) {
-            redeemBtn.onclick = goToShop;
-        }
-        var closeRechargeBtn = document.getElementById('closeRechargeModal');
-        if (closeRechargeBtn) {
-            closeRechargeBtn.onclick = function() {
-                document.getElementById('rechargeModal').classList.remove('show');
-            };
-        }
-        var packageList = document.getElementById('packageList');
-        if (packageList) {
-            packageList.innerHTML = '';
-            var pkgItems = [
-                { label: '⚡ 快速包', desc: '3-8元 / 20次' },
-                { label: '完整包', desc: '10-30元 / 15-20次' },
-                { label: '✨ 能量晶', desc: '8元 / 10能量点' }
-            ];
-            pkgItems.forEach(function(item) {
-                var div = document.createElement('div');
-                div.className = 'package-item';
-                div.innerHTML = '<strong>' + item.label + '</strong> ' + item.desc;
-                div.onclick = goToShop;
-                packageList.appendChild(div);
-            });
-        }
-        document.getElementById('redeemCode').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') goToShop();
-        });
-    }
-
-    function bindLoginEvents() {
-        var loginBtn = document.getElementById('loginBtn');
-        var regBtn = document.getElementById('registerBtn');
-        var forgotBtn = document.getElementById('forgotBtn');
-        if (loginBtn) {
-            loginBtn.onclick = doLogin;
-        }
-        if (regBtn) {
-            regBtn.onclick = goToRegister;
-        }
-        if (forgotBtn) {
-            forgotBtn.onclick = goToForgot;
-        }
-        var passInput = document.getElementById('loginPassword');
-        if (passInput) {
-            passInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') doLogin();
-            });
-        }
-        var userInput = document.getElementById('loginUsername');
-        if (userInput) {
-            userInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    var next = document.getElementById('loginPassword');
-                    if (next) next.focus();
-                }
-            });
-        }
-    }
-
-    function enableDataSync() {
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'aiJudge_users') {
-                loadUsers();
-                if (currentUser) {
-                    updateUI();
-                    showToast('🔄 数据已更新');
-                }
-            }
-        });
-        try {
-            var channel = new BroadcastChannel('judge_channel');
-            channel.onmessage = function(event) {
-                if (event.data === 'data_updated' || event.data === 'redeem_success') {
-                    loadUsers();
-                    if (currentUser) {
-                        updateUI();
-                        showToast('🔄 数据已同步');
-                    }
-                }
-            };
-        } catch(e) {}
-    }
-
     function init() {
         loadUsers();
         bindLoginEvents();
@@ -1505,7 +1427,7 @@
             showAuthScreen();
         }
         enableDataSync();
-        console.log('✅ 裁决者已加载');
+        console.log('✅ 裁决者新架构已加载');
         console.log('📡 API:', CONFIG.API_URL);
         console.log('🤖 模型:', CONFIG.MODEL);
     }
