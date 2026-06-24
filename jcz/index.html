@@ -240,7 +240,7 @@
     'use strict';
 
     // ============================================================
-    // 0. 服务器配置
+    // 0. 服务器配置（全部指向新服务器）
     // ============================================================
     var SERVER_URL = 'http://8.156.93.214:3000';
 
@@ -289,7 +289,7 @@
     history.pushState({ page: 'main' }, '');
 
     // ============================================================
-    // 2. 核心配置（DeepSeek API Key 已嵌入）
+    // 2. 核心配置
     // ============================================================
     var CONFIG = {
         API_KEY: 'sk-a4ce10a564884b918795bb8207bde14e',
@@ -312,7 +312,6 @@
         { id: 'ai4', name: '小能', role: 'con', prompt: '你是务实风险规避者，关注成本和可行性。' }
     ];
 
-    // 积分扣费标准（与服务器一致）
     var ENERGY_COST = {
         fast: { 2: 0.3, 3: 0.5, 4: 0.7 },
         speed: { 2: 1.0, 3: 1.4, 4: 1.6 },
@@ -320,7 +319,7 @@
     };
 
     var currentUser = null;
-    var currentUserData = null; // 从服务器获取的用户数据
+    var currentUserData = null;
     var selectedAIs = [];
     var currentMode = 'fast';
     var currentSubMode = 'speed';
@@ -335,7 +334,7 @@
     var isStopped = false;
     var activeAbortController = null;
     var apiCallCounter = 0;
-    var MAX_API_CALLS = 28; // 前端封顶，但服务器也会校验
+    var MAX_API_CALLS = 28;
     var currentSessionId = 0;
 
     var floatBtn = document.getElementById('answerFloatBtn');
@@ -422,16 +421,10 @@
     }
 
     // ============================================================
-    // 用户管理（替代localStorage）
+    // 用户管理（全部走服务器）
     // ============================================================
-    function loadUsers() {
-        // 不再从localStorage加载，登录时从服务器获取
-        return {};
-    }
-
-    function saveUsers(users) {
-        // 不再保存到localStorage，数据在服务器
-    }
+    function loadUsers() { return {}; }
+    function saveUsers(users) {}
 
     function updateUI() {
         if (!currentUser || !currentUserData) return;
@@ -454,7 +447,7 @@
         if (selectedAIs.length === 0) {
             selectedAIs.push(allAIs[0], allAIs[1]);
         }
-        maxAIAllowed = 4; // 默认
+        maxAIAllowed = 4;
         renderAIGrid();
         setMode('fast');
         updateUI();
@@ -489,7 +482,6 @@
             return;
         }
 
-        // 调用服务器登录接口
         serverLogin(username, password)
             .then(function(res) {
                 if (res.success) {
@@ -518,7 +510,7 @@
     }
 
     // ============================================================
-    // AI选择、模式切换（与之前一致）
+    // AI选择、模式切换
     // ============================================================
     function renderAIGrid() {
         var grid = document.getElementById('aiGrid');
@@ -637,10 +629,8 @@
     // 预扣积分（调用服务器）
     // ============================================================
     function canUse() {
-        // GM账号不扣积分，但依然要验证
         if (currentUser === 'luoyangqq') return true;
         if (!currentUserData) return false;
-        // 检查积分是否足够
         var cost = getEnergyCost();
         var points = currentUserData.points || 0;
         if (currentMode === 'fast') {
@@ -657,13 +647,11 @@
     }
 
     function deductUsage() {
-        // 调用服务器预扣积分
         var mode = (currentMode === 'fast') ? 'fast' : (currentSubMode === 'speed' ? 'speed' : 'deep');
         var aiCount = selectedAIs.length;
         return serverConsume(currentUser, mode, aiCount)
             .then(function(res) {
                 if (res.success) {
-                    // 更新本地数据
                     if (res.user) {
                         currentUserData = res.user;
                         updateUI();
@@ -681,7 +669,7 @@
     }
 
     // ============================================================
-    // API调用（通过服务器转发）
+    // API调用
     // ============================================================
     function buildStructuredPrompt(ai, isDebate, opponentName, opponentSolution) {
         var today = new Date().toISOString().slice(0,10);
@@ -694,7 +682,6 @@
         } else {
             var opName = opponentName || '对方';
             var opSol = opponentSolution || '对方的方案';
-            // 上下文截断：只保留最近3轮（从discussionMessages中取最后3轮）
             var historySummary = '';
             var total = discussionMessages.length;
             var startIdx = Math.max(0, total - 3);
@@ -711,7 +698,6 @@
     }
 
     async function callAI(ai, isDebate, opponentName, opponentSolution) {
-        // 前端硬性封顶
         if (apiCallCounter >= MAX_API_CALLS) {
             showToast('⚠️ API调用已达上限（28次），本次分析停止');
             return null;
@@ -767,9 +753,6 @@
         }
     }
 
-    // ============================================================
-    // 解析和显示（与之前一致）
-    // ============================================================
     function parseStructuredContent(text) {
         if (!text) return { solution: '', reason: '', supplement: '', supplementTarget: '' };
         var result = { solution: '', reason: '', supplement: '', supplementTarget: '' };
@@ -832,7 +815,6 @@
         area.appendChild(div);
     }
 
-    // 隐形AI补充理由（由服务器处理，或仍由前端调用）
     async function generateReasonForAnswer(answer) {
         if (apiCallCounter >= MAX_API_CALLS) {
             return '';
@@ -878,9 +860,6 @@
         }
     }
 
-    // ============================================================
-    // 停止（调用服务器）
-    // ============================================================
     function stopDiscussion() {
         if (!isDiscussing) {
             showToast('当前没有正在进行的分析');
@@ -894,13 +873,10 @@
         isStopped = true;
         isDiscussing = false;
 
-        // 通知服务器停止会话
         serverStop(currentUser, currentSessionId)
             .then(function(res) {
                 if (res.success) {
-                    console.log('✅ 服务器已停止会话');
-                } else {
-                    console.warn('服务器停止响应:', res.message);
+                    console.log('服务器已停止会话');
                 }
             })
             .catch(function(err) {
@@ -920,9 +896,6 @@
         showToast('⏹ 分析已停止（费用已扣除）');
     }
 
-    // ============================================================
-    // 主分析流程（预扣积分）
-    // ============================================================
     async function startDiscussion() {
         if (isDiscussing) {
             showToast('⏳ 分析正在进行中，请等待完成');
@@ -933,14 +906,11 @@
         if (!q) { showToast('请输入问题'); return; }
         if (selectedAIs.length < 2) { showToast('请至少选择2个AI'); return; }
 
-        // 先检查积分是否足够（前端快速检查）
         if (!canUse()) return;
 
-        // 调用服务器预扣积分
         var charged = await deductUsage();
         if (!charged) return;
 
-        // 重置状态
         isStopped = false;
         isDiscussing = true;
         apiCallCounter = 0;
@@ -964,7 +934,6 @@
         document.getElementById('interruptPanel').classList.remove('show');
         if (floatBtn) floatBtn.style.display = 'none';
 
-        // 记录日志：开始分析
         serverLogAction(currentUser, 'start_analysis', {
             mode: currentMode + '_' + currentSubMode,
             ai_count: totalAIs,
@@ -1052,7 +1021,6 @@
                 showToast('⚠️ 未能提取明确答案');
             }
 
-            // 记录日志：分析完成
             serverLogAction(currentUser, 'finish_analysis', {
                 mode: currentMode + '_' + currentSubMode,
                 ai_count: totalAIs,
@@ -1074,9 +1042,6 @@
         }
     }
 
-    // ============================================================
-    // 提取最终答案（与之前一致，但使用完整discussionMessages）
-    // ============================================================
     function extractFinalAnswer() {
         if (discussionMessages.length === 0) {
             finalAnswer = null;
@@ -1212,9 +1177,6 @@
         area.innerHTML = html;
     }
 
-    // ============================================================
-    // 重新分析（打断）
-    // ============================================================
     async function sendInterrupt() {
         var extra = document.getElementById('interruptInput').value.trim();
         if (!extra) { showToast('请输入补充条件'); return; }
@@ -1349,7 +1311,6 @@
     }
     function grantShareRewardDelayed() {
         if (!currentUser) return false;
-        // 分享奖励需要服务器实现，暂保留原有逻辑
         showToast('✅ 分享成功！获得1次快速分析');
         return true;
     }
@@ -1498,26 +1459,17 @@
         }
     }
 
-    function enableDataSync() {
-        // 不再需要存储事件监听，但保留以防万一
-    }
+    function enableDataSync() {}
 
     function init() {
-        // 清除旧的localStorage数据，全部走服务器
-        // 但保留记住用户
         bindLoginEvents();
         var savedUser = localStorage.getItem('aiJudge_remember');
         if (savedUser) {
-            // 尝试自动登录
             document.getElementById('loginUsername').value = savedUser;
-            // 不自动登录，让用户手动点击
         }
         showAuthScreen();
         enableDataSync();
-
-        // 注册页面跳转的返回处理
-        // 如果从注册页面回来，可能带参数，但无影响
-        console.log('✅ 服务器版加载完成，服务器地址:', SERVER_URL);
+        console.log('裁决者服务器版已加载，服务器地址:', SERVER_URL);
     }
 
     if (document.readyState === 'loading') {
