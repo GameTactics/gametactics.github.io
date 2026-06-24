@@ -249,7 +249,7 @@
     };
 
     // ============================================================
-    // 1. 返回键拦截（APP模式）
+    // 1. 返回键拦截
     // ============================================================
     window.addEventListener('popstate', function (e) {
         var mainScreen = document.getElementById('mainScreen');
@@ -364,7 +364,7 @@
     function validatePassword(pwd) { return pwd && pwd.length >= 6; }
 
     // ============================================================
-    // 用户管理（使用localStorage）
+    // 用户管理
     // ============================================================
     function loadUsers() {
         try {
@@ -911,7 +911,7 @@
     }
 
     // ============================================================
-    // 主分析流程（强制显示最终答案修复）
+    // 主分析流程
     // ============================================================
     async function startDiscussion() {
         if (isDiscussing) {
@@ -1026,9 +1026,10 @@
 
             // ===== 强制确保显示 =====
             if (!finalAnswer || !finalAnswer.answer) {
+                var fallback = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '讨论未产生有效答案';
                 finalAnswer = {
-                    answer: '讨论已结束，隐形AI正在整理最终答案...',
-                    reason: '请稍后查看，或重新运行分析。'
+                    answer: fallback || '讨论未产生明确答案',
+                    reason: '隐形AI未能从讨论中提取出有效方案。'
                 };
             }
             displayFinalAnswer();
@@ -1039,9 +1040,9 @@
             if (!isStopped) {
                 showToast('❌ 分析出错：' + err.message);
             }
-            // 出错时也显示默认答案
+            var fallbackMsg = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '分析过程中出现错误';
             finalAnswer = {
-                answer: '分析过程中出现错误，请重新尝试。',
+                answer: fallbackMsg || '分析过程中出现错误，请重新尝试。',
                 reason: err.message || '未知错误'
             };
             displayFinalAnswer();
@@ -1056,7 +1057,7 @@
     }
 
     // ============================================================
-    // 提取最终答案（三层兜底）
+    // 提取最终答案（暴力兜底）
     // ============================================================
     function extractFinalAnswer() {
         if (discussionMessages.length === 0) {
@@ -1064,142 +1065,36 @@
             return;
         }
 
-        // ===== 第一层：正常投票逻辑 =====
-        var proposalMap = {};
-        var reasonMap = {};
+        var lastMsg = discussionMessages[discussionMessages.length - 1];
+        var rawText = lastMsg.content || '';
 
-        for (var i = 0; i < discussionMessages.length; i++) {
-            var msg = discussionMessages[i];
-            if (!msg.content || msg.content === '无响应') continue;
-            var parsed = parseStructuredContent(msg.content);
-            var rawSolution = parsed.solution || '';
-            if (!rawSolution) continue;
+        // 尝试解析【方案】和【理由】
+        var solMatch = rawText.match(/【方案】\s*([\s\S]*?)(?=【理由】|【补充】|$)/);
+        var reaMatch = rawText.match(/【理由】\s*([\s\S]*?)(?=【方案】|【补充】|$)/);
 
-            var isAgree = /同意\s*([^，,。\s]+)\s*的方案/.test(rawSolution);
-            if (!isAgree) {
-                var key = rawSolution.trim();
-                if (!proposalMap[msg.name]) {
-                    proposalMap[msg.name] = key;
-                    reasonMap[msg.name] = parsed.reason || '';
-                }
-            }
-        }
-
-        var agreedCount = {};
-        for (var key in proposalMap) {
-            var proposal = proposalMap[key];
-            if (!agreedCount[proposal]) agreedCount[proposal] = 0;
-            agreedCount[proposal] = 1;
-        }
-
-        for (var j = 0; j < discussionMessages.length; j++) {
-            var msg2 = discussionMessages[j];
-            if (!msg2.content || msg2.content === '无响应') continue;
-            var parsed2 = parseStructuredContent(msg2.content);
-            var rawSolution2 = parsed2.solution || '';
-            if (!rawSolution2) continue;
-
-            var match = rawSolution2.match(/同意\s*([^，,。\s]+)\s*的方案/);
-            if (match) {
-                var targetName = match[1];
-                var realProposal = proposalMap[targetName] || '';
-                if (realProposal) {
-                    if (!agreedCount[realProposal]) agreedCount[realProposal] = 0;
-                    agreedCount[realProposal] = (agreedCount[realProposal] || 0) + 1;
-                }
-            }
-        }
-
-        var bestProposal = '';
-        var bestCount = 0;
-        for (var key2 in agreedCount) {
-            if (agreedCount[key2] > bestCount) {
-                bestCount = agreedCount[key2];
-                bestProposal = key2;
-            }
-        }
-
-        // ===== 第二层：如果投票失败，取最后一条发言的方案 =====
-        if (!bestProposal) {
-            for (var k = discussionMessages.length - 1; k >= 0; k--) {
-                var msg3 = discussionMessages[k];
-                if (!msg3.content || msg3.content === '无响应') continue;
-                var parsed3 = parseStructuredContent(msg3.content);
-                if (parsed3.solution) {
-                    bestProposal = parsed3.solution.trim();
-                    if (parsed3.reason) {
-                        finalAnswer = {
-                            answer: bestProposal,
-                            reason: parsed3.reason
-                        };
-                        return;
-                    }
-                    break;
-                }
-            }
-        }
-
-        // ===== 第三层：最终兜底，直接取最后一条发言的原始内容 =====
-        if (!bestProposal) {
-            var lastMsg = discussionMessages[discussionMessages.length - 1];
-            if (lastMsg && lastMsg.content && lastMsg.content !== '无响应') {
-                var rawText = lastMsg.content;
-                var solMatch = rawText.match(/【方案】\s*([\s\S]*?)(?=【理由】|$)/);
-                var reaMatch = rawText.match(/【理由】\s*([\s\S]*?)(?=【方案】|$)/);
-                if (solMatch) {
-                    bestProposal = solMatch[1].trim();
-                    finalReason = reaMatch ? reaMatch[1].trim() : '';
-                } else {
-                    bestProposal = rawText.slice(0, 100);
-                    finalReason = '';
-                }
-            }
-        }
-
-        // 如果仍然为空，显示提示
-        if (!bestProposal) {
+        if (solMatch) {
+            var bestProposal = solMatch[1].trim();
+            var finalReason = reaMatch ? reaMatch[1].trim() : '';
             finalAnswer = {
-                answer: '讨论未产生明确答案，请重新尝试。',
-                reason: '隐形AI未能从讨论中提取出有效方案。'
+                answer: bestProposal || '（无答案）',
+                reason: finalReason || '经过多轮讨论，该方案被选为最终答案。'
             };
             return;
         }
 
-        // ===== 为最终答案配理由 =====
-        var finalReason = '';
-        for (var name in proposalMap) {
-            if (proposalMap[name] === bestProposal && reasonMap[name]) {
-                finalReason = reasonMap[name];
-                break;
-            }
+        // 如果解析失败，直接取原始内容的前100字
+        if (rawText && rawText.length > 0) {
+            finalAnswer = {
+                answer: rawText.slice(0, 100) + (rawText.length > 100 ? '...' : ''),
+                reason: '隐形AI从讨论中提取了以上内容。'
+            };
+            return;
         }
 
-        if (!finalReason) {
-            for (var m = 0; m < discussionMessages.length; m++) {
-                var msg4 = discussionMessages[m];
-                if (!msg4.content || msg4.content === '无响应') continue;
-                var parsed4 = parseStructuredContent(msg4.content);
-                if (parsed4.solution === bestProposal && parsed4.reason) {
-                    finalReason = parsed4.reason;
-                    break;
-                }
-                if (parsed4.solution && parsed4.solution === bestProposal && msg4.content.length > 0) {
-                    var contentWithoutSolution = msg4.content.replace(/【方案】.*?(?=【理由】|【补充】|$)/, '');
-                    if (contentWithoutSolution && contentWithoutSolution.trim().length > 0) {
-                        finalReason = contentWithoutSolution.trim();
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (!finalReason) {
-            finalReason = '经过多轮讨论，该方案被最多AI支持，因此被选为最终答案。';
-        }
-
+        // 最终兜底
         finalAnswer = {
-            answer: bestProposal,
-            reason: finalReason
+            answer: '讨论未产生明确答案，请重新尝试。',
+            reason: '隐形AI未能从讨论中提取出有效方案。'
         };
     }
 
@@ -1316,9 +1211,10 @@
             }
             extractFinalAnswer();
             if (!finalAnswer || !finalAnswer.answer) {
+                var fallbackMsg = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '讨论未产生有效答案';
                 finalAnswer = {
-                    answer: '讨论已结束，隐形AI正在整理最终答案...',
-                    reason: '请稍后查看，或重新运行分析。'
+                    answer: fallbackMsg || '讨论未产生明确答案',
+                    reason: '隐形AI未能从讨论中提取出有效方案。'
                 };
             }
             displayFinalAnswer();
@@ -1328,8 +1224,9 @@
             if (!isStopped) {
                 showToast('❌ 重新分析出错：' + err.message);
             }
+            var fallbackMsg = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '分析过程中出现错误';
             finalAnswer = {
-                answer: '分析过程中出现错误，请重新尝试。',
+                answer: fallbackMsg || '分析过程中出现错误，请重新尝试。',
                 reason: err.message || '未知错误'
             };
             displayFinalAnswer();
