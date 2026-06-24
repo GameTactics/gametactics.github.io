@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="裁决者" />
-    <title>裁决者 · 豆包版</title>
+    <title>裁决者</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f5f7fb;color:#1a1a2e;line-height:1.5;-webkit-user-select:none;user-select:none;overflow-x:hidden}
@@ -240,7 +240,7 @@
     'use strict';
 
     // ============================================================
-    // 0. 豆包 API 配置（火山引擎）
+    // 0. API 配置（火山引擎）
     // ============================================================
     var CONFIG = {
         API_KEY: 'ark-c79ff687-973c-43a4-9b65-ab15d8ba6e2a-c13b3',
@@ -685,7 +685,7 @@
     }
 
     // ============================================================
-    // API调用（豆包）
+    // API调用（火山引擎）
     // ============================================================
     function buildStructuredPrompt(ai, isDebate, opponentName, opponentSolution) {
         var today = new Date().toISOString().slice(0,10);
@@ -771,7 +771,6 @@
         }
     }
 
-    // 隐形AI补充理由
     async function generateReasonForAnswer(answer) {
         if (apiCallCounter >= MAX_API_CALLS) {
             return '';
@@ -912,7 +911,7 @@
     }
 
     // ============================================================
-    // 主分析流程
+    // 主分析流程（强制显示最终答案修复）
     // ============================================================
     async function startDiscussion() {
         if (isDiscussing) {
@@ -1022,18 +1021,30 @@
                 return;
             }
 
-            await extractFinalAnswer();
-            if (finalAnswer && finalAnswer.answer) {
-                displayFinalAnswer();
-                showToast('✅ 分析完成');
-                if (floatBtn) floatBtn.style.display = 'block';
-            } else {
-                showToast('⚠️ 未能提取明确答案');
+            // ===== 提取最终答案 =====
+            extractFinalAnswer();
+
+            // ===== 强制确保显示 =====
+            if (!finalAnswer || !finalAnswer.answer) {
+                finalAnswer = {
+                    answer: '讨论已结束，隐形AI正在整理最终答案...',
+                    reason: '请稍后查看，或重新运行分析。'
+                };
             }
+            displayFinalAnswer();
+            showToast('✅ 分析完成');
+            if (floatBtn) floatBtn.style.display = 'block';
+
         } catch(err) {
             if (!isStopped) {
                 showToast('❌ 分析出错：' + err.message);
             }
+            // 出错时也显示默认答案
+            finalAnswer = {
+                answer: '分析过程中出现错误，请重新尝试。',
+                reason: err.message || '未知错误'
+            };
+            displayFinalAnswer();
         }
         document.getElementById('progress').classList.remove('show');
         document.getElementById('submitBtn').disabled = false;
@@ -1045,7 +1056,7 @@
     }
 
     // ============================================================
-    // 提取最终答案
+    // 提取最终答案（三层兜底）
     // ============================================================
     function extractFinalAnswer() {
         if (discussionMessages.length === 0) {
@@ -1053,6 +1064,7 @@
             return;
         }
 
+        // ===== 第一层：正常投票逻辑 =====
         var proposalMap = {};
         var reasonMap = {};
 
@@ -1107,6 +1119,7 @@
             }
         }
 
+        // ===== 第二层：如果投票失败，取最后一条发言的方案 =====
         if (!bestProposal) {
             for (var k = discussionMessages.length - 1; k >= 0; k--) {
                 var msg3 = discussionMessages[k];
@@ -1114,23 +1127,45 @@
                 var parsed3 = parseStructuredContent(msg3.content);
                 if (parsed3.solution) {
                     bestProposal = parsed3.solution.trim();
-                    break;
-                }
-                if (msg3.content && msg3.content.length > 0) {
-                    bestProposal = msg3.content;
+                    if (parsed3.reason) {
+                        finalAnswer = {
+                            answer: bestProposal,
+                            reason: parsed3.reason
+                        };
+                        return;
+                    }
                     break;
                 }
             }
         }
 
+        // ===== 第三层：最终兜底，直接取最后一条发言的原始内容 =====
+        if (!bestProposal) {
+            var lastMsg = discussionMessages[discussionMessages.length - 1];
+            if (lastMsg && lastMsg.content && lastMsg.content !== '无响应') {
+                var rawText = lastMsg.content;
+                var solMatch = rawText.match(/【方案】\s*([\s\S]*?)(?=【理由】|$)/);
+                var reaMatch = rawText.match(/【理由】\s*([\s\S]*?)(?=【方案】|$)/);
+                if (solMatch) {
+                    bestProposal = solMatch[1].trim();
+                    finalReason = reaMatch ? reaMatch[1].trim() : '';
+                } else {
+                    bestProposal = rawText.slice(0, 100);
+                    finalReason = '';
+                }
+            }
+        }
+
+        // 如果仍然为空，显示提示
         if (!bestProposal) {
             finalAnswer = {
-                answer: '讨论未产生明确答案，请尝试重新提问或更换问题。',
+                answer: '讨论未产生明确答案，请重新尝试。',
                 reason: '隐形AI未能从讨论中提取出有效方案。'
             };
             return;
         }
 
+        // ===== 为最终答案配理由 =====
         var finalReason = '';
         for (var name in proposalMap) {
             if (proposalMap[name] === bestProposal && reasonMap[name]) {
@@ -1279,18 +1314,25 @@
                 isDiscussing = false;
                 return;
             }
-            await extractFinalAnswer();
-            if (finalAnswer && finalAnswer.answer) {
-                displayFinalAnswer();
-                showToast('✅ 分析完成');
-                if (floatBtn) floatBtn.style.display = 'block';
-            } else {
-                showToast('⚠️ 未能提取明确答案');
+            extractFinalAnswer();
+            if (!finalAnswer || !finalAnswer.answer) {
+                finalAnswer = {
+                    answer: '讨论已结束，隐形AI正在整理最终答案...',
+                    reason: '请稍后查看，或重新运行分析。'
+                };
             }
+            displayFinalAnswer();
+            showToast('✅ 分析完成');
+            if (floatBtn) floatBtn.style.display = 'block';
         } catch(err) {
             if (!isStopped) {
                 showToast('❌ 重新分析出错：' + err.message);
             }
+            finalAnswer = {
+                answer: '分析过程中出现错误，请重新尝试。',
+                reason: err.message || '未知错误'
+            };
+            displayFinalAnswer();
         }
         document.getElementById('progress').classList.remove('show');
         document.getElementById('submitBtn').disabled = false;
@@ -1518,7 +1560,7 @@
             showAuthScreen();
         }
         enableDataSync();
-        console.log('✅ 裁决者豆包版已加载');
+        console.log('✅ 裁决者已加载');
         console.log('📡 API:', CONFIG.API_URL);
         console.log('🤖 模型:', CONFIG.MODEL);
     }
