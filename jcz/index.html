@@ -539,9 +539,43 @@
     }
 
     // ============================================================
-    // 05 答案仓
+    // 05 答案仓（核心修改）
     // ============================================================
     var finalAnswer = null;
+
+    // 清洗函数：去除所有AI名字、立场词、前缀，只保留核心内容
+    function cleanFinalText(text) {
+        if (!text) return '';
+        var cleaned = text;
+        // 去掉所有AI名字 + 可能的“（正方/反方）”
+        for (var i = 0; i < REAL_NAMES.length; i++) {
+            var name = REAL_NAMES[i];
+            var regex1 = new RegExp(name + '\\s*[（(]?[正反][方][）)]?\\s*[:：]?\\s*', 'g');
+            var regex2 = new RegExp(name + '\\s*[:：]?\\s*', 'g');
+            cleaned = cleaned.replace(regex1, '');
+            cleaned = cleaned.replace(regex2, '');
+        }
+        // 去掉“正方：”、“反方：”
+        cleaned = cleaned.replace(/[正反][方][：:]\s*/g, '');
+        // 去掉“方案：”、“理由：”、“补充意见：”等标签（保留内容）
+        cleaned = cleaned.replace(/【方案】\s*/g, '');
+        cleaned = cleaned.replace(/【理由】\s*/g, '');
+        cleaned = cleaned.replace(/【补充意见】\s*/g, '');
+        cleaned = cleaned.replace(/方案[：:]\s*/g, '');
+        cleaned = cleaned.replace(/理由[：:]\s*/g, '');
+        // 去掉“同意XX的方案”这类引用
+        cleaned = cleaned.replace(/同意\s*[^，,。\s]+的方案\s*/g, '');
+        // 去掉“不，”、“我（方）”、“坚持”、“认为”、“主张”等立场词
+        cleaned = cleaned.replace(/^不，\s*/, '');
+        cleaned = cleaned.replace(/^我(?:方)?\s*/, '');
+        cleaned = cleaned.replace(/^坚持\s*/, '');
+        cleaned = cleaned.replace(/^认为\s*/, '');
+        cleaned = cleaned.replace(/^主张\s*/, '');
+        cleaned = cleaned.replace(/^分析者\s*/, '');
+        // 去除多余空格和换行
+        cleaned = cleaned.replace(/\s+/g, ' ').trim();
+        return cleaned;
+    }
 
     function extractFinalAnswer() {
         if (discussionMessages.length === 0) {
@@ -549,69 +583,82 @@
             return;
         }
 
+        var foundSolution = null;
+        var foundReason = null;
+
+        // 1) 先从最后一条消息提取
         var lastMsg = discussionMessages[discussionMessages.length - 1];
-        var rawText = lastMsg.content || '';
-
-        var solMatch = rawText.match(/【方案】\s*([\s\S]*?)(?=【理由】|【补充】|$)/);
-        var reaMatch = rawText.match(/【理由】\s*([\s\S]*?)(?=【方案】|【补充】|$)/);
-
+        var raw = lastMsg.content || '';
+        var solMatch = raw.match(/【方案】\s*([\s\S]*?)(?=【理由】|【补充】|$)/);
+        var reaMatch = raw.match(/【理由】\s*([\s\S]*?)(?=【方案】|【补充】|$)/);
         if (solMatch) {
-            var bestProposal = solMatch[1].trim();
-            var agreeMatch = bestProposal.match(/同意\s*([^，,。\s]+)\s*的方案/);
-            if (agreeMatch) {
-                for (var i = discussionMessages.length - 2; i >= 0; i--) {
-                    var prevMsg = discussionMessages[i];
-                    if (!prevMsg.content || prevMsg.content === '无响应') continue;
-                    var parsed = parseStructuredContent(prevMsg.content);
-                    if (parsed.solution && !/同意/.test(parsed.solution)) {
-                        bestProposal = parsed.solution.trim();
-                        break;
-                    }
-                }
-            }
-            var finalReason = reaMatch ? reaMatch[1].trim() : '';
-            finalAnswer = {
-                answer: bestProposal || '（无答案）',
-                reason: finalReason || '经过多轮讨论，该方案被选为最终答案。'
-            };
-            return;
+            foundSolution = solMatch[1].trim();
+            foundReason = reaMatch ? reaMatch[1].trim() : '';
         }
 
-        if (rawText && rawText.length > 0) {
-            var cleanText = rawText
-                .replace(/小明（正方）[：:]\s*/, '')
-                .replace(/小智（反方）[：:]\s*/, '')
-                .replace(/小慧（正方）[：:]\s*/, '')
-                .replace(/小能（反方）[：:]\s*/, '')
-                .replace(/小明[：:]\s*/, '')
-                .replace(/小智[：:]\s*/, '')
-                .replace(/小慧[：:]\s*/, '')
-                .replace(/小能[：:]\s*/, '')
-                .replace(/正方[：:]\s*/, '')
-                .replace(/反方[：:]\s*/, '')
-                .slice(0, 100);
-            finalAnswer = {
-                answer: cleanText || '讨论未产生明确答案',
-                reason: '隐形AI从讨论中提取了以上内容。'
-            };
-            return;
+        // 2) 如果没提取到，遍历所有消息（从后往前）找有【方案】的
+        if (!foundSolution) {
+            for (var i = discussionMessages.length - 1; i >= 0; i--) {
+                var msg = discussionMessages[i];
+                var content = msg.content || '';
+                var sol = content.match(/【方案】\s*([\s\S]*?)(?=【理由】|【补充】|$)/);
+                if (sol) {
+                    foundSolution = sol[1].trim();
+                    var rea = content.match(/【理由】\s*([\s\S]*?)(?=【方案】|【补充】|$)/);
+                    foundReason = rea ? rea[1].trim() : '';
+                    break;
+                }
+            }
+        }
+
+        // 3) 如果还是没有，取最后一条消息的纯文本（去掉所有标签）作为答案
+        if (!foundSolution) {
+            var lastRaw = discussionMessages[discussionMessages.length - 1].content || '';
+            var plain = lastRaw.replace(/【[^】]*】/g, '').trim();
+            if (plain.length > 0) {
+                foundSolution = plain;
+                foundReason = '';
+            } else {
+                foundSolution = '讨论未产生明确答案';
+                foundReason = '';
+            }
+        }
+
+        // 4) 强力清洗答案和理由
+        foundSolution = cleanFinalText(foundSolution);
+        if (foundReason) {
+            foundReason = cleanFinalText(foundReason);
+        }
+
+        // 如果答案过长（超过200字），截取前200字并加省略号
+        if (foundSolution.length > 200) {
+            foundSolution = foundSolution.slice(0, 200) + '…';
         }
 
         finalAnswer = {
-            answer: '讨论未产生明确答案，请重新尝试。',
-            reason: '隐形AI未能从讨论中提取出有效方案。'
+            answer: foundSolution || '（无答案）',
+            reason: foundReason || ''
         };
     }
 
     function displayFinalAnswer() {
         var area = document.getElementById('finalAnswerArea');
         if (!area) return;
+
+        // 清空讨论区，让最终答案独占
+        var discussionArea = document.getElementById('discussionArea');
+        if (discussionArea) discussionArea.innerHTML = '';
+
         var answerText = finalAnswer.answer || '（无答案）';
         var reasonText = finalAnswer.reason || '';
-        answerText = answerText.replace(/^方案[：:]\s*/, '');
-        var html = '<div class="final-answer"><div class="fa-answer">' + escapeHtml(answerText) + '</div>';
+
+        // 构建HTML：没有任何标题，只有答案、分割线和理由
+        var html = '<div class="final-answer">';
+        html += '<div class="fa-answer">' + escapeHtml(answerText) + '</div>';
         if (reasonText && reasonText.trim().length > 0) {
-            html += '<hr class="fa-divider"><div class="fa-reason-label">理由</div><div class="fa-reason">' + escapeHtml(reasonText) + '</div>';
+            html += '<hr class="fa-divider">';
+            html += '<div class="fa-reason-label">理由</div>';
+            html += '<div class="fa-reason">' + escapeHtml(reasonText) + '</div>';
         }
         html += '</div>';
         area.innerHTML = html;
@@ -1255,14 +1302,23 @@
 
             extractFinalAnswer();
 
-            if (!finalAnswer || !finalAnswer.answer) {
+            // 如果仍然没有有效答案，强行从最后一条消息提取纯文本
+            if (!finalAnswer || !finalAnswer.answer || finalAnswer.answer === '（无答案）') {
                 var fallback = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '讨论未产生有效答案';
-                var clean = fallback.replace(/【方案】\s*/, '').replace(/【理由】\s*/, '').slice(0, 100);
-                finalAnswer = {
-                    answer: clean || '讨论未产生明确答案',
-                    reason: '隐形AI已提取讨论内容。'
-                };
+                var cleanedFallback = cleanFinalText(fallback);
+                if (cleanedFallback.length > 0) {
+                    finalAnswer = {
+                        answer: cleanedFallback.slice(0, 200),
+                        reason: ''
+                    };
+                } else {
+                    finalAnswer = {
+                        answer: '讨论未产生明确答案，请重新尝试。',
+                        reason: ''
+                    };
+                }
             }
+
             displayFinalAnswer();
             showToast('✅ 分析完成');
             if (floatBtn) floatBtn.style.display = 'block';
@@ -1272,10 +1328,10 @@
                 showToast('❌ 分析出错：' + err.message);
             }
             var fallbackMsg = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '分析过程中出现错误';
-            var clean = fallbackMsg.replace(/【方案】\s*/, '').replace(/【理由】\s*/, '').slice(0, 100);
+            var cleaned = cleanFinalText(fallbackMsg);
             finalAnswer = {
-                answer: clean || '分析过程中出现错误，请重新尝试。',
-                reason: err.message || '未知错误'
+                answer: cleaned || '分析过程中出现错误，请重新尝试。',
+                reason: err.message || ''
             };
             displayFinalAnswer();
         }
@@ -1383,12 +1439,12 @@
                 return;
             }
             extractFinalAnswer();
-            if (!finalAnswer || !finalAnswer.answer) {
+            if (!finalAnswer || !finalAnswer.answer || finalAnswer.answer === '（无答案）') {
                 var fallbackMsg = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '讨论未产生有效答案';
-                var clean = fallbackMsg.replace(/【方案】\s*/, '').replace(/【理由】\s*/, '').slice(0, 100);
+                var cleaned = cleanFinalText(fallbackMsg);
                 finalAnswer = {
-                    answer: clean || '讨论未产生明确答案',
-                    reason: '隐形AI已提取讨论内容。'
+                    answer: cleaned || '讨论未产生明确答案',
+                    reason: ''
                 };
             }
             displayFinalAnswer();
@@ -1399,10 +1455,10 @@
                 showToast('❌ 重新分析出错：' + err.message);
             }
             var fallbackMsg = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '分析过程中出现错误';
-            var clean = fallbackMsg.replace(/【方案】\s*/, '').replace(/【理由】\s*/, '').slice(0, 100);
+            var cleaned = cleanFinalText(fallbackMsg);
             finalAnswer = {
-                answer: clean || '分析过程中出现错误，请重新尝试。',
-                reason: err.message || '未知错误'
+                answer: cleaned || '分析过程中出现错误，请重新尝试。',
+                reason: err.message || ''
             };
             displayFinalAnswer();
         }
