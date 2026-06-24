@@ -911,7 +911,7 @@
     }
 
     // ============================================================
-    // 主分析流程
+    // 主分析流程（最终答案强制提取）
     // ============================================================
     async function startDiscussion() {
         if (isDiscussing) {
@@ -1027,9 +1027,11 @@
             // ===== 强制确保显示 =====
             if (!finalAnswer || !finalAnswer.answer) {
                 var fallback = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '讨论未产生有效答案';
+                // 强制清理，只取前100字
+                var clean = fallback.replace(/【方案】\s*/, '').replace(/【理由】\s*/, '').slice(0, 100);
                 finalAnswer = {
-                    answer: fallback || '讨论未产生明确答案',
-                    reason: '隐形AI未能从讨论中提取出有效方案。'
+                    answer: clean || '讨论未产生明确答案',
+                    reason: '隐形AI已提取讨论内容。'
                 };
             }
             displayFinalAnswer();
@@ -1041,8 +1043,9 @@
                 showToast('❌ 分析出错：' + err.message);
             }
             var fallbackMsg = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '分析过程中出现错误';
+            var clean = fallbackMsg.replace(/【方案】\s*/, '').replace(/【理由】\s*/, '').slice(0, 100);
             finalAnswer = {
-                answer: fallbackMsg || '分析过程中出现错误，请重新尝试。',
+                answer: clean || '分析过程中出现错误，请重新尝试。',
                 reason: err.message || '未知错误'
             };
             displayFinalAnswer();
@@ -1057,7 +1060,7 @@
     }
 
     // ============================================================
-    // 提取最终答案（暴力兜底）
+    // 提取最终答案（强制清理，只显示方案内容）
     // ============================================================
     function extractFinalAnswer() {
         if (discussionMessages.length === 0) {
@@ -1069,12 +1072,30 @@
         var rawText = lastMsg.content || '';
 
         // 尝试解析【方案】和【理由】
-        var solMatch = rawText.match(/【方案】\s*([\s\S]*?)(?=【理由】|【补充】|$)/);
-        var reaMatch = rawText.match(/【理由】\s*([\s\S]*?)(?=【方案】|【补充】|$)/);
+        var solMatch = rawText.match(/【方案】\s*([\s\S]*?)(?=【理由】|【补充】|【补充意见】|$)/);
+        var reaMatch = rawText.match(/【理由】\s*([\s\S]*?)(?=【方案】|【补充】|【补充意见】|$)/);
 
         if (solMatch) {
             var bestProposal = solMatch[1].trim();
+            // 如果方案内容是以"同意"开头，尝试提取真正的内容
+            var agreeMatch = bestProposal.match(/同意\s*([^，,。\s]+)\s*的方案/);
+            if (agreeMatch) {
+                // 尝试从其他发言中找真正的方案
+                for (var i = discussionMessages.length - 2; i >= 0; i--) {
+                    var prevMsg = discussionMessages[i];
+                    if (!prevMsg.content || prevMsg.content === '无响应') continue;
+                    var prevParsed = parseStructuredContent(prevMsg.content);
+                    if (prevParsed.solution && !/同意/.test(prevParsed.solution)) {
+                        bestProposal = prevParsed.solution.trim();
+                        break;
+                    }
+                }
+            }
             var finalReason = reaMatch ? reaMatch[1].trim() : '';
+            // 如果理由以"建议"开头且过长，截断
+            if (finalReason.length > 100) {
+                finalReason = finalReason.slice(0, 100) + '...';
+            }
             finalAnswer = {
                 answer: bestProposal || '（无答案）',
                 reason: finalReason || '经过多轮讨论，该方案被选为最终答案。'
@@ -1082,16 +1103,27 @@
             return;
         }
 
-        // 如果解析失败，直接取原始内容的前100字
+        // 如果解析失败，直接取原始内容的前100字，并去除AI名字和角色标签
         if (rawText && rawText.length > 0) {
+            var cleanText = rawText
+                .replace(/小明（正方）[：:]\s*/, '')
+                .replace(/小智（反方）[：:]\s*/, '')
+                .replace(/小慧（正方）[：:]\s*/, '')
+                .replace(/小能（反方）[：:]\s*/, '')
+                .replace(/小明[：:]\s*/, '')
+                .replace(/小智[：:]\s*/, '')
+                .replace(/小慧[：:]\s*/, '')
+                .replace(/小能[：:]\s*/, '')
+                .replace(/正方[：:]\s*/, '')
+                .replace(/反方[：:]\s*/, '')
+                .slice(0, 100);
             finalAnswer = {
-                answer: rawText.slice(0, 100) + (rawText.length > 100 ? '...' : ''),
+                answer: cleanText || '讨论未产生明确答案',
                 reason: '隐形AI从讨论中提取了以上内容。'
             };
             return;
         }
 
-        // 最终兜底
         finalAnswer = {
             answer: '讨论未产生明确答案，请重新尝试。',
             reason: '隐形AI未能从讨论中提取出有效方案。'
@@ -1104,6 +1136,20 @@
         var answerText = finalAnswer.answer || '（无答案）';
         var reasonText = finalAnswer.reason || '';
         answerText = answerText.replace(/^方案[：:]\s*/, '');
+        // 最终清洗：如果答案还包含“同意XX”，尝试提取真正内容
+        var agreeMatch = answerText.match(/同意\s*([^，,。\s]+)/);
+        if (agreeMatch && answerText.length < 20) {
+            // 如果答案太短且是“同意XX”，尝试从讨论中找真正方案
+            for (var i = discussionMessages.length - 2; i >= 0; i--) {
+                var msg = discussionMessages[i];
+                if (!msg.content || msg.content === '无响应') continue;
+                var parsed = parseStructuredContent(msg.content);
+                if (parsed.solution && !/同意/.test(parsed.solution)) {
+                    answerText = parsed.solution.trim();
+                    break;
+                }
+            }
+        }
         var html = '<div class="final-answer"><div class="fa-answer">' + escapeHtml(answerText) + '</div>';
         if (reasonText && reasonText.trim().length > 0) {
             html += '<hr class="fa-divider"><div class="fa-reason-label">理由</div><div class="fa-reason">' + escapeHtml(reasonText) + '</div>';
@@ -1212,9 +1258,10 @@
             extractFinalAnswer();
             if (!finalAnswer || !finalAnswer.answer) {
                 var fallbackMsg = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '讨论未产生有效答案';
+                var clean = fallbackMsg.replace(/【方案】\s*/, '').replace(/【理由】\s*/, '').slice(0, 100);
                 finalAnswer = {
-                    answer: fallbackMsg || '讨论未产生明确答案',
-                    reason: '隐形AI未能从讨论中提取出有效方案。'
+                    answer: clean || '讨论未产生明确答案',
+                    reason: '隐形AI已提取讨论内容。'
                 };
             }
             displayFinalAnswer();
@@ -1225,8 +1272,9 @@
                 showToast('❌ 重新分析出错：' + err.message);
             }
             var fallbackMsg = discussionMessages.length > 0 ? discussionMessages[discussionMessages.length - 1].content : '分析过程中出现错误';
+            var clean = fallbackMsg.replace(/【方案】\s*/, '').replace(/【理由】\s*/, '').slice(0, 100);
             finalAnswer = {
-                answer: fallbackMsg || '分析过程中出现错误，请重新尝试。',
+                answer: clean || '分析过程中出现错误，请重新尝试。',
                 reason: err.message || '未知错误'
             };
             displayFinalAnswer();
