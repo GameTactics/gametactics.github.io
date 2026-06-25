@@ -240,7 +240,7 @@
     'use strict';
 
     // ============================================================
-    // 01 配置仓
+    // 01 配置仓 - 已连接后端
     // ============================================================
     var CONFIG = {
         API_KEY: 'ark-c79ff687-973c-43a4-9b65-ab15d8ba6e2a-c13b3',
@@ -277,7 +277,7 @@
     // 02 数据仓 - 全部走后端
     // ============================================================
     var currentUser = null;
-    var _userData = null;  // 内存缓存
+    var _userData = null;
 
     function fetchUserData(username) {
         return fetch(CONFIG.BACKEND_URL + '/api/users?username=' + encodeURIComponent(username))
@@ -358,7 +358,7 @@
     }
 
     // ============================================================
-    // 04 辩论仓（不变）
+    // 04 辩论仓
     // ============================================================
     var selectedAIs = [];
     var currentMode = 'fast';
@@ -878,7 +878,6 @@
         if (selectedAIs.length === 0) {
             selectedAIs.push(allAIs[0], allAIs[1]);
         }
-        // 先拉取后端数据
         fetchUserData(currentUser).then(function() {
             loadAILimitFromUser();
             renderAIGrid();
@@ -930,7 +929,6 @@
 
     function grantShareRewardDelayed() {
         if (!currentUser) return false;
-        // 分享奖励暂存本地，后续可接入后端
         var u = _userData || {};
         var now = Date.now();
         var today = new Date().toDateString();
@@ -950,7 +948,7 @@
         u._shareCount = (u._shareCount || 0) + 1;
         u._shareLastTime = now;
         u.fastCount = (u.fastCount || 0) + 1;
-        // 同步到后端
+
         fetch(CONFIG.BACKEND_URL + '/api/consume', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1111,7 +1109,7 @@
     }
 
     // ============================================================
-    // 10 辩论启动 - 修改 deductUsage 为异步
+    // 10 辩论启动
     // ============================================================
     async function startDiscussion() {
         if (isDiscussing) {
