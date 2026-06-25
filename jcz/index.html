@@ -245,7 +245,8 @@
     var CONFIG = {
         API_KEY: 'ark-c79ff687-973c-43a4-9b65-ab15d8ba6e2a-c13b3',
         API_URL: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
-        MODEL: 'doubao-seed-2-0-mini-260428'
+        MODEL: 'doubao-seed-2-0-mini-260428',
+        BACKEND_URL: 'http://8.156.93.214:3000'
     };
 
     var GM_ACCOUNT = {
@@ -269,37 +270,32 @@
         deep: { 2: 1.4, 3: 2.0, 4: 2.2 }
     };
 
-    // ===== 只改了这一行 =====
     var DOWNLOAD_URL = 'https://wwbnn.lanzouu.com/iqRK93sujkub';
-    // =======================
-
     var QQ_NUMBER = '451134850';
 
     // ============================================================
-    // 02 数据仓
+    // 02 数据仓 - 全部走后端
     // ============================================================
-    var users = {};
-    function loadUsers() {
-        try {
-            var stored = localStorage.getItem('aiJudge_users');
-            users = stored ? JSON.parse(stored) : {};
-            if (users['123456789']) {
-                delete users['123456789'];
-                saveUsers();
-            }
-        } catch(e) { users = {}; }
-    }
+    var currentUser = null;
+    var _userData = null;  // 内存缓存
 
-    function saveUsers() {
-        try {
-            localStorage.setItem('aiJudge_users', JSON.stringify(users));
-        } catch(e) {}
+    function fetchUserData(username) {
+        return fetch(CONFIG.BACKEND_URL + '/api/users?username=' + encodeURIComponent(username))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success && data.user) {
+                    _userData = data.user;
+                    return _userData;
+                }
+                return null;
+            });
     }
 
     // ============================================================
     // 03 认证仓
     // ============================================================
-    var currentUser = null;
+    function validateUsername(name) { return name && name.length >= 8 && name.length <= 20; }
+    function validatePassword(pwd) { return pwd && pwd.length >= 6; }
 
     function doLogin() {
         var username = document.getElementById('loginUsername').value.trim();
@@ -316,40 +312,32 @@
             return;
         }
 
-        if (username === GM_ACCOUNT.username && password === GM_ACCOUNT.password) {
-            if (!users[username]) {
-                users[username] = {
-                    password: GM_ACCOUNT.password,
-                    fastCount: 0,
-                    fullCount: 0,
-                    points: 0,
-                    shareCount: 0,
-                    shareDate: new Date().toDateString(),
-                    shareLastTime: 0,
-                    usedCodes: [],
-                    aiLimit: 4,
-                    records: []
-                };
-                saveUsers();
+        fetch(CONFIG.BACKEND_URL + '/api/user/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: username, password: password })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success) {
+                currentUser = username;
+                localStorage.setItem('aiJudge_remember', username);
+                return fetchUserData(username).then(function() {
+                    showMainScreen();
+                });
+            } else {
+                errEl.textContent = data.msg || '登录失败';
             }
-            currentUser = username;
-            localStorage.setItem('aiJudge_remember', username);
-            showMainScreen();
-            return;
-        }
-
-        var user = users[username];
-        if (!user || user.password !== password) {
-            errEl.textContent = '用户名或密码错误';
-            return;
-        }
-        currentUser = username;
-        localStorage.setItem('aiJudge_remember', username);
-        showMainScreen();
+        })
+        .catch(function(err) {
+            errEl.textContent = '网络错误，请检查服务器';
+            console.warn(err);
+        });
     }
 
     function logout() {
         currentUser = null;
+        _userData = null;
         localStorage.removeItem('aiJudge_remember');
         document.getElementById('mainScreen').style.display = 'none';
         document.getElementById('authScreen').style.display = 'flex';
@@ -370,7 +358,7 @@
     }
 
     // ============================================================
-    // 04 辩论仓
+    // 04 辩论仓（不变）
     // ============================================================
     var selectedAIs = [];
     var currentMode = 'fast';
@@ -465,51 +453,6 @@
             return null;
         } finally {
             if (activeAbortController === controller) {
-                activeAbortController = null;
-            }
-        }
-    }
-
-    async function generateReasonForAnswer(answer) {
-        if (apiCallCounter >= MAX_API_CALLS) {
-            return '';
-        }
-        try {
-            var prompt = '问题：' + currentQuestion + '\n\n给出的方案是：' + answer + '\n\n请为这个方案生成一条简洁有力的理由（不超过80字），说明为什么这个方案是合理的。直接输出理由内容，不要加任何前缀。';
-            var controller = new AbortController();
-            activeAbortController = controller;
-            var signal = controller.signal;
-            var res = await fetch(CONFIG.API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + CONFIG.API_KEY
-                },
-                body: JSON.stringify({
-                    model: CONFIG.MODEL,
-                    messages: [
-                        { role: 'system', content: '你是一个理性的分析者，请为给出的方案生成合理的理由。' },
-                        { role: 'user', content: prompt }
-                    ],
-                    temperature: 0.5,
-                    max_tokens: 150
-                }),
-                signal: signal
-            });
-            if (isStopped) {
-                controller.abort();
-                return '';
-            }
-            var data = await res.json();
-            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                return '';
-            }
-            apiCallCounter++;
-            return data.choices[0].message.content.trim();
-        } catch(e) {
-            return '';
-        } finally {
-            if (activeAbortController) {
                 activeAbortController = null;
             }
         }
@@ -716,11 +659,8 @@
     }
 
     // ============================================================
-    // 06 扣费仓
+    // 06 扣费仓 - 连接后端
     // ============================================================
-    function validateUsername(name) { return name && name.length >= 8 && name.length <= 20; }
-    function validatePassword(pwd) { return pwd && pwd.length >= 6; }
-
     function getEnergyCost() {
         var aiCount = selectedAIs.length;
         if (currentMode === 'fast') {
@@ -734,8 +674,7 @@
 
     function canUse() {
         if (currentUser === 'luoyangqq') return true;
-        var u = users[currentUser];
-        if (!u) return false;
+        var u = _userData || {};
         if (currentMode === 'fast') {
             if (u.fastCount > 0) return true;
             var cost = getEnergyCost();
@@ -754,76 +693,71 @@
     var chargeLock = false;
 
     function deductUsage() {
-        if (currentUser === 'luoyangqq') return true;
+        if (currentUser === 'luoyangqq') return Promise.resolve(true);
         if (chargeLock) {
             showToast('⏳ 扣费中，请稍后...');
-            return false;
+            return Promise.resolve(false);
         }
         chargeLock = true;
-        try {
-            var u = users[currentUser];
-            if (!u) {
-                chargeLock = false;
+
+        var mode = currentMode === 'fast' ? 'fast' : 'full';
+        var aiCount = selectedAIs.length;
+        var cost = getEnergyCost();
+
+        return fetch(CONFIG.BACKEND_URL + '/api/consume', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: currentUser,
+                mode: mode,
+                aiCount: aiCount,
+                cost: cost
+            })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            chargeLock = false;
+            if (data.success) {
+                if (_userData) {
+                    _userData.fastCount = data.fastCount;
+                    _userData.fullCount = data.fullCount;
+                    _userData.points = data.points;
+                }
+                updateUI();
+                return true;
+            } else {
+                showToast('❌ ' + (data.msg || '扣费失败'));
                 return false;
             }
-            if (currentMode === 'fast') {
-                if (u.fastCount > 0) {
-                    u.fastCount--;
-                } else {
-                    var cost = getEnergyCost();
-                    u.points = (u.points || 0) - cost;
-                }
-            } else {
-                if (u.fullCount > 0) {
-                    u.fullCount--;
-                } else {
-                    var cost = getEnergyCost();
-                    u.points = (u.points || 0) - cost;
-                }
-            }
-            if (!u.records) u.records = [];
-            var now = new Date();
-            var timeStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-            u.records.push({
-                time: timeStr,
-                fastChange: currentMode === 'fast' ? '-1' : '-',
-                fastRemain: u.fastCount || 0,
-                fullChange: currentMode === 'full' ? '-1' : '-',
-                fullRemain: u.fullCount || 0,
-                energyChange: '-',
-                energyRemain: u.points || 0
-            });
-            saveUsers();
-            updateUI();
+        })
+        .catch(function(err) {
             chargeLock = false;
-            return true;
-        } catch(e) {
-            chargeLock = false;
-            showToast('❌ 扣费失败：' + e.message);
+            showToast('❌ 扣费失败：' + err.message);
             return false;
-        }
+        });
     }
 
     // ============================================================
-    // 07 UI仓
+    // 07 UI仓 - 连接后端
     // ============================================================
     var maxAIAllowed = 4;
 
     function updateUI() {
         if (!currentUser) return;
-        var u = users[currentUser];
-        if (!u) return;
-        document.getElementById('accountDisplay').innerText = currentUser;
-        document.getElementById('fastCountDisplay').innerText = u.fastCount || 0;
-        document.getElementById('fullCountDisplay').innerText = u.fullCount || 0;
-        document.getElementById('pointsDisplay').innerText = u.points || 0;
-        document.getElementById('selectedCount').innerText = selectedAIs.length;
-        document.getElementById('aiLimitDisplay').innerText = '🤖 限' + maxAIAllowed + 'AI';
-        var hint = document.getElementById('aiLimitHint');
-        if (hint) {
-            hint.textContent = '当前套餐最多选择 ' + maxAIAllowed + ' 个AI，选择越多分析越全面';
-        }
-        renderAIGrid();
+        fetchUserData(currentUser).then(function(u) {
+            if (!u) return;
+            document.getElementById('accountDisplay').innerText = currentUser;
+            document.getElementById('fastCountDisplay').innerText = u.fastCount || 0;
+            document.getElementById('fullCountDisplay').innerText = u.fullCount || 0;
+            document.getElementById('pointsDisplay').innerText = u.points || 0;
+            document.getElementById('selectedCount').innerText = selectedAIs.length;
+            document.getElementById('aiLimitDisplay').innerText = '🤖 限' + maxAIAllowed + 'AI';
+            var hint = document.getElementById('aiLimitHint');
+            if (hint) {
+                hint.textContent = '当前套餐最多选择 ' + maxAIAllowed + ' 个AI，选择越多分析越全面';
+            }
+            renderAIGrid();
+        });
     }
 
     function renderAIGrid() {
@@ -870,8 +804,7 @@
 
     function loadAILimitFromUser() {
         if (!currentUser) return;
-        var u = users[currentUser];
-        if (!u) return;
+        var u = _userData || {};
         maxAIAllowed = u.aiLimit || 4;
         while (selectedAIs.length > maxAIAllowed) {
             selectedAIs.pop();
@@ -945,10 +878,13 @@
         if (selectedAIs.length === 0) {
             selectedAIs.push(allAIs[0], allAIs[1]);
         }
-        loadAILimitFromUser();
-        renderAIGrid();
-        setMode('fast');
-        updateUI();
+        // 先拉取后端数据
+        fetchUserData(currentUser).then(function() {
+            loadAILimitFromUser();
+            renderAIGrid();
+            setMode('fast');
+            updateUI();
+        });
         if (!mainEventsBound) {
             bindMainEvents();
             mainEventsBound = true;
@@ -994,29 +930,49 @@
 
     function grantShareRewardDelayed() {
         if (!currentUser) return false;
-        var u = users[currentUser];
-        if (!u) return false;
+        // 分享奖励暂存本地，后续可接入后端
+        var u = _userData || {};
         var now = Date.now();
         var today = new Date().toDateString();
-        if (u.shareDate !== today) {
-            u.shareCount = 0;
-            u.shareDate = today;
-            u.shareLastTime = 0;
+        if (u._shareDate !== today) {
+            u._shareCount = 0;
+            u._shareDate = today;
+            u._shareLastTime = 0;
         }
-        if ((u.shareCount || 0) >= 3) {
+        if ((u._shareCount || 0) >= 3) {
             showToast('今日分享已达上限（3次）');
             return false;
         }
-        if (now - (u.shareLastTime || 0) < 5 * 60 * 1000) {
+        if (now - (u._shareLastTime || 0) < 5 * 60 * 1000) {
             showToast('两次分享至少间隔5分钟');
             return false;
         }
-        u.shareCount = (u.shareCount || 0) + 1;
-        u.shareLastTime = now;
+        u._shareCount = (u._shareCount || 0) + 1;
+        u._shareLastTime = now;
         u.fastCount = (u.fastCount || 0) + 1;
-        saveUsers();
-        updateUI();
-        showToast('✅ 分享成功！获得1次快速分析');
+        // 同步到后端
+        fetch(CONFIG.BACKEND_URL + '/api/consume', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: currentUser,
+                mode: 'fast',
+                aiCount: 0,
+                cost: 0,
+                shareReward: true
+            })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success) {
+                _userData.fastCount = data.fastCount;
+                _userData.fullCount = data.fullCount;
+                _userData.points = data.points;
+                updateUI();
+                showToast('✅ 分享成功！获得1次快速分析');
+            }
+        })
+        .catch(function() { showToast('⚠️ 分享奖励同步失败，请稍后重试'); });
         return true;
     }
 
@@ -1155,32 +1111,8 @@
     }
 
     // ============================================================
-    // 10 启动仓
+    // 10 辩论启动 - 修改 deductUsage 为异步
     // ============================================================
-    function enableDataSync() {
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'aiJudge_users') {
-                loadUsers();
-                if (currentUser) {
-                    updateUI();
-                    showToast('🔄 数据已更新');
-                }
-            }
-        });
-        try {
-            var channel = new BroadcastChannel('judge_channel');
-            channel.onmessage = function(event) {
-                if (event.data === 'data_updated' || event.data === 'redeem_success') {
-                    loadUsers();
-                    if (currentUser) {
-                        updateUI();
-                        showToast('🔄 数据已同步');
-                    }
-                }
-            };
-        } catch(e) {}
-    }
-
     async function startDiscussion() {
         if (isDiscussing) {
             showToast('⏳ 分析正在进行中，请等待完成');
@@ -1191,7 +1123,7 @@
         if (!q) { showToast('请输入问题'); return; }
         if (selectedAIs.length < 2) { showToast('请至少选择2个AI'); return; }
 
-        var charged = deductUsage();
+        var charged = await deductUsage();
         if (!charged) return;
 
         isStopped = false;
@@ -1336,7 +1268,7 @@
         var extra = document.getElementById('interruptInput').value.trim();
         if (!extra) { showToast('请输入补充条件'); return; }
         if (!canUse()) return;
-        var charged = deductUsage();
+        var charged = await deductUsage();
         if (!charged) return;
 
         isStopped = false;
@@ -1459,20 +1391,30 @@
         }
     }
 
+    // ============================================================
+    // 11 启动仓
+    // ============================================================
     function init() {
-        loadUsers();
         bindLoginEvents();
         var savedUser = localStorage.getItem('aiJudge_remember');
-        if (savedUser && users[savedUser]) {
+        if (savedUser) {
             currentUser = savedUser;
-            showMainScreen();
-            showToast('👋 欢迎回来，' + savedUser);
+            fetchUserData(currentUser).then(function(data) {
+                if (data) {
+                    showMainScreen();
+                    showToast('👋 欢迎回来，' + savedUser);
+                } else {
+                    showAuthScreen();
+                    showToast('⚠️ 用户不存在，请重新登录');
+                }
+            }).catch(function() {
+                showAuthScreen();
+            });
         } else {
             showAuthScreen();
         }
-        enableDataSync();
-        console.log('✅ 裁决者新架构已加载');
-        console.log('📡 API:', CONFIG.API_URL);
+        console.log('✅ 裁决者后端版已加载');
+        console.log('📡 后端地址:', CONFIG.BACKEND_URL);
         console.log('🤖 模型:', CONFIG.MODEL);
     }
 
